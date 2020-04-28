@@ -9,6 +9,7 @@
 package org.luwrain.app.telegram;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.io.*;
 
 import org.drinkless.tdlib.*;
@@ -83,25 +84,16 @@ abstract class Operations
 		}});
     }
 
-    void getContacts()
+    void getContacts(Runnable onSuccess)
     {
-	Log.debug(LOG_COMPONENT, "getting contacts");
-	getClient().send(new TdApi.GetContacts(), new Client.ResultHandler() {
-		@Override public void onResult(TdApi.Object object) {
-		    switch (object.getConstructor())
-		    {
-			/*
-			  case TdApi.ImportedContacts.CONSTRUCTOR:
-			  Log.debug(LOG_COMPONENT, "response on ImportContacts: " + object);
-			  return;
-			*/
-		    case TdApi.Error.CONSTRUCTOR:
-			Log.error(LOG_COMPONENT, "Receive an error for GetContacts: " + object);
-			return;
-		    default:
-			Log.error(LOG_COMPONENT, "Receive wrong response from TDLib: " + object);
-		    }
-		}});
+	getClient().send(new TdApi.GetContacts(),
+			 new DefaultHandler(TdApi.Users.CONSTRUCTOR, (obj)->{
+				 synchronized(objects){
+				     final TdApi.Users users = (TdApi.Users)obj;
+				     objects.contacts = users.userIds;
+				 }
+				 app.getLuwrain().runUiSafely(()->onSuccess.run());
+			 }));
     }
 
     void openChat(TdApi.User user)
@@ -213,4 +205,31 @@ abstract class Operations
 	    //            print("");
         }
     }
+
+private final class DefaultHandler implements Client.ResultHandler
+{
+    private final int constructor;
+    private final Consumer onSuccess;
+    DefaultHandler(int constructor, Consumer onSuccess)
+    {
+	this.constructor = constructor;
+	this.onSuccess = onSuccess;
+    }
+		@Override public void onResult(TdApi.Object object)
+    {
+	if (object == null)
+	    return;
+	if (object.getConstructor() == constructor)
+	{
+	    onSuccess.accept(object);
+	    return;
+	}
+	if (object.getConstructor() == TdApi.Error.CONSTRUCTOR)
+	{
+	    Log.error(LOG_COMPONENT, "Receive an error for " + String.valueOf(constructor) + ":" + object.toString());
+			return;
+	}
+	Log.error(LOG_COMPONENT, "Receive wrong response for " + String.valueOf(constructor) + ":" + object.toString());
+		    }
 }
+    }

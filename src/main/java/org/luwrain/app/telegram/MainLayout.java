@@ -102,7 +102,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
 	    };
 	synchronized(app.getObjects()) {
 	app.getObjects().chatsListeners.add(this);
-		app.getObjects().usersListeners.add(this);
+	//		app.getObjects().usersListeners.add(this);
 	}
     }
 
@@ -148,42 +148,41 @@ return ConsoleArea.InputHandler.Result.OK;
 
     @Override public void onChatsUpdate(Chat chat)
     {
-	updateChats();
+	buildChatsList();
     }
 
         @Override public void onUsersUpdate(User user)
     {
-	updateChats();
+	buildChatsList();
     }
 
-
-    private void updateChats()
+    private void buildChatsList()
     {
 		final List res = new LinkedList();
-		final Set<Long> knownUsers = new TreeSet();
+		final Set<Integer> knownUsers = new TreeSet();
 	for(Map.Entry<Long, Chat> e: app.getObjects().chats.entrySet())
 	{
 	    if (e.getValue().type instanceof ChatTypePrivate)
 	    {
 		final ChatTypePrivate p = (ChatTypePrivate)e.getValue().type;
-		knownUsers.add(new Long(p.userId));
+		knownUsers.add(new Integer(p.userId));
 	    }
 	    res.add(e.getValue());
 	}
-
-		for(Map.Entry<Integer, User> e: app.getObjects().users.entrySet())
-		    if (!knownUsers.contains(new Long(e.getValue().id)))
-	    res.add(e.getValue());
-
-		
+	final int[] contacts = app.getObjects().contacts;
+	for(int contact: contacts)
+	    if (!knownUsers.contains(new Integer(contact)))
+		{
+		    final User user = app.getObjects().users.get(contact);
+		    if (user != null)
+	    res.add(user);
+		}
 	items = res.toArray(new Object[res.size()]);
 	chatsArea.refresh();Log.debug(LOG_COMPONENT, "" + res.size() + " items in main layout");
-
     }
 
     private boolean actAddContact()
     {
-	app.getLuwrain().playSound(Sounds.OK);
 	return true;
     }
 
@@ -212,8 +211,10 @@ return ConsoleArea.InputHandler.Result.OK;
 	return params;
     }
 
-    void activateDefaultArea()
+    void activate()
     {
+			app.getOperations().getChats(100);
+			app.getOperations().getContacts(()->buildChatsList());
 	app.getLuwrain().setActiveArea(chatsArea);
     }
 

@@ -12,37 +12,36 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import org.drinkless.tdlib.*;
+import org.drinkless.tdlib.TdApi.User;
+import org.drinkless.tdlib.TdApi.Chat;
 
 import org.luwrain.core.*;
 
 final class Objects
 {
-        interface ChatsListener
+    interface ChatsListener
     {
-	void onChatsUpdate(TdApi.Chat chat);
+	void onChatsUpdate(Chat chat);
     }
 
-            interface UsersListener
+    interface UsersListener
     {
-	void onUsersUpdate(TdApi.User user);
+	void onUsersUpdate(User user);
     }
 
-
-
-
-    final ConcurrentMap<Integer, TdApi.User> users = new ConcurrentHashMap<Integer, TdApi.User>();
+    final ConcurrentMap<Integer, User> users = new ConcurrentHashMap();
+    int[] contacts = new int[0];
+        final ConcurrentMap<Long, Chat> chats = new ConcurrentHashMap();
+    final NavigableSet<OrderedChat> mainChatList = new TreeSet();
+    boolean haveFullMainChatList = false;
     final ConcurrentMap<Integer, TdApi.BasicGroup> basicGroups = new ConcurrentHashMap<Integer, TdApi.BasicGroup>();
     final ConcurrentMap<Integer, TdApi.Supergroup> supergroups = new ConcurrentHashMap<Integer, TdApi.Supergroup>();
     final ConcurrentMap<Integer, TdApi.SecretChat> secretChats = new ConcurrentHashMap<Integer, TdApi.SecretChat>();
-    final ConcurrentMap<Long, TdApi.Chat> chats = new ConcurrentHashMap<Long, TdApi.Chat>();
-    final NavigableSet<OrderedChat> mainChatList = new TreeSet<OrderedChat>();
-    boolean haveFullMainChatList = false;
 
     final List<ChatsListener> chatsListeners = new LinkedList();
-        final List<UsersListener> usersListeners = new LinkedList();
+    final List<UsersListener> usersListeners = new LinkedList();
 
-        private final App app;
-
+    private final App app;
 
     Objects(App app)
     {
@@ -50,17 +49,15 @@ final class Objects
 	this.app = app;
     }
 
-    void chatsUpdated(TdApi.Chat chat)
+    void chatsUpdated(Chat chat)
     {
 	for(ChatsListener l: chatsListeners)
 	    app.getLuwrain().runUiSafely(()->l.onChatsUpdate(chat));
     }
 
-        void usersUpdated(TdApi.User user)
+    void usersUpdated(User user)
     {
 	for(UsersListener l: usersListeners)
 	    app.getLuwrain().runUiSafely(()->l.onUsersUpdate(user));
     }
-
-    
 }

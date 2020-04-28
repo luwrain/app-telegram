@@ -96,9 +96,7 @@ final class App extends AppBase<Strings> implements MonoApp
 	    {
 		getLuwrain().runUiSafely(()->{
 		getLayout().setBasicLayout(App.this.mainLayout.getLayout());
-		App.this.mainLayout.activateDefaultArea();
-		getOperations().getChats(100);
-		getOperations().getContacts();
+		App.this.mainLayout.activate();
 		    });
 	    }
 	    @Override Client getClient()
