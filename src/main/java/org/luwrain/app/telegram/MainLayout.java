@@ -22,7 +22,7 @@ import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.template.*;
 
-final class MainLayout extends LayoutBase implements ListArea.ClickHandler, ConsoleArea.InputHandler, ConsoleArea.ClickHandler, Objects.ChatsListener, Objects.UsersListener
+final class MainLayout extends LayoutBase implements ListArea.ClickHandler, ConsoleArea.InputHandler, ConsoleArea.ClickHandler, Objects.ChatsListener
 {
     static private final String LOG_COMPONENT = App.LOG_COMPONENT;
 
@@ -30,7 +30,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
     private final ListArea chatsArea;
     private final ConsoleArea consoleArea;
 
-    private Object[] items = new Object[0];
+    private Chat[] chats = new Chat[0];
     private Chat activeChat = null;
     private Message[] messages = new Message[0];
 
@@ -102,7 +102,6 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
 	    };
 	synchronized(app.getObjects()) {
 	app.getObjects().chatsListeners.add(this);
-	//		app.getObjects().usersListeners.add(this);
 	}
     }
 
@@ -120,10 +119,8 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
 	{
 	    final Chat chat = (Chat)obj;
 	    this.activeChat = chat;
-	    app.getOperations().getChatHistory(chat, (messagesChat, messages)->{
-		    this.messages = messages.messages;
-		    consoleArea.refresh();
-		});
+	    updateActiveChatHistory();
+	    consoleArea.reset(false);
 	    app.getLuwrain().setActiveArea(consoleArea);
 	    return true;
 	}
@@ -135,7 +132,11 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
 	NullCheck.notNull(text, "text");
 	if (text.isEmpty() || activeChat == null)
 	    	return ConsoleArea.InputHandler.Result.REJECTED;
-	app.getOperations().sendMessage(activeChat, text);
+	app.getOperations().sendMessage(activeChat, text, ()->{
+		consoleArea.setInput("");
+		updateActiveChatHistory();
+		app.getLuwrain().playSound(Sounds.DONE);
+	    });
 return ConsoleArea.InputHandler.Result.OK;
     }
 
@@ -148,37 +149,29 @@ return ConsoleArea.InputHandler.Result.OK;
 
     @Override public void onChatsUpdate(Chat chat)
     {
-	buildChatsList();
-    }
-
-        @Override public void onUsersUpdate(User user)
-    {
-	buildChatsList();
+buildChatsList();
     }
 
     private void buildChatsList()
     {
-		final List res = new LinkedList();
-		final Set<Integer> knownUsers = new TreeSet();
+		final List<Chat> res = new LinkedList();
 	for(Map.Entry<Long, Chat> e: app.getObjects().chats.entrySet())
-	{
-	    if (e.getValue().type instanceof ChatTypePrivate)
-	    {
-		final ChatTypePrivate p = (ChatTypePrivate)e.getValue().type;
-		knownUsers.add(new Integer(p.userId));
-	    }
 	    res.add(e.getValue());
-	}
-	final int[] contacts = app.getObjects().contacts;
-	for(int contact: contacts)
-	    if (!knownUsers.contains(new Integer(contact)))
-		{
-		    final User user = app.getObjects().users.get(contact);
-		    if (user != null)
-	    res.add(user);
-		}
-	items = res.toArray(new Object[res.size()]);
+	chats = res.toArray(new Chat[res.size()]);
 	chatsArea.refresh();Log.debug(LOG_COMPONENT, "" + res.size() + " items in main layout");
+    }
+
+    private void updateActiveChatHistory()
+    {
+	if (activeChat == null)
+	    return;
+		    app.getOperations().getChatHistory(activeChat, (messagesChat, messages)->{
+		    final List<Message> res = new LinkedList();
+		    res.add(messagesChat.lastMessage);
+		    res.addAll(Arrays.asList(messages.messages));
+		    this.messages = res.toArray(new Message[res.size()]);
+		    consoleArea.refresh();
+		});
     }
 
     private boolean actAddContact()
@@ -191,7 +184,7 @@ return ConsoleArea.InputHandler.Result.OK;
 	final ListArea.Params params = new ListArea.Params();
 	params.context = new DefaultControlContext(app.getLuwrain());
 	params.model = new ChatsModel();
-	params.appearance = new ChatsListAppearance();
+	params.appearance = new ChatsListAppearance(app);
 	params.clickHandler = this;
 	params.name = "area1";
 	return params;
@@ -227,63 +220,17 @@ return ConsoleArea.InputHandler.Result.OK;
     {
 	@Override public int getItemCount()
 	{
-	    return items.length;
+	    return chats.length;
 	}
 	@Override public Object getItem(int index)
 	{
-	    return items[index];
+	    return chats[index];
 	}
 	@Override public void refresh()
 	{
 	}
     }
 
-private class ChatsListAppearance implements ListArea.Appearance
-{
-    @Override public void announceItem(Object item, Set<Flags> flags)
-    {
-	NullCheck.notNull(item, "item");
-	NullCheck.notNull(flags, "flags");
-	if (item instanceof Chat)
-	{
-	    final Chat chat = (Chat)item;
-	    app.getLuwrain().setEventResponse(DefaultEventResponse.listItem(chat.title, Suggestions.LIST_ITEM));
-		    return;
-	}
-		if (item instanceof User)
-	{
-	    final User user = (User)item;
-	    app.getLuwrain().setEventResponse(DefaultEventResponse.listItem(user.firstName + " " + user.lastName, Suggestions.LIST_ITEM));
-		    return;
-	}
-	app.getLuwrain().setEventResponse(DefaultEventResponse.listItem(item.toString(), Suggestions.LIST_ITEM));
-	    return;
-    }
-    @Override public String getScreenAppearance(Object item, Set<Flags> flags)
-    {
-	NullCheck.notNull(item, "item");
-	NullCheck.notNull(flags, "flags");
-	if (item instanceof Chat)
-	{
-	    final Chat chat = (Chat)item;
-	    return chat.title;
-	}
-		if (item instanceof User)
-	{
-	    final User user = (User)item;
-	    return user.firstName + " " + user.lastName;
-	}
-	return item.toString();
-    }
-    @Override public int getObservableLeftBound(Object item)
-    {
-	return 0;
-    }
-    @Override public int getObservableRightBound(Object item)
-    {
-	return getScreenAppearance(item, EnumSet.noneOf(Flags.class)).length();
-    }
-}
 
     private final class ConsoleAreaModel implements ConsoleArea.Model
     {
@@ -320,6 +267,18 @@ private class ChatsListAppearance implements ListArea.Appearance
 	@Override public String getTextAppearance(Object item)
 	{
 	    NullCheck.notNull(item, "item");
+
+	    	    if (item instanceof Message)
+	    {
+		final Message message = (Message)item;
+
+		if (message.content instanceof MessageText)
+		{
+		    final MessageText text = (MessageText)message.content;
+		    return text.text.text;
+		}
+	    }
+		
 	    return item.toString();
 	}
     }

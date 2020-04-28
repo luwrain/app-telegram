@@ -41,6 +41,7 @@ abstract class UpdatesHandler implements Client.ResultHandler
 	if (object == null)
 	    Log.warning(LOG_COMPONENT, "null update object");
 	//			    Log.debug(LOG_COMPONENT, "handling " + object.toString());
+	//..	Log.debug(LOG_COMPONENT, "test update");
 	switch (object.getConstructor())
 	{
 	case TdApi.UpdateAuthorizationState.CONSTRUCTOR:
@@ -50,9 +51,8 @@ abstract class UpdatesHandler implements Client.ResultHandler
 	    final TdApi.UpdateUser updateUser = (TdApi.UpdateUser) object;
 	    synchronized(objects){
 		                        objects.users.put(updateUser.user.id, updateUser.user);
-					objects.usersUpdated(updateUser.user);
-					Log.debug(LOG_COMPONENT, "Updated user: " + updateUser.user);
 	    }
+	    					objects.usersUpdated(updateUser.user);
                     break;
                 case TdApi.UpdateUserStatus.CONSTRUCTOR:  {
                     final TdApi.UpdateUserStatus updateUserStatus = (TdApi.UpdateUserStatus) object;
@@ -78,14 +78,14 @@ objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGr
                     break;
                 case TdApi.UpdateNewChat.CONSTRUCTOR: {
                     final TdApi.UpdateNewChat updateNewChat = (TdApi.UpdateNewChat) object;
+		                        final TdApi.Chat chat = updateNewChat.chat;
 		                        synchronized (objects) {
-                    final TdApi.Chat chat = updateNewChat.chat;
                         objects.chats.put(chat.id, chat);
-			objects.chatsUpdated(chat);
 			                        final long order = chat.order;
                         chat.order = 0;
 			//                        setChatOrder(chat, order);
                     }
+								objects.chatsUpdated(chat);
                     break;
                 }
                 case TdApi.UpdateChatTitle.CONSTRUCTOR: {

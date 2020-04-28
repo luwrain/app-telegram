@@ -45,6 +45,12 @@ final class App extends AppBase<Strings> implements MonoApp
 	this.mainLayout = new MainLayout(this);
 	this.authLayout = new AuthLayout(this);
 	this.client = Client.create(newResultHandler(), null, null); // recreate client after previous has closed
+        Client.execute(new TdApi.SetLogVerbosityLevel(0));
+	final String logFile = new File(getLuwrain().getFileProperty("luwrain.dir.userhome"), "td.log").getAbsolutePath();
+	Log.debug(LOG_COMPONENT, "tdlib log file is " + logFile);
+        if (Client.execute(new TdApi.SetLogStream(new TdApi.LogStreamFile(logFile, 1 << 27))) instanceof TdApi.Error) {
+            throw new IOError(new IOException("Write access to the current directory is required"));
+        }
 	setAppName(getStrings().appName());
 	return true;
     }
@@ -139,8 +145,12 @@ final class App extends AppBase<Strings> implements MonoApp
 
     @Override public void closeApp()
     {
+	Log.debug(LOG_COMPONENT, "finishing the session");
+	/*
 	if (client != null)
 	    client.close();
+	Log.debug(LOG_COMPONENT, "client closed");
+	*/
 	super.closeApp();
     }
 

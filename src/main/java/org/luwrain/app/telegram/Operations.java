@@ -63,25 +63,18 @@ abstract class Operations
 		}});
     }
 
-    void sendMessage(TdApi.Chat chat, String text)
+    void sendMessage(TdApi.Chat chat, String text, Runnable onSuccess)
     {
+	NullCheck.notNull(chat, "chat");
+	NullCheck.notEmpty(text, "text");
+	NullCheck.notNull(onSuccess, "onSuccess");
 	TdApi.InlineKeyboardButton[] row = {new TdApi.InlineKeyboardButton("https://telegram.org?1", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?2", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?3", new TdApi.InlineKeyboardButtonTypeUrl())};
         TdApi.ReplyMarkup replyMarkup = new TdApi.ReplyMarkupInlineKeyboard(new TdApi.InlineKeyboardButton[][]{row, row, row});
 	final TdApi.InputMessageContent content = new TdApi.InputMessageText(new TdApi.FormattedText(text, null), false, true);
-	getClient().send(new TdApi.SendMessage(chat.id, 0, null, replyMarkup, content), new Client.ResultHandler() {
-		@Override public void onResult(TdApi.Object object) {
-		    switch (object.getConstructor())
-		    {
-		    case TdApi.Message.CONSTRUCTOR:
-			Log.debug(LOG_COMPONENT, "response on message sending: " + object);
-			return;
-		    case TdApi.Error.CONSTRUCTOR:
-			Log.error(LOG_COMPONENT, "Receive an error for GetContacts: " + object);
-			return;
-		    default:
-			Log.error(LOG_COMPONENT, "Receive wrong response from TDLib: " + object);
-		    }
-		}});
+	getClient().send(new TdApi.SendMessage(chat.id, 0, null, replyMarkup, content),
+			 new DefaultHandler(TdApi.Message.CONSTRUCTOR, (obj)->{
+				 app.getLuwrain().runUiSafely(()->onSuccess.run());
+			 }));
     }
 
     void getContacts(Runnable onSuccess)
@@ -138,21 +131,10 @@ abstract class Operations
     {
 	NullCheck.notNull(chat, "chat");
 	NullCheck.notNull(callback, "callback");
-	getClient().send(new TdApi.GetChatHistory(chat.id, chat.lastMessage.id, 0, 50, false), new Client.ResultHandler() {
-		@Override public void onResult(TdApi.Object object) {
-		    switch (object.getConstructor())
-		    {
-		    case TdApi.Messages.CONSTRUCTOR:
-			//			    Log.debug(LOG_COMPONENT, "response on CreatePrivateChat: " + object);
-			app.getLuwrain().runUiSafely(()->callback.onChatHistoryMessages(chat, (TdApi.Messages)object));
-			return;
-		    case TdApi.Error.CONSTRUCTOR:
-			Log.error(LOG_COMPONENT, "Receive an error for CreatePrivateChat: " + object);
-			return;
-		    default:
-			Log.error(LOG_COMPONENT, "Receive wrong response from TDLib: " + object);
-		    }
-		}});
+	getClient().send(new TdApi.GetChatHistory(chat.id, chat.lastMessage.id, 0, 100, false),
+			 new DefaultHandler(TdApi.Messages.CONSTRUCTOR, (obj)->{
+				 app.getLuwrain().runUiSafely(()->callback.onChatHistoryMessages(chat, (TdApi.Messages)obj));
+			 }));
     }
 
     void getChats(int limit)
