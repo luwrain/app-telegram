@@ -11,6 +11,7 @@ package org.luwrain.app.telegram;
 import java.util.*;
 
 import org.drinkless.tdlib.TdApi.Chat;
+import org.drinkless.tdlib.TdApi.ChatTypePrivate;
 import org.drinkless.tdlib.TdApi.User;
 import org.drinkless.tdlib.TdApi.Message;
 import org.drinkless.tdlib.TdApi.MessageText;
@@ -51,12 +52,15 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
+		    /*
 		    switch(event.getCode())
 		    {
 		    case REFRESH:
-			app.getOperations().getContacts();
+						app.getOperations().getContacts();
+			app.getOperations().getMainChatList(20);
 			return true;
 		    }
+		    */
 		    if (app.onSystemEvent(this, event, actions))
 			return true;
 		    return super.onSystemEvent(event);
@@ -156,10 +160,19 @@ return ConsoleArea.InputHandler.Result.OK;
     private void updateChats()
     {
 		final List res = new LinkedList();
+		final Set<Long> knownUsers = new TreeSet();
 	for(Map.Entry<Long, Chat> e: app.getObjects().chats.entrySet())
+	{
+	    if (e.getValue().type instanceof ChatTypePrivate)
+	    {
+		final ChatTypePrivate p = (ChatTypePrivate)e.getValue().type;
+		knownUsers.add(new Long(p.userId));
+	    }
 	    res.add(e.getValue());
+	}
 
 		for(Map.Entry<Integer, User> e: app.getObjects().users.entrySet())
+		    if (!knownUsers.contains(new Long(e.getValue().id)))
 	    res.add(e.getValue());
 
 		
@@ -197,6 +210,11 @@ return ConsoleArea.InputHandler.Result.OK;
 	params.clickHandler = this;
 	params.inputHandler = this;
 	return params;
+    }
+
+    void activateDefaultArea()
+    {
+	app.getLuwrain().setActiveArea(chatsArea);
     }
 
     AreaLayout getLayout()

@@ -163,7 +163,7 @@ abstract class Operations
 		}});
     }
 
-    void getMainChatList(int limit)
+    void getChats(int limit)
     {
         synchronized (objects) {
             if (!objects.haveFullMainChatList && limit > objects.mainChatList.size()) {
@@ -176,7 +176,8 @@ abstract class Operations
                     offsetChatId = last.chatId;
                 }
                 getClient().send(new TdApi.GetChats(new TdApi.ChatListMain(), offsetOrder, offsetChatId, limit - objects.mainChatList.size()), new Client.ResultHandler() {
-			@Override public void onResult(TdApi.Object object) {
+			@Override public void onResult(TdApi.Object object)
+			{
 			    switch (object.getConstructor()) {
                             case TdApi.Error.CONSTRUCTOR:
 				Log.error(LOG_COMPONENT, "Receive an error for GetChats: " + object);
@@ -189,7 +190,7 @@ abstract class Operations
                                     }
                                 }
                                 // chats had already been received through updates, let's retry request
-                                getMainChatList(limit);
+                                getChats(limit);
                                 break;
                             default:
                                 Log.error(LOG_COMPONENT, "Receive wrong response from TDLib: " + object);

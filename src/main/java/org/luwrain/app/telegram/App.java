@@ -29,6 +29,7 @@ final class App extends AppBase<Strings> implements MonoApp
     private Operations operations = null;
     private Objects objects = null;
     private MainLayout mainLayout = null;
+    private AuthLayout authLayout = null;
     private Client client = null;
 
     App()
@@ -42,6 +43,7 @@ final class App extends AppBase<Strings> implements MonoApp
 	this.objects = new Objects(this);
 	this.operations = newOperations();
 	this.mainLayout = new MainLayout(this);
+	this.authLayout = new AuthLayout(this);
 	this.client = Client.create(newResultHandler(), null, null); // recreate client after previous has closed
 	setAppName(getStrings().appName());
 	return true;
@@ -90,6 +92,15 @@ final class App extends AppBase<Strings> implements MonoApp
     private Client.ResultHandler newResultHandler()
     {
 	return new UpdatesHandler(tdlibDir, objects){
+	    @Override public void onReady()
+	    {
+		getLuwrain().runUiSafely(()->{
+		getLayout().setBasicLayout(App.this.mainLayout.getLayout());
+		App.this.mainLayout.activateDefaultArea();
+		getOperations().getChats(100);
+		getOperations().getContacts();
+		    });
+	    }
 	    @Override Client getClient()
 	    {
 		if (App.this.client == null)
@@ -125,7 +136,14 @@ final class App extends AppBase<Strings> implements MonoApp
 
     @Override public AreaLayout getDefaultAreaLayout()
     {
-	return this.mainLayout.getLayout();
+	return this.authLayout.getLayout();
+    }
+
+    @Override public void closeApp()
+    {
+	if (client != null)
+	    client.close();
+	super.closeApp();
     }
 
     @Override public MonoApp.Result onMonoAppSecondInstance(Application app)

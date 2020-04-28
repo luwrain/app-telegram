@@ -34,6 +34,7 @@ abstract class UpdatesHandler implements Client.ResultHandler
     }
 
     abstract Client getClient();
+    abstract void onReady();
 
     @Override public void onResult(TdApi.Object object)
     {
@@ -320,14 +321,7 @@ this.authorizationState = authorizationState;
 	}
 	case TdApi.AuthorizationStateReady.CONSTRUCTOR:
 	    haveAuthorization = true;
-	    /*
-	    authorizationLock.lock();
-	    try {
-		gotAuthorization.signal();
-	    } finally {
-		authorizationLock.unlock();
-	    }
-	    */
+	    onReady();
 	    break;
 	case TdApi.AuthorizationStateLoggingOut.CONSTRUCTOR:
 	    haveAuthorization = false;
