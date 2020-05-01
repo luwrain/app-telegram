@@ -150,6 +150,12 @@ return ConsoleArea.InputHandler.Result.OK;
     @Override public void onChatsUpdate(Chat chat)
     {
 buildChatsList();
+if (chat.lastMessage != null)
+{
+    final String text = Utils.getMessageText(chat.lastMessage);
+    if (!text.trim().isEmpty())
+	app.getLuwrain().speak(text.trim(), Sounds.CHAT_MESSAGE);
+}
     }
 
     private void buildChatsList()

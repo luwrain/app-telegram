@@ -14,15 +14,15 @@ import org.luwrain.core.*;
 public final class Extension extends org.luwrain.core.extensions.EmptyExtension
 {
     static private final String LOG_COMPONENT = App.LOG_COMPONENT;
-    
+
     @Override public String init(Luwrain luwrain)
     {
-	        try {
-            System.loadLibrary("tdjni");
-        } catch (UnsatisfiedLinkError e) {
-		    Log.error(LOG_COMPONENT, "unable to load tdjni: " + e.getClass().getName() + ":" + e.getMessage());
-		    return "unable to load tdjni: " + e.getClass().getName() + ":" + e.getMessage();
-        }
+	final JniLoader jniLoader = new JniLoader();
+	if (!jniLoader.loadByShortName(luwrain.getClass().getClassLoader(), "tdjni"))
+	{
+	    Log.warning(LOG_COMPONENT, "unable to load tdjni");
+	    return "Unable to load tdjni";
+	}
 	return null;
     }
 

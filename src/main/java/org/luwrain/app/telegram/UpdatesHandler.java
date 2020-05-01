@@ -92,7 +92,6 @@ objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGr
                     final TdApi.UpdateChatTitle updateChat = (TdApi.UpdateChatTitle) object;
 		                        synchronized (objects) {
                     final TdApi.Chat chat = objects.chats.get(updateChat.chatId);
-
                         chat.title = updateChat.title;
                     }
                     break;
@@ -118,11 +117,13 @@ objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGr
                 }
                 case TdApi.UpdateChatLastMessage.CONSTRUCTOR: {
                     final TdApi.UpdateChatLastMessage updateChat = (TdApi.UpdateChatLastMessage) object;
+		    final TdApi.Chat chat;
 		                        synchronized (objects) {
-                    final TdApi.Chat chat = objects.chats.get(updateChat.chatId);
+chat = objects.chats.get(updateChat.chatId);
                         chat.lastMessage = updateChat.lastMessage;
 			//                        setChatOrder(chat, updateChat.order);
                     }
+					objects.chatsUpdated(chat);
                     break;
                 }
                 case TdApi.UpdateChatOrder.CONSTRUCTOR: {

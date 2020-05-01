@@ -41,7 +41,7 @@ final class ChatsListAppearance implements ListArea.Appearance
     b.append(chat.title);
     if (chat.lastMessage != null)
     {
-	final String text = getMessageText(chat.lastMessage);
+	final String text = Utils.getMessageText(chat.lastMessage);
 	if (!text.trim().isEmpty())
 	    b.append(" ").append(text.trim());
     }
@@ -68,16 +68,5 @@ final class ChatsListAppearance implements ListArea.Appearance
     @Override public int getObservableRightBound(Object item)
     {
 	return getScreenAppearance(item, EnumSet.noneOf(Flags.class)).length();
-    }
-
-    private String getMessageText(Message message)
-    {
-	NullCheck.notNull(message, "message");
-	if (message.content instanceof MessageText)
-	{
-	    final MessageText text = (MessageText)message.content;
-	    return text.text.text;
-	}
-	return "";
     }
 }
