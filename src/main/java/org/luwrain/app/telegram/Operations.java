@@ -137,55 +137,29 @@ abstract class Operations
 			 }));
     }
 
-    void getChats(int limit)
+    void fillMainChatList(int limit)
     {
         synchronized (objects) {
-            if (!objects.haveFullMainChatList && limit > objects.mainChatList.size()) {
-                // have enough chats in the chat list or chat list is too small
-                long offsetOrder = Long.MAX_VALUE;
-		long offsetChatId = 0;
-                if (!objects.mainChatList.isEmpty()) {
-                    OrderedChat last = objects.mainChatList.last();
-                    offsetOrder = last.order;
-                    offsetChatId = last.chatId;
-                }
-                getClient().send(new TdApi.GetChats(new TdApi.ChatListMain(), offsetOrder, offsetChatId, limit - objects.mainChatList.size()), new Client.ResultHandler() {
-			@Override public void onResult(TdApi.Object object)
-			{
-			    switch (object.getConstructor()) {
-                            case TdApi.Error.CONSTRUCTOR:
-				Log.error(LOG_COMPONENT, "Receive an error for GetChats: " + object);
-                                break;
-                            case TdApi.Chats.CONSTRUCTOR:
-                                long[] chatIds = ((TdApi.Chats) object).chatIds;
-                                if (chatIds.length == 0) {
-                                    synchronized (objects) {
-                                        objects.haveFullMainChatList = true;
-                                    }
-                                }
-                                // chats had already been received through updates, let's retry request
-                                getChats(limit);
-                                break;
-                            default:
-                                Log.error(LOG_COMPONENT, "Receive wrong response from TDLib: " + object);
-			    }
-			}
-		    });
-                return;
-            }
-            // have enough chats in the chat list to answer request
-            java.util.Iterator<OrderedChat> iter = objects.mainChatList.iterator();
-            System.out.println("First " + limit + " chat(s) out of " + objects.mainChatList.size() + " known chat(s):");
-            for (int i = 0; i < limit; i++)
+            if (objects.haveFullMainChatList || limit <= objects.mainChats.size())
+		return;
+	    long offsetOrder = Long.MAX_VALUE;
+	    long offsetChatId = 0;
+	    if (!objects.mainChats.isEmpty())
 	    {
-                final long chatId = iter.next().chatId;
-                final TdApi.Chat chat = objects.chats.get(chatId);
-                synchronized (objects) {
-                    System.out.println(chatId + ": " + chat.title);
-                }
-            }
-	    //            print("");
-        }
+		final OrderedChat last = objects.mainChats.last();
+		offsetOrder = last.order;
+		offsetChatId = last.chatId;
+	    }
+	    getClient().send(new TdApi.GetChats(new TdApi.ChatListMain(), offsetOrder, offsetChatId, limit - objects.mainChats.size()),
+			     new DefaultHandler(TdApi.Chats.CONSTRUCTOR, (object)->{
+				     final long[] chatIds = ((TdApi.Chats) object).chatIds;
+				     if (chatIds.length == 0)
+					 synchronized(objects){
+					     objects.haveFullMainChatList = true;
+					 }
+				     fillMainChatList(limit);
+			     }));
+	}
     }
 
 private final class DefaultHandler implements Client.ResultHandler
@@ -214,4 +188,4 @@ private final class DefaultHandler implements Client.ResultHandler
 	Log.error(LOG_COMPONENT, "Receive wrong response for " + String.valueOf(constructor) + ":" + object.toString());
 		    }
 }
-    }
+}

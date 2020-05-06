@@ -32,7 +32,7 @@ final class Objects
     final ConcurrentMap<Integer, User> users = new ConcurrentHashMap();
     int[] contacts = new int[0];
         final ConcurrentMap<Long, Chat> chats = new ConcurrentHashMap();
-    final NavigableSet<OrderedChat> mainChatList = new TreeSet();
+    final NavigableSet<OrderedChat> mainChats = new TreeSet();
     boolean haveFullMainChatList = false;
     final ConcurrentMap<Integer, TdApi.BasicGroup> basicGroups = new ConcurrentHashMap<Integer, TdApi.BasicGroup>();
     final ConcurrentMap<Integer, TdApi.Supergroup> supergroups = new ConcurrentHashMap<Integer, TdApi.Supergroup>();

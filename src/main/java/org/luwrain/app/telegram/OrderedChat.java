@@ -19,17 +19,16 @@ final class OrderedChat implements Comparable<OrderedChat>
 	this.chatId = chatId;
     }
 
-    @Override public int compareTo(OrderedChat o) {
-	if (this.order != o.order)
-	    return o.order < this.order ? -1 : 1;
-	if (this.chatId != o.chatId)
-	    return o.chatId < this.chatId ? -1 : 1;
-	return 0;
+    @Override public int compareTo(OrderedChat o)
+    {
+	if (this.chatId == o.chatId)
+	    return 0;
+	return -1 * new Long(this.order).compareTo(new Long(o.order));
     }
 
     @Override public boolean equals(Object obj)
     {
-	OrderedChat o = (OrderedChat) obj;
-	return this.order == o.order && this.chatId == o.chatId;
+	final OrderedChat o = (OrderedChat) obj;
+	return this.chatId == o.chatId;
     }
 }

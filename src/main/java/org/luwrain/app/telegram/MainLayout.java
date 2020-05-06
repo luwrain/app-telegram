@@ -25,6 +25,7 @@ import org.luwrain.template.*;
 final class MainLayout extends LayoutBase implements ListArea.ClickHandler, ConsoleArea.InputHandler, ConsoleArea.ClickHandler, Objects.ChatsListener
 {
     static private final String LOG_COMPONENT = App.LOG_COMPONENT;
+    static private final int CHAT_NUM_LIMIT = 100;
 
     private final App app;
     private final ListArea chatsArea;
@@ -145,8 +146,6 @@ return ConsoleArea.InputHandler.Result.OK;
 	return false;
     }
 
-
-
     @Override public void onChatsUpdate(Chat chat)
     {
 buildChatsList();
@@ -160,10 +159,21 @@ if (chat.lastMessage != null)
 
     private void buildChatsList()
     {
+	final Objects objects = app.getObjects();
 		final List<Chat> res = new LinkedList();
-	for(Map.Entry<Long, Chat> e: app.getObjects().chats.entrySet())
-	    res.add(e.getValue());
-	chats = res.toArray(new Chat[res.size()]);
+		synchronized(objects) {
+		    Log.debug(LOG_COMPONENT, "building");
+		for(OrderedChat c: objects.mainChats)
+		{
+		    final Chat chat = objects.chats.get(c.chatId);
+		    if (chat != null)
+		    {
+			Log.debug(LOG_COMPONENT, "order " + c.order);
+			res.add(chat);
+		    }
+		}
+		}
+	this.chats = res.toArray(new Chat[res.size()]);
 	chatsArea.refresh();Log.debug(LOG_COMPONENT, "" + res.size() + " items in main layout");
     }
 
@@ -212,8 +222,7 @@ if (chat.lastMessage != null)
 
     void activate()
     {
-			app.getOperations().getChats(100);
-			app.getOperations().getContacts(()->buildChatsList());
+			app.getOperations().fillMainChatList(CHAT_NUM_LIMIT);
 	app.getLuwrain().setActiveArea(chatsArea);
     }
 
@@ -236,7 +245,6 @@ if (chat.lastMessage != null)
 	{
 	}
     }
-
 
     private final class ConsoleAreaModel implements ConsoleArea.Model
     {

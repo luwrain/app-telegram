@@ -81,9 +81,10 @@ objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGr
 		                        final TdApi.Chat chat = updateNewChat.chat;
 		                        synchronized (objects) {
                         objects.chats.put(chat.id, chat);
-			                        final long order = chat.order;
-                        chat.order = 0;
-			//                        setChatOrder(chat, order);
+			objects.mainChats.add(new OrderedChat(chat.order, chat.id));
+			//			                        final long order = chat.order;
+			//                        chat.order = 0;
+			//			                        setChatOrder(chat, order);
                     }
 								objects.chatsUpdated(chat);
                     break;
@@ -127,13 +128,14 @@ chat = objects.chats.get(updateChat.chatId);
                     break;
                 }
                 case TdApi.UpdateChatOrder.CONSTRUCTOR: {
-                    TdApi.UpdateChatOrder updateChat = (TdApi.UpdateChatOrder) object;
-		    /*
-                    TdApi.Chat chat = chats.get(updateChat.chatId);
-                    synchronized (chat) {
-                        setChatOrder(chat, updateChat.order);
+                    final TdApi.UpdateChatOrder updateChat = (TdApi.UpdateChatOrder) object;
+		    final TdApi.Chat chat;
+		    synchronized (objects) {
+chat = objects.chats.get(updateChat.chatId);
+					    objects.mainChats.remove(new OrderedChat(0, chat.id));
+					    objects.mainChats.add(new OrderedChat(updateChat.order, chat.id));
                     }
-		    */
+		    objects.chatsUpdated(chat);
                     break;
                 }
                 case TdApi.UpdateChatIsPinned.CONSTRUCTOR: {
