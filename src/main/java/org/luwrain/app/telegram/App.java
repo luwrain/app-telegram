@@ -146,11 +146,9 @@ final class App extends AppBase<Strings> implements MonoApp
     @Override public void closeApp()
     {
 	Log.debug(LOG_COMPONENT, "finishing the session");
-	/*
 	if (client != null)
 	    client.close();
 	Log.debug(LOG_COMPONENT, "client closed");
-	*/
 	super.closeApp();
     }
 
