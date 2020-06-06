@@ -262,38 +262,23 @@ if (chat.lastMessage != null)
 
         private final class ConsoleAreaAppearance implements ConsoleArea.Appearance
     {
+	private final MessageAppearance messageAppearance = new MessageAppearance(app.getLuwrain());
 	@Override public void announceItem(Object item)
 	{
 	    NullCheck.notNull(item, "item");
-	    if (item instanceof Message)
+	    if (!(item instanceof Message))
 	    {
-		final Message message = (Message)item;
-
-		if (message.content instanceof MessageText)
-		{
-		    final MessageText text = (MessageText)message.content;
-			    app.getLuwrain().setEventResponse(DefaultEventResponse.text(text.text.text));
-		}
-			    return;
-	    }
 	    app.getLuwrain().setEventResponse(DefaultEventResponse.text(item.toString()));
+	    }
+	    messageAppearance.announce((Message)item); 
 	}
 	@Override public String getTextAppearance(Object item)
 	{
 	    NullCheck.notNull(item, "item");
 
-	    	    if (item instanceof Message)
-	    {
-		final Message message = (Message)item;
-
-		if (message.content instanceof MessageText)
-		{
-		    final MessageText text = (MessageText)message.content;
-		    return text.text.text;
-		}
-	    }
-		
-	    return item.toString();
+	    if (!(item instanceof Message))
+		return item.toString();
+	    return messageAppearance.getTextAppearance((Message)item);
 	}
     }
 }
