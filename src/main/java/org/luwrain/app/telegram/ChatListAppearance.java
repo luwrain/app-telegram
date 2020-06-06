@@ -41,11 +41,11 @@ final class ChatsListAppearance implements ListArea.Appearance
     b.append(chat.title);
     if (chat.lastMessage != null)
     {
-	final String text = Utils.getMessageText(chat.lastMessage);
+	final String text = MessageAppearance.getMessageText(chat.lastMessage);
 	if (!text.trim().isEmpty())
 	    b.append(" ").append(text.trim());
     }
-    app.getLuwrain().setEventResponse(DefaultEventResponse.listItem(new String(b), Suggestions.LIST_ITEM));
+    app.getLuwrain().setEventResponse(DefaultEventResponse.listItem(chat.unreadCount > 0?Sounds.ATTENTION:Sounds.LIST_ITEM, new String(b), Suggestions.LIST_ITEM));
 	}
 
     @Override public String getScreenAppearance(Object item, Set<Flags> flags)

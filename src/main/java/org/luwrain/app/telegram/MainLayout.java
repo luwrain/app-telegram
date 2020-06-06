@@ -151,7 +151,7 @@ return ConsoleArea.InputHandler.Result.OK;
 buildChatsList();
 if (chat.lastMessage != null)
 {
-    final String text = Utils.getMessageText(chat.lastMessage);
+    final String text = MessageAppearance.getMessageText(chat.lastMessage);
     if (!text.trim().isEmpty())
 	app.getLuwrain().speak(text.trim(), Sounds.CHAT_MESSAGE);
 }
@@ -262,7 +262,7 @@ if (chat.lastMessage != null)
 
         private final class ConsoleAreaAppearance implements ConsoleArea.Appearance
     {
-	private final MessageAppearance messageAppearance = new MessageAppearance(app.getLuwrain());
+	private final MessageAppearance messageAppearance = new MessageAppearance(app.getLuwrain(), app.getObjects());
 	@Override public void announceItem(Object item)
 	{
 	    NullCheck.notNull(item, "item");
@@ -275,7 +275,6 @@ if (chat.lastMessage != null)
 	@Override public String getTextAppearance(Object item)
 	{
 	    NullCheck.notNull(item, "item");
-
 	    if (!(item instanceof Message))
 		return item.toString();
 	    return messageAppearance.getTextAppearance((Message)item);

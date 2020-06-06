@@ -11,6 +11,7 @@ package org.luwrain.app.telegram;
 import java.util.*;
 
 import org.drinkless.tdlib.TdApi.Chat;
+import org.drinkless.tdlib.TdApi.User;
 import org.drinkless.tdlib.TdApi.Message;
 import org.drinkless.tdlib.TdApi.MessageText;
 
@@ -20,11 +21,14 @@ import org.luwrain.controls.*;
 final class MessageAppearance
 {
     private final Luwrain luwrain;
+        private final Objects objects;
 
-    MessageAppearance(Luwrain luwrain)
+    MessageAppearance(Luwrain luwrain, Objects objects)
     {
 	NullCheck.notNull(luwrain, "luwrain");
+	NullCheck.notNull(objects, "objects");
 	this.luwrain = luwrain;
+	this.objects = objects;
     }
 
     void announce(Message message)
@@ -48,7 +52,14 @@ final class MessageAppearance
     {
 	NullCheck.notNull(message, "message");
 	NullCheck.notNull(text, "text");
-	luwrain.setEventResponse(DefaultEventResponse.listItem(text.text.text));
+	final User user = objects.users.get(message.senderUserId);
+	final StringBuilder b = new StringBuilder();
+		b.append(text.text.text);
+	if (user != null && user.firstName != null && !user.firstName.trim().isEmpty())
+	    b.append(" ").append(user.firstName.trim());
+	final Date date = new Date(message.date);
+	b.append(" ").append(date.toString());
+	luwrain.setEventResponse(DefaultEventResponse.listItem(new String(b)));
     }
 
     String getTextAppearance(Message message)
@@ -62,5 +73,16 @@ final class MessageAppearance
 	    return text.text.text;
 	}
 	return message.content.getClass().getName();
+    }
+
+    static String getMessageText(Message message)
+    {
+	NullCheck.notNull(message, "message");
+	if (message.content instanceof MessageText)
+	{
+	    final MessageText text = (MessageText)message.content;
+	    return text.text.text;
+	}
+	return "";
     }
 }
