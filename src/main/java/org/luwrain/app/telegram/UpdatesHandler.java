@@ -47,13 +47,22 @@ abstract class UpdatesHandler implements Client.ResultHandler
 	case TdApi.UpdateAuthorizationState.CONSTRUCTOR:
 	    authStateUpdated(((TdApi.UpdateAuthorizationState) object).authorizationState);
 	    break;
-	case TdApi.UpdateUser.CONSTRUCTOR:
+	case TdApi.UpdateFile.CONSTRUCTOR: {
+		    	    final TdApi.UpdateFile updateFile = (TdApi.UpdateFile) object;
+			    synchronized(objects) {
+				objects.files.put(updateFile.file.id, updateFile.file);	
+			    }
+			    objects.filesUpdated(updateFile.file);
+			    break;
+	}
+	case TdApi.UpdateUser.CONSTRUCTOR: {
 	    final TdApi.UpdateUser updateUser = (TdApi.UpdateUser) object;
 	    synchronized(objects){
 		                        objects.users.put(updateUser.user.id, updateUser.user);
 	    }
 	    					objects.usersUpdated(updateUser.user);
                     break;
+	}
                 case TdApi.UpdateUserStatus.CONSTRUCTOR:  {
                     final TdApi.UpdateUserStatus updateUserStatus = (TdApi.UpdateUserStatus) object;
                     synchronized (objects) {

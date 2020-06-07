@@ -14,6 +14,7 @@ import java.util.concurrent.*;
 import org.drinkless.tdlib.*;
 import org.drinkless.tdlib.TdApi.User;
 import org.drinkless.tdlib.TdApi.Chat;
+import org.drinkless.tdlib.TdApi.File;
 
 import org.luwrain.core.*;
 
@@ -29,9 +30,15 @@ final class Objects
 	void onUsersUpdate(User user);
     }
 
+    interface FilesListener
+    {
+	void onFilesUpdate(File file);
+    }
+
     final ConcurrentMap<Integer, User> users = new ConcurrentHashMap();
+    final ConcurrentMap<Integer, File> files = new ConcurrentHashMap();
     int[] contacts = new int[0];
-        final ConcurrentMap<Long, Chat> chats = new ConcurrentHashMap();
+    final ConcurrentMap<Long, Chat> chats = new ConcurrentHashMap();
     final NavigableSet<OrderedChat> mainChats = new TreeSet();
     boolean haveFullMainChatList = false;
     final ConcurrentMap<Integer, TdApi.BasicGroup> basicGroups = new ConcurrentHashMap<Integer, TdApi.BasicGroup>();
@@ -40,6 +47,7 @@ final class Objects
 
     final List<ChatsListener> chatsListeners = new LinkedList();
     final List<UsersListener> usersListeners = new LinkedList();
+        final List<FilesListener> filesListeners = new LinkedList();
 
     private final App app;
 
@@ -60,4 +68,11 @@ final class Objects
 	for(UsersListener l: usersListeners)
 	    app.getLuwrain().runUiSafely(()->l.onUsersUpdate(user));
     }
+
+        void filesUpdated(File file)
+    {
+	for(FilesListener l: filesListeners)
+	    app.getLuwrain().runUiSafely(()->l.onFilesUpdate(file));
+    }
+
 }

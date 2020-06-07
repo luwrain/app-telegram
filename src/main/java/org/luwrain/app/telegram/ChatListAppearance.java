@@ -34,19 +34,19 @@ final class ChatsListAppearance implements ListArea.Appearance
 	if (!(item instanceof Chat))
 	{
 	    app.getLuwrain().setEventResponse(DefaultEventResponse.listItem(item.toString(), Suggestions.LIST_ITEM));
-    return;
-}
-	    final Chat chat = (Chat)item;
-    final StringBuilder b = new StringBuilder();
-    b.append(chat.title);
-    if (chat.lastMessage != null)
-    {
-	final String text = MessageAppearance.getMessageText(chat.lastMessage);
-	if (!text.trim().isEmpty())
-	    b.append(" ").append(text.trim());
-    }
-    app.getLuwrain().setEventResponse(DefaultEventResponse.listItem(chat.unreadCount > 0?Sounds.ATTENTION:Sounds.LIST_ITEM, new String(b), Suggestions.LIST_ITEM));
+	    return;
 	}
+	final Chat chat = (Chat)item;
+	final StringBuilder b = new StringBuilder();
+	b.append(chat.title);
+	if (chat.lastMessage != null)
+	{
+	    final String text = MessageAppearance.getMessageText(chat.lastMessage);
+	    if (!text.trim().isEmpty())
+		b.append(" ").append(text.trim());
+	}
+	app.getLuwrain().setEventResponse(DefaultEventResponse.listItem(chat.unreadCount > 0?Sounds.ATTENTION:Sounds.LIST_ITEM, new String(b), Suggestions.LIST_ITEM));
+    }
 
     @Override public String getScreenAppearance(Object item, Set<Flags> flags)
     {
@@ -55,7 +55,15 @@ final class ChatsListAppearance implements ListArea.Appearance
 	if (item instanceof Chat)
 	{
 	    final Chat chat = (Chat)item;
-	    return chat.title;
+	    final StringBuilder b = new StringBuilder();
+	    b.append(chat.title);
+	    if (chat.lastMessage != null)
+	    {
+		final String text = MessageAppearance.getMessageText(chat.lastMessage);
+		if (!text.trim().isEmpty())
+		    b.append(": ").append(text);
+	    }
+	    return new String(b);
 	}
 	return item.toString();
     }

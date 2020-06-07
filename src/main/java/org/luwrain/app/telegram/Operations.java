@@ -127,6 +127,15 @@ abstract class Operations
 		}});
     }
 
+        void downloadFile(TdApi.File file)
+    {
+	NullCheck.notNull(file, "file");
+	getClient().send(new TdApi.DownloadFile(file.id, 1, 0, 0, false),
+			 new DefaultHandler(TdApi.File.CONSTRUCTOR, (obj)->{
+			 }));
+    }
+
+
     void getChatHistory(TdApi.Chat chat, ChatHistoryCallback callback)
     {
 	NullCheck.notNull(chat, "chat");

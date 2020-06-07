@@ -14,6 +14,7 @@ import org.drinkless.tdlib.TdApi.Chat;
 import org.drinkless.tdlib.TdApi.User;
 import org.drinkless.tdlib.TdApi.Message;
 import org.drinkless.tdlib.TdApi.MessageText;
+import org.drinkless.tdlib.TdApi.MessageAudio;
 
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
@@ -45,6 +46,15 @@ final class MessageAppearance
 		    announceMessageText(message, text);
 		    return;
 		}
+
+		if (message.content instanceof MessageAudio)
+	{
+		    final MessageAudio audio = (MessageAudio)message.content;
+		    announceMessageAudio(message, audio);
+		    return;
+		}
+
+		
 	luwrain.setEventResponse(DefaultEventResponse.text(message.content.getClass().getName()));
 	}
 
@@ -62,6 +72,22 @@ final class MessageAppearance
 	luwrain.setEventResponse(DefaultEventResponse.listItem(new String(b)));
     }
 
+        void announceMessageAudio(Message message, MessageAudio audio)
+    {
+	NullCheck.notNull(message, "message");
+	NullCheck.notNull(audio, "audio");
+	final User user = objects.users.get(message.senderUserId);
+	final StringBuilder b = new StringBuilder();
+	b.append("аудио ");
+	b.append(audio.audio.audio.local.downloadedSize).append("/").append(audio.audio.audio.expectedSize);
+	b.append(audio.audio.audio.local.path).append(" ");
+	b.append(audio.audio.audio.local.canBeDownloaded).append(" ");
+	if (user != null && user.firstName != null && !user.firstName.trim().isEmpty())
+	    b.append(" ").append(user.firstName.trim());
+	luwrain.setEventResponse(DefaultEventResponse.listItem(new String(b)));
+    }
+
+
     String getTextAppearance(Message message)
     {
 	NullCheck.notNull(message, "message");
@@ -78,6 +104,8 @@ final class MessageAppearance
     static String getMessageText(Message message)
     {
 	NullCheck.notNull(message, "message");
+	if (message.content == null)
+	    return "";
 	if (message.content instanceof MessageText)
 	{
 	    final MessageText text = (MessageText)message.content;

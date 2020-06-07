@@ -15,6 +15,7 @@ import org.drinkless.tdlib.TdApi.ChatTypePrivate;
 import org.drinkless.tdlib.TdApi.User;
 import org.drinkless.tdlib.TdApi.Message;
 import org.drinkless.tdlib.TdApi.MessageText;
+import org.drinkless.tdlib.TdApi.MessageAudio;
 import org.drinkless.tdlib.TdApi.Messages;
 
 import org.luwrain.core.*;
@@ -143,6 +144,31 @@ return ConsoleArea.InputHandler.Result.OK;
 
     @Override public boolean onConsoleClick(ConsoleArea consoleArea, int index, Object obj)
     {
+	if (obj == null || !(obj instanceof Message))
+	    return false;
+	final Message message = (Message)obj;
+	if (message.content != null && message.content instanceof MessageAudio)
+	{
+	    final MessageAudio audio = (MessageAudio)message.content;
+	    if (audio.audio.audio.local.isDownloadingActive)
+		return false;
+
+	    	    if (audio.audio.audio.local.isDownloadingCompleted)
+		    {
+			if (audio.audio.audio.local.path == null || audio.audio.audio.local.path.isEmpty())
+			    return false;
+			if (app.getLuwrain().getPlayer() == null)
+			    return false;
+			app.getLuwrain().getPlayer().play(new org.luwrain.player.Playlist(new String[]{
+				    org.luwrain.util.UrlUtils.fileToUrl(new java.io.File(audio.audio.audio.local.path))
+			    }), 0, 0, org.luwrain.player.Player.DEFAULT_FLAGS, new Properties());
+		return true;
+		    }
+		    app.getOperations().downloadFile(audio.audio.audio);
+		    app.getLuwrain().message("Выполняется доставка файла");//FIXME:
+		    return true;
+		    
+	}
 	return false;
     }
 
