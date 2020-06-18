@@ -15,4 +15,5 @@ public interface Strings
     static final String NAME = "luwrain.telegram";
 
     String appName();
-    }
+    String contactsAreaName();
+}
