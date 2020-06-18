@@ -117,20 +117,17 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
     @Override public boolean onListClick(ListArea listArea, int index, Object obj)
     {
 	if (obj == null)
-	    return false	; 
-	if (obj instanceof User)
-	{
-	    final User user = (User)obj;
-	    app.getOperations().openChat(user);
-	    return true;
-	}
+	    return false	;
 	if (obj instanceof Chat)
 	{
 	    final Chat chat = (Chat)obj;
-	    this.activeChat = chat;
-	    updateActiveChatHistory();
-	    consoleArea.reset(false);
-	    app.getLuwrain().setActiveArea(consoleArea);
+	    app.getOperations().openChat(chat, ()->{
+		    Log.debug(LOG_COMPONENT, "Chat " + chat.id + " opened, loading history");
+		    this.activeChat = chat;
+		    updateActiveChatHistory();
+		    consoleArea.reset(false);
+		    app.getLuwrain().setActiveArea(consoleArea);
+		});
 	    return true;
 	}
 	return false;
@@ -214,13 +211,15 @@ if (chat.lastMessage != null)
     {
 	if (activeChat == null)
 	    return;
-		    app.getOperations().getChatHistory(activeChat, (messagesChat, messages)->{
-		    final List<Message> res = new LinkedList();
+	app.getOperations().getChatHistory(activeChat, (messagesChat, messages)->{
+		final List<Message> res = new LinkedList();
+		if (messagesChat != null && messagesChat.lastMessage != null)
 		    res.add(messagesChat.lastMessage);
+		if (messages != null && messages.messages != null)
 		    res.addAll(Arrays.asList(messages.messages));
-		    this.messages = res.toArray(new Message[res.size()]);
-		    consoleArea.refresh();
-		});
+		this.messages = res.toArray(new Message[res.size()]);
+		consoleArea.refresh();
+	    });
     }
 
     private boolean actContacts()

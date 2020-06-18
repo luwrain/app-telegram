@@ -91,8 +91,10 @@ final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, 
 
     @Override public boolean onListClick(ListArea listArea, int index, Object obj)
     {
-	if (obj == null)
+	if (obj == null || !(obj instanceof Contact))
 	    return false	;
+	final Contact contact = (Contact)obj;
+	app.getOperations().createPrivateChat(contact.userId, ()->app.layouts().main());
 		return true;
     }
 
@@ -100,13 +102,15 @@ final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, 
     {
 	app.getOperations().getContacts(()->{
 		final List<Contact> res = new LinkedList();
-		for(int u: app.getObjects().getContacts())
-		{
-		    final User user = app.getObjects().users.get(u);
-		    if (user == null)
-			continue;
-		    res.add(new Contact(user.phoneNumber, user.firstName, user.lastName, "", user.id));
-		}
+		synchronized(app.getObjects()) {
+		    for(int u: app.getObjects().getContacts())
+		    {
+			final User user = app.getObjects().users.get(u);
+			if (user == null)
+			    continue;
+			res.add(new Contact(user.phoneNumber, user.firstName, user.lastName, "", user.id));
+		    }
+		};
 		this.contacts = res.toArray(new Contact[res.size()]);
 		contactsArea.refresh();
 	    });

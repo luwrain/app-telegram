@@ -13,6 +13,9 @@ import java.util.function.Consumer;
 import java.io.*;
 
 import org.drinkless.tdlib.*;
+import org.drinkless.tdlib.TdApi.Chat;
+import org.drinkless.tdlib.TdApi.User;
+import org.drinkless.tdlib.TdApi.Contact;
 
 import org.luwrain.core.*;
 import org.luwrain.core.Log;
@@ -82,42 +85,23 @@ abstract class Operations
 			 }));
     }
 
-    void openChat(TdApi.User user)
+    void openChat(Chat chat, Runnable onSuccess)
     {
-	Log.debug(LOG_COMPONENT, "opening chat for " + user.firstName + " " + user.lastName);
-	getClient().send(new TdApi.OpenChat(user.id), new Client.ResultHandler() {
-		@Override public void onResult(TdApi.Object object) {
-		    switch (object.getConstructor())
-		    {
-		    case TdApi.Ok.CONSTRUCTOR:
-			Log.debug(LOG_COMPONENT, "response on open chat: " + object);
-			return;
-		    case TdApi.Error.CONSTRUCTOR:
-			Log.error(LOG_COMPONENT, "Receive an error for open chat: " + object);
-			return;
-		    default:
-			Log.error(LOG_COMPONENT, "Receive wrong response from TDLib: " + object);
-		    }
-		}});
+	NullCheck.notNull(chat, "chat");
+	NullCheck.notNull(onSuccess, "onSuccess");
+	getClient().send(new TdApi.OpenChat(chat.id),
+			 new DefaultHandler(TdApi.Ok.CONSTRUCTOR, (obj)->{
+				 app.getLuwrain().runUiSafely(onSuccess);
+			 }));
     }
 
-    void createPrivateChat(TdApi.User user)
+    void createPrivateChat(int userId, Runnable onSuccess)
     {
-	Log.debug(LOG_COMPONENT, "creating private chat for " + user.firstName + " " + user.lastName);
-	getClient().send(new TdApi.CreatePrivateChat(user.id, false), new Client.ResultHandler() {
-		@Override public void onResult(TdApi.Object object) {
-		    switch (object.getConstructor())
-		    {
-		    case TdApi.Chat.CONSTRUCTOR:
-			Log.debug(LOG_COMPONENT, "response on CreatePrivateChat: " + object);
-			return;
-		    case TdApi.Error.CONSTRUCTOR:
-			Log.error(LOG_COMPONENT, "Receive an error for CreatePrivateChat: " + object);
-			return;
-		    default:
-			Log.error(LOG_COMPONENT, "Receive wrong response from TDLib: " + object);
-		    }
-		}});
+	NullCheck.notNull(onSuccess, "onSuccess");
+	getClient().send(new TdApi.CreatePrivateChat(userId, false),
+			 new DefaultHandler(TdApi.Chat.CONSTRUCTOR, (obj)->{
+				 app.getLuwrain().runUiSafely(onSuccess);
+			 }));
     }
 
         void downloadFile(TdApi.File file)
@@ -133,7 +117,7 @@ abstract class Operations
     {
 	NullCheck.notNull(chat, "chat");
 	NullCheck.notNull(callback, "callback");
-	getClient().send(new TdApi.GetChatHistory(chat.id, chat.lastMessage.id, 0, 100, false),
+	getClient().send(new TdApi.GetChatHistory(chat.id, chat.lastMessage != null?chat.lastMessage.id:0, 0, 100, false),
 			 new DefaultHandler(TdApi.Messages.CONSTRUCTOR, (obj)->{
 				 app.getLuwrain().runUiSafely(()->callback.onChatHistoryMessages(chat, (TdApi.Messages)obj));
 			 }));
