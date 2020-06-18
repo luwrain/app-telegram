@@ -42,7 +42,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
 	this.app = app;
 	this.chatsArea = new ListArea(createChatsParams()){
 		private final Actions actions = actions(
-							action("add-contact", "Добавить контакт", new KeyboardEvent(KeyboardEvent.Special.INSERT), MainLayout.this::actAddContact)
+							action("contacts", app.getStrings().actionContacts(), new KeyboardEvent(KeyboardEvent.Special.F6), MainLayout.this::actContacts)
 							);
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
@@ -80,6 +80,9 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
 		}
 	    };
 	this.consoleArea = new ConsoleArea(createConsoleParams()){
+		private final Actions actions = actions(
+														action("contacts", app.getStrings().actionContacts(), new KeyboardEvent(KeyboardEvent.Special.F6), MainLayout.this::actContacts)
+							);
 		@Override public boolean onInputEvent(KeyboardEvent event)
 		{
 		    NullCheck.notNull(event, "event");
@@ -90,7 +93,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-		    if (app.onSystemEvent(this, event))
+		    if (app.onSystemEvent(this, event, actions))
 			return true;
 		    return super.onSystemEvent(event);
 		}
@@ -100,6 +103,10 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
 		    if (app.onAreaQuery(this, query))
 			return true;
 		    return super.onAreaQuery(query);
+		}
+		@Override public Action[] getAreaActions()
+		{
+		    return actions.getAreaActions();
 		}
 	    };
 	synchronized(app.getObjects()) {
@@ -216,8 +223,9 @@ if (chat.lastMessage != null)
 		});
     }
 
-    private boolean actAddContact()
+    private boolean actContacts()
     {
+	app.layouts().contacts();
 	return true;
     }
 
@@ -228,7 +236,7 @@ if (chat.lastMessage != null)
 	params.model = new ChatsModel();
 	params.appearance = new ChatsListAppearance(app);
 	params.clickHandler = this;
-	params.name = "area1";
+	params.name = app.getStrings().chatsAreaName();
 	return params;
     }
 

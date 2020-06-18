@@ -29,6 +29,7 @@ final class App extends AppBase<Strings> implements MonoApp
     private Operations operations = null;
     private Objects objects = null;
     private MainLayout mainLayout = null;
+    private ContactsLayout contactsLayout = null;
     private AuthLayout authLayout = null;
     private Client client = null;
 
@@ -39,10 +40,12 @@ final class App extends AppBase<Strings> implements MonoApp
 
     @Override public boolean onAppInit()
     {
+	this.conv = new Conversations(this);
 	this.tdlibDir = new File(getLuwrain().getAppDataDir("luwrain.telegram").toFile(), "tdlib");
 	this.objects = new Objects(this);
 	this.operations = newOperations();
 	this.mainLayout = new MainLayout(this);
+	this.contactsLayout = new ContactsLayout(this);
 	this.authLayout = new AuthLayout(this);
 	this.client = Client.create(newResultHandler(), null, null); // recreate client after previous has closed
         Client.execute(new TdApi.SetLogVerbosityLevel(0));
@@ -80,7 +83,13 @@ final class App extends AppBase<Strings> implements MonoApp
 	return onInputEvent(area, event, null);
     }
 
-        Conversations conv()
+    void layout(AreaLayout layout)
+    {
+	NullCheck.notNull(layout, "layout");
+	getLayout().setBasicLayout(layout);
+    }
+
+        Conversations getConv()
     {
 	return this.conv;
     }
@@ -134,6 +143,13 @@ final class App extends AppBase<Strings> implements MonoApp
 	    @Override public void main()
 	    {
 		getLayout().setBasicLayout(mainLayout.getLayout());
+		getLuwrain().announceActiveArea();
+	    }
+	    	    @Override public void contacts()
+	    {
+		getLayout().setBasicLayout(contactsLayout.getLayout());
+		getLuwrain().announceActiveArea();
+		contactsLayout.updateContactsList();
 	    }
 	};
     }
@@ -158,5 +174,9 @@ final class App extends AppBase<Strings> implements MonoApp
 	return MonoApp.Result.BRING_FOREGROUND;
     }
 
-
+    interface Layouts
+{
+    void main();
+    void contacts();
+    }
 }

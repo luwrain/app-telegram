@@ -36,8 +36,8 @@ final class Objects
     }
 
     final ConcurrentMap<Integer, User> users = new ConcurrentHashMap();
+    private int[] contacts = new int[0];
     final ConcurrentMap<Integer, File> files = new ConcurrentHashMap();
-    int[] contacts = new int[0];
     final ConcurrentMap<Long, Chat> chats = new ConcurrentHashMap();
     final NavigableSet<OrderedChat> mainChats = new TreeSet();
     boolean haveFullMainChatList = false;
@@ -75,4 +75,14 @@ final class Objects
 	    app.getLuwrain().runUiSafely(()->l.onFilesUpdate(file));
     }
 
+    synchronized void setContacts(int[] contacts)
+    {
+	NullCheck.notNull(contacts, "contacts");
+	this.contacts = contacts.clone();
+    }
+
+    synchronized int[] getContacts()
+    {
+	return this.contacts.clone();
+    }
 }

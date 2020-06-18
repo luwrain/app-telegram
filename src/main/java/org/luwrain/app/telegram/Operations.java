@@ -44,23 +44,17 @@ abstract class Operations
 
     abstract Client getClient();
 
-    void importContact(String phone, String firstName, String lastName)
+    void addContact(String phone, String firstName, String lastName, Runnable onSuccess)
     {
+	NullCheck.notEmpty(phone, "phone");
+	NullCheck.notEmpty(firstName, "firstName");
+	NullCheck.notEmpty(lastName, "lastName");
+	NullCheck.notNull(onSuccess, "onSuccess");
 	final TdApi.Contact contact = new TdApi.Contact(phone, firstName, lastName, "", 0);
-	getClient().send(new TdApi.ImportContacts(new TdApi.Contact[]{contact}), new Client.ResultHandler() {
-		@Override public void onResult(TdApi.Object object) {
-		    switch (object.getConstructor())
-		    {
-		    case TdApi.ImportedContacts.CONSTRUCTOR:
-			Log.debug(LOG_COMPONENT, "response on ImportContacts: " + object);
-			return;
-		    case TdApi.Error.CONSTRUCTOR:
-			Log.error(LOG_COMPONENT, "Receive an error for ImportContacts: " + object);
-			return;
-		    default:
-			Log.error(LOG_COMPONENT, "Receive wrong response from TDLib: " + object);
-		    }
-		}});
+	getClient().send(new TdApi.ImportContacts(new TdApi.Contact[]{contact}),
+			 new DefaultHandler(TdApi.ImportedContacts.CONSTRUCTOR, (obj)->{
+				 app.getLuwrain().runUiSafely(onSuccess);
+			 }));
     }
 
     void sendMessage(TdApi.Chat chat, String text, Runnable onSuccess)
@@ -79,12 +73,11 @@ abstract class Operations
 
     void getContacts(Runnable onSuccess)
     {
+	NullCheck.notNull(onSuccess, "onSuccess");
 	getClient().send(new TdApi.GetContacts(),
 			 new DefaultHandler(TdApi.Users.CONSTRUCTOR, (obj)->{
-				 synchronized(objects){
-				     final TdApi.Users users = (TdApi.Users)obj;
-				     objects.contacts = users.userIds;
-				 }
+				 final TdApi.Users users = (TdApi.Users)obj;
+				 objects.setContacts(users.userIds);
 				 app.getLuwrain().runUiSafely(()->onSuccess.run());
 			 }));
     }
