@@ -25,7 +25,6 @@ public final class Extension extends org.luwrain.core.extensions.EmptyExtension
 	return null;
     }
 
-    
     @Override public Command[] getCommands(Luwrain luwrain)
     {
 	return new Command[]{new SimpleShortcutCommand("telegram")};
@@ -33,17 +32,6 @@ public final class Extension extends org.luwrain.core.extensions.EmptyExtension
 
     @Override public ExtensionObject[] getExtObjects(Luwrain luwrain)
     {
-	return new Shortcut[]{
-	    new Shortcut(){
-		@Override public String getExtObjName()
-		{
-		    return "telegram";
-		}
-		@Override public Application[] prepareApp(String[] args)
-		{
-		    NullCheck.notNull(args, "args");
-		    return new Application[]{new App()};
-		}
-	    }};
+	return new Shortcut[]{ new SimpleShortcut("telegram", App.class) };
     }
 }

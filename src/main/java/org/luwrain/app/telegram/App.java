@@ -19,7 +19,7 @@ import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
 import org.luwrain.template.*;
 
-final class App extends AppBase<Strings> implements MonoApp
+public final class App extends AppBase<Strings> implements MonoApp
 {
     static final String LOG_COMPONENT = "telegram";
 
@@ -32,7 +32,7 @@ final class App extends AppBase<Strings> implements MonoApp
     private AuthLayout authLayout = null;
     private Client client = null;
 
-    App()
+    public App()
     {
 	super(Strings.NAME, Strings.class);
     }
