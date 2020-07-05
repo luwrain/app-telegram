@@ -33,10 +33,10 @@ final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, 
 	this.app = app;
 	this.contactsArea = new ListArea(createContactsParams()){
 		private final Actions actions = actions(
-							action("chats", app.getStrings().actionChats(), new KeyboardEvent(KeyboardEvent.Special.F5), ContactsLayout.this::actChats),
-																												action("new-contact", app.getStrings().actionNewContact(), new KeyboardEvent(KeyboardEvent.Special.INSERT), ContactsLayout.this::actNewContact)
+							action("chats", app.getStrings().actionChats(), new InputEvent(InputEvent.Special.F5), ContactsLayout.this::actChats),
+																												action("new-contact", app.getStrings().actionNewContact(), new InputEvent(InputEvent.Special.INSERT), ContactsLayout.this::actNewContact)
 							);
-		@Override public boolean onInputEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(InputEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (app.onInputEvent(this, event))

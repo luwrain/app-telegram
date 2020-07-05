@@ -28,7 +28,7 @@ final class AuthLayout extends LayoutBase
 	NullCheck.notNull(app, "app");
 	this.app = app;
 	this.formArea = new FormArea(new DefaultControlContext(app.getLuwrain()), app.getStrings().appName()) {
-		@Override public boolean onInputEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(InputEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (app.onInputEvent(this, event))

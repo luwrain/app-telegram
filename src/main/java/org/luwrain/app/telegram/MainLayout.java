@@ -41,9 +41,9 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
 	this.app = app;
 	this.chatsArea = new ListArea(createChatsParams()){
 		private final Actions actions = actions(
-							action("contacts", app.getStrings().actionContacts(), new KeyboardEvent(KeyboardEvent.Special.F6), MainLayout.this::actContacts)
+							action("contacts", app.getStrings().actionContacts(), new InputEvent(InputEvent.Special.F6), MainLayout.this::actContacts)
 							);
-		@Override public boolean onInputEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(InputEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (app.onInputEvent(this, event))
@@ -80,9 +80,9 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
 	    };
 	this.consoleArea = new ConsoleArea(createConsoleParams()){
 		private final Actions actions = actions(
-														action("contacts", app.getStrings().actionContacts(), new KeyboardEvent(KeyboardEvent.Special.F6), MainLayout.this::actContacts)
+														action("contacts", app.getStrings().actionContacts(), new InputEvent(InputEvent.Special.F6), MainLayout.this::actContacts)
 							);
-		@Override public boolean onInputEvent(KeyboardEvent event)
+		@Override public boolean onInputEvent(InputEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (app.onInputEvent(this, event))
@@ -244,7 +244,7 @@ if (chat.lastMessage != null)
 	params.context = new DefaultControlContext(app.getLuwrain());
 	params.model = new ConsoleAreaModel();
 	params.appearance = new ConsoleAreaAppearance();
-	params.areaName = "Беседа";
+	params.name = "Беседа";
 	params.inputPos = ConsoleArea.InputPos.TOP;
 	params.inputPrefix = ">";
 	params.clickHandler = this;
@@ -280,11 +280,11 @@ if (chat.lastMessage != null)
 
     private final class ConsoleAreaModel implements ConsoleArea.Model
     {
-        @Override public int getConsoleItemCount()
+        @Override public int getItemCount()
 	{
 	    return messages.length;
 	}
-	@Override public Object getConsoleItem(int index)
+	@Override public Object getItem(int index)
 	{
 	    if (index < 0 || index >= messages.length)
 		throw new IllegalArgumentException("index (" + index + ") must be greater or equal to zero and less than " + String.valueOf(messages.length));
