@@ -15,6 +15,8 @@ import org.drinkless.tdlib.*;
 import org.drinkless.tdlib.TdApi.Chat;
 import org.drinkless.tdlib.TdApi.User;
 import org.drinkless.tdlib.TdApi.Contact;
+import org.drinkless.tdlib.TdApi.Supergroup;
+import org.drinkless.tdlib.TdApi.BasicGroup;
 
 import org.luwrain.core.*;
 import org.luwrain.core.Log;
@@ -33,6 +35,17 @@ abstract class Operations
     {
 	void onChatHistoryMessages(TdApi.Chat chat, TdApi.Messages messages);
     }
+
+    interface SupergroupCallback
+    {
+	void onSupergroup(Supergroup supergroup);
+    }
+
+        interface BasicGroupCallback
+    {
+	void onBasicGroup(BasicGroup basicGroup);
+    }
+
 
     private final App app;
     private final Objects objects;
@@ -93,6 +106,46 @@ abstract class Operations
 				 app.getLuwrain().runUiSafely(onSuccess);
 			 }));
     }
+
+        void closeChat(Chat chat, Runnable onSuccess)
+    {
+	NullCheck.notNull(chat, "chat");
+	NullCheck.notNull(onSuccess, "onSuccess");
+	getClient().send(new TdApi.CloseChat(chat.id),
+			 new DefaultHandler(TdApi.Ok.CONSTRUCTOR, (obj)->{
+				 app.getLuwrain().runUiSafely(onSuccess);
+			 }));
+    }
+
+            void leaveChat(Chat chat, Runnable onSuccess)
+    {
+	NullCheck.notNull(chat, "chat");
+	NullCheck.notNull(onSuccess, "onSuccess");
+	getClient().send(new TdApi.LeaveChat(chat.id),
+			 new DefaultHandler(TdApi.Ok.CONSTRUCTOR, (obj)->{
+				 app.getLuwrain().runUiSafely(onSuccess);
+			 }));
+    }
+
+
+    void getSupergroup(int supergroupId, SupergroupCallback callback)
+    {
+	NullCheck.notNull(callback, "callback");
+	getClient().send(new TdApi.GetSupergroup(supergroupId),
+			 new DefaultHandler(TdApi.Supergroup.CONSTRUCTOR, (obj)->{
+				 app.getLuwrain().runUiSafely(()->callback.onSupergroup((Supergroup)obj));
+			 }));
+    }
+
+        void getBasicGroup(int basicGroupId, BasicGroupCallback callback)
+    {
+	NullCheck.notNull(callback, "callback");
+	getClient().send(new TdApi.GetBasicGroup(basicGroupId),
+			 new DefaultHandler(TdApi.BasicGroup.CONSTRUCTOR, (obj)->{
+				 app.getLuwrain().runUiSafely(()->callback.onBasicGroup((BasicGroup)obj));
+			 }));
+    }
+
 
     void createPrivateChat(int userId, Runnable onSuccess)
     {

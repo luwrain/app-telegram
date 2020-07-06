@@ -82,12 +82,6 @@ public final class App extends AppBase<Strings> implements MonoApp
 	return onInputEvent(area, event, null);
     }
 
-    void layout(AreaLayout layout)
-    {
-	NullCheck.notNull(layout, "layout");
-	getLayout().setBasicLayout(layout);
-    }
-
         Conversations getConv()
     {
 	return this.conv;
@@ -134,7 +128,12 @@ public final class App extends AppBase<Strings> implements MonoApp
 	};
     }
 
-
+    void layout(AreaLayout layout)
+    {
+	NullCheck.notNull(layout, "layout");
+			getLayout().setBasicLayout(layout);
+		getLuwrain().announceActiveArea();
+    }
 
     Layouts layouts()
     {

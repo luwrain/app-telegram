@@ -41,7 +41,8 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
 	this.app = app;
 	this.chatsArea = new ListArea(createChatsParams()){
 		private final Actions actions = actions(
-							action("contacts", app.getStrings().actionContacts(), new InputEvent(InputEvent.Special.F6), MainLayout.this::actContacts)
+							action("contacts", app.getStrings().actionContacts(), new InputEvent(InputEvent.Special.F6), MainLayout.this::actContacts),
+							action("close-chat", app.getStrings().actionCloseChat(), new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actCloseChat)
 							);
 		@Override public boolean onInputEvent(InputEvent event)
 		{
@@ -53,15 +54,12 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
 		@Override public boolean onSystemEvent(EnvironmentEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-		    /*
+		    if (event.getType() == EnvironmentEvent.Type.REGULAR)
 		    switch(event.getCode())
 		    {
-		    case REFRESH:
-						app.getOperations().getContacts();
-			app.getOperations().getMainChatList(20);
-			return true;
+		    case PROPERTIES:
+			return onChatProperties();
 		    }
-		    */
 		    if (app.onSystemEvent(this, event, actions))
 			return true;
 		    return super.onSystemEvent(event);
@@ -226,6 +224,28 @@ if (chat.lastMessage != null)
 	app.layouts().contacts();
 	return true;
     }
+
+        private boolean actCloseChat()
+    {
+	final Object obj = chatsArea.selected();
+	if (obj == null || !(obj instanceof Chat))
+	    return false;
+	final Chat chat = (Chat)obj;
+	app.getOperations().leaveChat(chat, ()->app.getLuwrain().playSound(Sounds.OK));
+	return true;
+    }
+
+    private boolean onChatProperties()
+    {
+	final Object obj = chatsArea.selected();
+	if (obj == null || !(obj instanceof Chat))
+	    return false;
+	final Chat chat = (Chat)obj;
+	final ChatPropertiesLayout layout = new ChatPropertiesLayout(app, chat, ()->app.layouts().main());
+	app.layout(layout.getLayout());
+	return true;
+    }
+
 
     private ListArea.Params createChatsParams()
     {
