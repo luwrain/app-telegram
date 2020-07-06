@@ -13,6 +13,7 @@ import java.io.*;
 
 import org.drinkless.tdlib.*;
 import org.drinkless.tdlib.TdApi.Chat;
+import org.drinkless.tdlib.TdApi.Message;
 import org.drinkless.tdlib.TdApi.User;
 import org.drinkless.tdlib.TdApi.Contact;
 import org.drinkless.tdlib.TdApi.Supergroup;
@@ -174,6 +175,21 @@ abstract class Operations
 				 app.getLuwrain().runUiSafely(()->callback.onChatHistoryMessages(chat, (TdApi.Messages)obj));
 			 }));
     }
+
+        void viewMessages(Chat chat, Message[] messages)
+    {
+	NullCheck.notNull(chat, "chat");
+	NullCheck.notNull(messages, "messages");
+	if (messages.length == 0)
+	    return;
+	final long[] ids = new long[messages.length];
+	for(int i = 0;i < messages.length;i++)
+	    ids[i] = messages[i].id;
+	getClient().send(new TdApi.ViewMessages(chat.id, ids, false),
+			 new DefaultHandler(TdApi.Ok.CONSTRUCTOR, (obj)->{
+			 }));
+    }
+
 
     void fillMainChatList(int limit)
     {

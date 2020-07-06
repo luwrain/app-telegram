@@ -119,7 +119,6 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
 	{
 	    final Chat chat = (Chat)obj;
 	    app.getOperations().openChat(chat, ()->{
-		    Log.debug(LOG_COMPONENT, "Chat " + chat.id + " opened, loading history");
 		    this.activeChat = chat;
 		    updateActiveChatHistory();
 		    consoleArea.reset(false);
@@ -215,6 +214,7 @@ if (chat.lastMessage != null)
 		if (messages != null && messages.messages != null)
 		    res.addAll(Arrays.asList(messages.messages));
 		this.messages = res.toArray(new Message[res.size()]);
+		app.getOperations().viewMessages(activeChat, this.messages);
 		consoleArea.refresh();
 	    });
     }
