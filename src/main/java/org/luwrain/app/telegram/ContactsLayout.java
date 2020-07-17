@@ -43,7 +43,7 @@ final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, 
 			return true;
 		    return super.onInputEvent(event);
 		}
-		@Override public boolean onSystemEvent(EnvironmentEvent event)
+		@Override public boolean onSystemEvent(SystemEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (app.onSystemEvent(this, event, actions))

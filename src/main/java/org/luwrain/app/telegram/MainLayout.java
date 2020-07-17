@@ -51,10 +51,10 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
 			return true;
 		    return super.onInputEvent(event);
 		}
-		@Override public boolean onSystemEvent(EnvironmentEvent event)
+		@Override public boolean onSystemEvent(SystemEvent event)
 		{
 		    NullCheck.notNull(event, "event");
-		    if (event.getType() == EnvironmentEvent.Type.REGULAR)
+		    if (event.getType() == SystemEvent.Type.REGULAR)
 		    switch(event.getCode())
 		    {
 		    case PROPERTIES:
@@ -87,7 +87,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
 			return true;
 		    return super.onInputEvent(event);
 		}
-		@Override public boolean onSystemEvent(EnvironmentEvent event)
+		@Override public boolean onSystemEvent(SystemEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (app.onSystemEvent(this, event, actions))
