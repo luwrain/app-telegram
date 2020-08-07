@@ -26,7 +26,7 @@ import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
-import org.luwrain.template.*;
+import org.luwrain.app.base.*;
 
 abstract class Operations
 {

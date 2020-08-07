@@ -16,7 +16,7 @@ import org.drinkless.tdlib.TdApi.UserStatusOnline;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
-import org.luwrain.template.*;
+import org.luwrain.app.base.*;
 
 final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, Objects.UsersListener
 {

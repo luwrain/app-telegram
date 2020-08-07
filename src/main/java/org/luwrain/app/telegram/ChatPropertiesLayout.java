@@ -20,7 +20,7 @@ import org.drinkless.tdlib.TdApi.BasicGroup;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
-import org.luwrain.template.*;
+import org.luwrain.app.base.*;
 
 final class ChatPropertiesLayout extends LayoutBase
 {
