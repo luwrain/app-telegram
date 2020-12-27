@@ -57,31 +57,6 @@ public final class App extends AppBase<Strings> implements MonoApp
 	return true;
     }
 
-    boolean onInputEvent(Area area, InputEvent event, Runnable closing)
-    {
-	NullCheck.notNull(area, "area");
-	NullCheck.notNull(event, "event");
-	if (super.onInputEvent(area, event))
-	    return true;
-	if (event.isSpecial())
-	    switch(event.getSpecial())
-	    {
-	    case ESCAPE:
-		if (closing != null)
-		    closing.run(); else
-		closeApp();
-		return true;
-	    }
-	return false;
-    }
-
-    @Override public boolean onInputEvent(Area area, InputEvent event)
-    {
-	NullCheck.notNull(area, "area");
-	NullCheck.notNull(event, "event");
-	return onInputEvent(area, event, null);
-    }
-
         Conversations getConv()
     {
 	return this.conv;
@@ -155,6 +130,12 @@ public final class App extends AppBase<Strings> implements MonoApp
     @Override public AreaLayout getDefaultAreaLayout()
     {
 	return this.authLayout.getLayout();
+    }
+
+    @Override public boolean onEscape(InputEvent event)
+    {
+	closeApp();
+	return true;
     }
 
     @Override public void closeApp()

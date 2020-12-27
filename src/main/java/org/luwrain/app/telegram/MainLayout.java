@@ -9,12 +9,15 @@ package org.luwrain.app.telegram;
 
 import java.util.*;
 
+import org.drinkless.tdlib.TdApi.LocalFile;
 import org.drinkless.tdlib.TdApi.Chat;
 import org.drinkless.tdlib.TdApi.ChatTypePrivate;
 import org.drinkless.tdlib.TdApi.User;
 import org.drinkless.tdlib.TdApi.Message;
 import org.drinkless.tdlib.TdApi.MessageText;
 import org.drinkless.tdlib.TdApi.MessageAudio;
+import org.drinkless.tdlib.TdApi.MessageVoiceNote;
+import org.drinkless.tdlib.TdApi.VoiceNote;
 import org.drinkless.tdlib.TdApi.Messages;
 
 import org.luwrain.core.*;
@@ -147,12 +150,12 @@ return ConsoleArea.InputHandler.Result.OK;
 	if (obj == null || !(obj instanceof Message))
 	    return false;
 	final Message message = (Message)obj;
+
 	if (message.content != null && message.content instanceof MessageAudio)
 	{
 	    final MessageAudio audio = (MessageAudio)message.content;
 	    if (audio.audio.audio.local.isDownloadingActive)
 		return false;
-
 	    	    if (audio.audio.audio.local.isDownloadingCompleted)
 		    {
 			if (audio.audio.audio.local.path == null || audio.audio.audio.local.path.isEmpty())
@@ -167,8 +170,33 @@ return ConsoleArea.InputHandler.Result.OK;
 		    app.getOperations().downloadFile(audio.audio.audio);
 		    app.getLuwrain().message("Выполняется доставка файла");//FIXME:
 		    return true;
-		    
 	}
+
+		if (message.content != null && message.content instanceof MessageVoiceNote)
+	{
+	    final MessageVoiceNote voiceNoteContent = (MessageVoiceNote)message.content;
+	    final VoiceNote voiceNote = voiceNoteContent.voiceNote;
+	    if (voiceNote.voice.local.isDownloadingActive)
+		return false;
+	    	    if (voiceNote.voice.local.isDownloadingCompleted)
+		    {
+			final LocalFile localFile = voiceNote.voice.local;
+			if (localFile.path == null || localFile.path.isEmpty())
+			    return false;
+			if (app.getLuwrain().getPlayer() == null)
+			    return false;
+			app.getLuwrain().getPlayer().play(new org.luwrain.player.Playlist(new String[]{
+				    org.luwrain.util.UrlUtils.fileToUrl(new java.io.File(localFile.path))
+			    }), 0, 0, org.luwrain.player.Player.DEFAULT_FLAGS, new Properties());
+		return true;
+		    }
+		    app.getOperations().downloadFile(voiceNote.voice);
+		    app.getLuwrain().message("Выполняется доставка файла");//FIXME:
+		    return true;
+	}
+
+
+	
 	return false;
     }
 
@@ -251,7 +279,7 @@ if (chat.lastMessage != null)
     {
 	final ListArea.Params params = new ListArea.Params();
 	params.context = new DefaultControlContext(app.getLuwrain());
-	params.model = new ChatsModel();
+	params.model = new ListUtils.ArrayModel(()->{return this.chats;});
 	params.appearance = new ChatsListAppearance(app);
 	params.clickHandler = this;
 	params.name = app.getStrings().chatsAreaName();
@@ -281,21 +309,6 @@ if (chat.lastMessage != null)
     AreaLayout getLayout()
     {
 	return new AreaLayout(AreaLayout.LEFT_RIGHT, chatsArea, consoleArea);
-    }
-
-    private class ChatsModel implements ListArea.Model
-    {
-	@Override public int getItemCount()
-	{
-	    return chats.length;
-	}
-	@Override public Object getItem(int index)
-	{
-	    return chats[index];
-	}
-	@Override public void refresh()
-	{
-	}
     }
 
     private final class ConsoleAreaModel implements ConsoleArea.Model

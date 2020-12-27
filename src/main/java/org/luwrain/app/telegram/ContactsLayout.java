@@ -123,7 +123,7 @@ final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, 
     {
 	final ListArea.Params params = new ListArea.Params();
 	params.context = new DefaultControlContext(app.getLuwrain());
-	params.model = new ContactsModel();
+	params.model = new ListUtils.ArrayModel(()->{return this.contacts;});
 	params.appearance = new ContactsAppearance();
 	params.clickHandler = this;
 	params.name = app.getStrings().contactsAreaName();
@@ -133,21 +133,6 @@ final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, 
     AreaLayout getLayout()
     {
 	return new AreaLayout(contactsArea);
-    }
-
-    private final class ContactsModel implements ListArea.Model
-    {
-	@Override public int getItemCount()
-	{
-	    return contacts.length;
-	}
-	@Override public Object getItem(int index)
-	{
-	    return contacts[index];
-	}
-	@Override public void refresh()
-	{
-	}
     }
 
     private final class ContactsAppearance implements ListArea.Appearance
@@ -170,7 +155,7 @@ final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, 
 			online = false;
 			app.getLuwrain().setEventResponse(DefaultEventResponse.listItem(
 											online?Sounds.SELECTED:Sounds.LIST_ITEM,
-											getContactTitle(contact),
+											Utils.getContactTitle(contact),
 											Suggestions.CLICKABLE_LIST_ITEM));
 			return;
 		    }
@@ -181,7 +166,7 @@ final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, 
 	    NullCheck.notNull(item, "item");
 	    NullCheck.notNull(flags, "flags");
 	    if (item instanceof Contact)
-		return getContactTitle((Contact)item);
+		return Utils.getContactTitle((Contact)item);
 	    return item.toString();
 	}
 	@Override public int getObservableLeftBound(Object item)
@@ -193,17 +178,6 @@ final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, 
 	{
 	    	    NullCheck.notNull(item, "item");
 	    return getScreenAppearance(item, EnumSet.noneOf(Flags.class)).length();
-	}
-	private String getContactTitle(Contact contact)
-	{
-	    NullCheck.notNull(contact, "contact");
-	    						final StringBuilder b = new StringBuilder();
-			if (contact.firstName != null)
-			    b.append(contact.firstName);
-			b.append(" ");
-			if (contact.lastName != null)
-			    b.append(contact.lastName);
-			return new String(b).trim();
 	}
     }
     }
