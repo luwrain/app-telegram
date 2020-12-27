@@ -111,6 +111,7 @@ final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, 
 		    }
 		};
 		this.contacts = res.toArray(new Contact[res.size()]);
+		Arrays.sort(contacts, new ContactsComparator());
 		contactsArea.refresh();
 	    });
     }
@@ -178,6 +179,14 @@ final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, 
 	{
 	    	    NullCheck.notNull(item, "item");
 	    return getScreenAppearance(item, EnumSet.noneOf(Flags.class)).length();
+	}
+    }
+
+    static private final class ContactsComparator implements Comparator<Contact>
+    {
+	@Override public int compare(Contact c1, Contact c2)
+	{
+	    return Utils.getContactTitle(c1).compareTo(Utils.getContactTitle(c2));
 	}
     }
     }
