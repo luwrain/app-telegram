@@ -37,7 +37,7 @@ public final class App extends AppBase<Strings> implements MonoApp
 	super(Strings.NAME, Strings.class, "luwrain.telegram");
     }
 
-    @Override public boolean onAppInit()
+    @Override public AreaLayout onAppInit()
     {
 	this.conv = new Conversations(this);
 	this.tdlibDir = new File(getLuwrain().getAppDataDir("luwrain.telegram").toFile(), "tdlib");
@@ -54,7 +54,7 @@ public final class App extends AppBase<Strings> implements MonoApp
             throw new IOError(new IOException("Write access to the current directory is required"));
         }
 	setAppName(getStrings().appName());
-	return true;
+	return authLayout.getLayout();
     }
 
         Conversations getConv()
@@ -125,11 +125,6 @@ public final class App extends AppBase<Strings> implements MonoApp
 		contactsLayout.updateContactsList();
 	    }
 	};
-    }
-
-    @Override public AreaLayout getDefaultAreaLayout()
-    {
-	return this.authLayout.getLayout();
     }
 
     @Override public boolean onEscape(InputEvent event)
