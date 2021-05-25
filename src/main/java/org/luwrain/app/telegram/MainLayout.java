@@ -162,7 +162,7 @@ return ConsoleArea.InputHandler.Result.OK;
 			    return false;
 			if (app.getLuwrain().getPlayer() == null)
 			    return false;
-			app.getLuwrain().getPlayer().play(new org.luwrain.player.Playlist(new String[]{
+			app.getLuwrain().getPlayer().play(new org.luwrain.player.FixedPlaylist(new String[]{
 				    org.luwrain.util.UrlUtils.fileToUrl(new java.io.File(audio.audio.audio.local.path))
 			    }), 0, 0, org.luwrain.player.Player.DEFAULT_FLAGS, new Properties());
 		return true;
@@ -185,7 +185,7 @@ return ConsoleArea.InputHandler.Result.OK;
 			    return false;
 			if (app.getLuwrain().getPlayer() == null)
 			    return false;
-			app.getLuwrain().getPlayer().play(new org.luwrain.player.Playlist(new String[]{
+			app.getLuwrain().getPlayer().play(new org.luwrain.player.FixedPlaylist(new String[]{
 				    org.luwrain.util.UrlUtils.fileToUrl(new java.io.File(localFile.path))
 			    }), 0, 0, org.luwrain.player.Player.DEFAULT_FLAGS, new Properties());
 		return true;
