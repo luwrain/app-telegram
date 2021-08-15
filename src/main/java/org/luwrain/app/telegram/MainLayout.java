@@ -16,6 +16,7 @@ import org.drinkless.tdlib.TdApi.User;
 import org.drinkless.tdlib.TdApi.Message;
 import org.drinkless.tdlib.TdApi.MessageText;
 import org.drinkless.tdlib.TdApi.MessageAudio;
+import org.drinkless.tdlib.TdApi.MessageDocument;
 import org.drinkless.tdlib.TdApi.MessageVoiceNote;
 import org.drinkless.tdlib.TdApi.VoiceNote;
 import org.drinkless.tdlib.TdApi.Messages;
@@ -171,6 +172,30 @@ return ConsoleArea.InputHandler.Result.OK;
 		    app.getLuwrain().message("Выполняется доставка файла");//FIXME:
 		    return true;
 	}
+
+		if (message.content != null && message.content instanceof MessageDocument)
+	{
+	    final MessageDocument doc = (MessageDocument)message.content;
+	    if (doc.document.document.local.isDownloadingActive)
+		return false;
+	    /*
+	    	    if (audio.audio.audio.local.isDownloadingCompleted)
+		    {
+			if (audio.audio.audio.local.path == null || audio.audio.audio.local.path.isEmpty())
+			    return false;
+			if (app.getLuwrain().getPlayer() == null)
+			    return false;
+			app.getLuwrain().getPlayer().play(new org.luwrain.player.FixedPlaylist(new String[]{
+				    org.luwrain.util.UrlUtils.fileToUrl(new java.io.File(audio.audio.audio.local.path))
+			    }), 0, 0, org.luwrain.player.Player.DEFAULT_FLAGS, new Properties());
+		return true;
+		    }
+	    */
+		    app.getOperations().downloadFile(doc.document.document);
+		    app.getLuwrain().message("Выполняется доставка файла");//FIXME:
+		    return true;
+	}
+
 
 		if (message.content != null && message.content instanceof MessageVoiceNote)
 	{

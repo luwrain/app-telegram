@@ -7,10 +7,9 @@
 
 package org.luwrain.app.telegram;
 
-import org.luwrain.base.*;
 import org.luwrain.core.*;
 
-public final class Extension extends org.luwrain.core.extensions.EmptyExtension
+public final class Extension extends EmptyExtension
 {
     static private final String LOG_COMPONENT = App.LOG_COMPONENT;
 
