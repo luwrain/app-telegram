@@ -81,7 +81,7 @@ abstract class Operations
 	TdApi.InlineKeyboardButton[] row = {new TdApi.InlineKeyboardButton("https://telegram.org?1", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?2", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?3", new TdApi.InlineKeyboardButtonTypeUrl())};
         TdApi.ReplyMarkup replyMarkup = new TdApi.ReplyMarkupInlineKeyboard(new TdApi.InlineKeyboardButton[][]{row, row, row});
 	final TdApi.InputMessageContent content = new TdApi.InputMessageText(new TdApi.FormattedText(text, null), false, true);
-	getClient().send(new TdApi.SendMessage(chat.id, 0, null, replyMarkup, content),
+	getClient().send(new TdApi.SendMessage(chat.id, 0, 0, null, replyMarkup, content),
 			 new DefaultHandler(TdApi.Message.CONSTRUCTOR, (obj)->{
 				 app.getLuwrain().runUiSafely(()->onSuccess.run());
 			 }));
@@ -185,7 +185,7 @@ abstract class Operations
 	final long[] ids = new long[messages.length];
 	for(int i = 0;i < messages.length;i++)
 	    ids[i] = messages[i].id;
-	getClient().send(new TdApi.ViewMessages(chat.id, ids, false),
+	getClient().send(new TdApi.ViewMessages(chat.id, 0, ids, false),
 			 new DefaultHandler(TdApi.Ok.CONSTRUCTOR, (obj)->{
 			 }));
     }

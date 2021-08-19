@@ -90,7 +90,7 @@ objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGr
 		                        final TdApi.Chat chat = updateNewChat.chat;
 		                        synchronized (objects) {
                         objects.chats.put(chat.id, chat);
-			objects.mainChats.add(new OrderedChat(chat.order, chat.id));
+			objects.mainChats.add(new OrderedChat(/*chat.order*/0, chat.id));
 			//			                        final long order = chat.order;
 			//                        chat.order = 0;
 			//			                        setChatOrder(chat, order);
@@ -116,6 +116,7 @@ objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGr
 		    */
                     break;
                 }
+		    /*
                 case TdApi.UpdateChatChatList.CONSTRUCTOR: {
                     final TdApi.UpdateChatChatList updateChat = (TdApi.UpdateChatChatList) object;
 		    synchronized (objects){
@@ -125,6 +126,7 @@ objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGr
                         }
                     break;
                 }
+		    */
                 case TdApi.UpdateChatLastMessage.CONSTRUCTOR: {
                     final TdApi.UpdateChatLastMessage updateChat = (TdApi.UpdateChatLastMessage) object;
 		    final TdApi.Chat chat;
@@ -136,6 +138,7 @@ chat = objects.chats.get(updateChat.chatId);
 					objects.chatsUpdated(chat);
                     break;
                 }
+		    /*
                 case TdApi.UpdateChatOrder.CONSTRUCTOR: {
                     final TdApi.UpdateChatOrder updateChat = (TdApi.UpdateChatOrder) object;
 		    final TdApi.Chat chat;
@@ -147,17 +150,18 @@ chat = objects.chats.get(updateChat.chatId);
 		    objects.chatsUpdated(chat);
                     break;
                 }
+		    */
+		    /*
                 case TdApi.UpdateChatIsPinned.CONSTRUCTOR: {
                     TdApi.UpdateChatIsPinned updateChat = (TdApi.UpdateChatIsPinned) object;
-		    /*
                     TdApi.Chat chat = chats.get(updateChat.chatId);
                     synchronized (chat) {
                         chat.isPinned = updateChat.isPinned;
                         setChatOrder(chat, updateChat.order);
                     }
-		    */
                     break;
                 }
+		    */
                 case TdApi.UpdateChatReadInbox.CONSTRUCTOR: {
                     final TdApi.UpdateChatReadInbox updateChat = (TdApi.UpdateChatReadInbox) object;
                     synchronized (objects) {
@@ -240,17 +244,6 @@ chat = objects.chats.get(updateChat.chatId);
                     TdApi.Chat chat = chats.get(update.chatId);
                     synchronized (chat) {
                         chat.isMarkedAsUnread = update.isMarkedAsUnread;
-                    }
-		    */
-                    break;
-                }
-                case TdApi.UpdateChatIsSponsored.CONSTRUCTOR: {
-                    TdApi.UpdateChatIsSponsored updateChat = (TdApi.UpdateChatIsSponsored) object;
-		    /*
-                    TdApi.Chat chat = chats.get(updateChat.chatId);
-                    synchronized (chat) {
-                        chat.isSponsored = updateChat.isSponsored;
-                        setChatOrder(chat, updateChat.order);
                     }
 		    */
                     break;
