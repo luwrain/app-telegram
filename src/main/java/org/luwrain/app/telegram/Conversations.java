@@ -37,7 +37,7 @@ final class Conversations
 
     String newContactPhone()
     {
-	final String res = Popups.simple(luwrain, "Новый контакт", "Телефон нового контакта::", "", (text)->{
+	final String res = Popups.text(luwrain, "Новый контакт", "Телефон нового контакта::", "", (text)->{
 		NullCheck.notNull(text, "text");
 		final String phone = properPhoneValue(text);
 		if (phone.length() < 2)

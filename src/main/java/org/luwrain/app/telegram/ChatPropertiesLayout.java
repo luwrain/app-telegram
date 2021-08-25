@@ -66,10 +66,10 @@ final class ChatPropertiesLayout extends LayoutBase
 	{
 	    final ChatTypeSupergroup s = (ChatTypeSupergroup)chat.type;
 	    app.getOperations().getSupergroup(s.supergroupId, (supergroup)->{
-		    propsArea.beginLinesTrans();
+		    propsArea.update((lines)->{
 		    fillSupergroup(chat, supergroup);
-		    propsArea.addLine("");
-		    propsArea.endLinesTrans();
+		    lines.addLine("");
+			});
 		});
 	    return;
 	}
@@ -78,19 +78,19 @@ final class ChatPropertiesLayout extends LayoutBase
 	{
 	    final ChatTypeBasicGroup b = (ChatTypeBasicGroup)chat.type;
 	    app.getOperations().getBasicGroup(b.basicGroupId, (basicGroup)->{
-		    propsArea.beginLinesTrans();
+		    propsArea.update((lines)->{
 		    fillBasicGroup(chat, basicGroup);
-		    propsArea.addLine("");
-		    propsArea.endLinesTrans();
+		    lines.addLine("");
+			});
 		});
 	    return;
 	}
 
 		
-		propsArea.beginLinesTrans();
+		propsArea.update((lines)->{
 	fillBasic(chat);
-	propsArea.addLine("");
-	propsArea.endLinesTrans();
+	lines.addLine("");
+		    });
     }
 
     private void fillBasic(Chat chat)

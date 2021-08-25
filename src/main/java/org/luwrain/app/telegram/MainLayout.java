@@ -16,6 +16,7 @@ import org.drinkless.tdlib.TdApi.User;
 import org.drinkless.tdlib.TdApi.Message;
 import org.drinkless.tdlib.TdApi.MessageText;
 import org.drinkless.tdlib.TdApi.MessageAudio;
+import org.drinkless.tdlib.TdApi.MessagePhoto;
 import org.drinkless.tdlib.TdApi.MessageDocument;
 import org.drinkless.tdlib.TdApi.MessageVoiceNote;
 import org.drinkless.tdlib.TdApi.VoiceNote;
