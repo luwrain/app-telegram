@@ -136,7 +136,7 @@ final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, 
 	return new AreaLayout(contactsArea);
     }
 
-    private final class ContactsAppearance implements ListArea.Appearance
+    private final class ContactsAppearance implements ListArea.Appearance<Object>
     {
 	@Override public void announceItem(Object item, Set<Flags> flags)
 	{

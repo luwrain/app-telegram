@@ -67,7 +67,7 @@ final class MessageAppearance
 	if (user != null && user.firstName != null && !user.firstName.trim().isEmpty())
 	    b.append(" ").append(user.firstName.trim());
 	final Date date = new Date(message.date);
-	b.append(" ").append(date.toString());
+	b.append(" ").append(message.date);
 	luwrain.setEventResponse(DefaultEventResponse.listItem(new String(b)));
     }
 

@@ -16,7 +16,7 @@ import org.drinkless.tdlib.TdApi.MessageText;
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
 
-final class ChatsListAppearance implements ListArea.Appearance
+final class ChatsListAppearance implements ListArea.Appearance<Object>
 {
     private final App app;
 

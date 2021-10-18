@@ -87,6 +87,21 @@ abstract class Operations
 			 }));
     }
 
+    void deleteMessage(TdApi.Chat chat, TdApi.Message[] messages, Runnable onSuccess)
+    {
+	NullCheck.notNull(chat, "chat");
+	NullCheck.notNullItems(messages, "messages");
+	NullCheck.notNull(onSuccess, "onSuccess");
+	final long[] ids = new long[messages.length];
+	for(int i = 0;i < messages.length;i++)
+	    ids[i] = messages[i].id;
+	getClient().send(new TdApi.DeleteMessages(chat.id, ids, true),
+			 new DefaultHandler(TdApi.Message.CONSTRUCTOR, (obj)->{
+				 app.getLuwrain().runUiSafely(()->onSuccess.run());
+			 }));
+    }
+
+
     void getContacts(Runnable onSuccess)
     {
 	NullCheck.notNull(onSuccess, "onSuccess");

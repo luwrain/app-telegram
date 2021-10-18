@@ -83,6 +83,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
 	    };
 	this.consoleArea = new ConsoleArea(createConsoleParams()){
 		private final Actions actions = actions(
+							action("delete", "Удалить сообщение", new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actDeleteMessage),
 														action("contacts", app.getStrings().actionContacts(), new InputEvent(InputEvent.Special.F6), MainLayout.this::actContacts)
 							);
 		@Override public boolean onInputEvent(InputEvent event)
@@ -221,8 +222,6 @@ return ConsoleArea.InputHandler.Result.OK;
 		    return true;
 	}
 
-
-	
 	return false;
     }
 
@@ -235,6 +234,19 @@ if (chat.lastMessage != null)
     if (!text.trim().isEmpty())
 	app.getLuwrain().speak(text.trim(), Sounds.CHAT_MESSAGE);
 }
+    }
+
+    private boolean actDeleteMessage()
+    {
+	if (activeChat == null)
+	    return false;
+	final Object obj = consoleArea.selected();
+	if (obj == null || !(obj instanceof Message))
+	    return false;
+	app.getOperations().deleteMessage(activeChat, new Message[]{ (Message)obj}, ()->{
+		app.getLuwrain().playSound(Sounds.OK);
+	    });
+	return true;
     }
 
     private void buildChatsList()
