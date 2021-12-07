@@ -11,44 +11,37 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import org.drinkless.tdlib.*;
-import org.drinkless.tdlib.TdApi.User;
-import org.drinkless.tdlib.TdApi.Chat;
-import org.drinkless.tdlib.TdApi.File;
+import org.drinkless.tdlib.TdApi.*;
+//import org.drinkless.tdlib.TdApi.User;
+//import org.drinkless.tdlib.TdApi.Chat;
+//import org.drinkless.tdlib.TdApi.File;
 
 import org.luwrain.core.*;
 
 final class Objects
 {
-    interface ChatsListener
-    {
-	void onChatsUpdate(Chat chat);
-    }
-
-    interface UsersListener
-    {
-	void onUsersUpdate(User user);
-    }
-
-    interface FilesListener
-    {
-	void onFilesUpdate(File file);
-    }
-
-    final ConcurrentMap<Long, User> users = new ConcurrentHashMap();
-    private long[] contacts = new long[0];
-    final ConcurrentMap<Integer, File> files = new ConcurrentHashMap();
-    final ConcurrentMap<Long, Chat> chats = new ConcurrentHashMap();
-    final NavigableSet<OrderedChat> mainChats = new TreeSet();
-    boolean haveFullMainChatList = false;
-    final ConcurrentMap<Long, TdApi.BasicGroup> basicGroups = new ConcurrentHashMap<>();
-    final ConcurrentMap<Integer, TdApi.Supergroup> supergroups = new ConcurrentHashMap<Integer, TdApi.Supergroup>();
-    final ConcurrentMap<Integer, TdApi.SecretChat> secretChats = new ConcurrentHashMap<Integer, TdApi.SecretChat>();
-
-    final List<ChatsListener> chatsListeners = new LinkedList();
-    final List<UsersListener> usersListeners = new LinkedList();
-        final List<FilesListener> filesListeners = new LinkedList();
+    interface ChatsListener { void onChatsUpdate(Chat chat); }
+    interface UsersListener { void onUsersUpdate(User user); }
+    interface FilesListener { void onFilesUpdate(File file); }
+    interface NewMessageListener { void onNewMessage(Chat chat, Message message); }
 
     private final App app;
+
+    final Map<Long, User> users = new ConcurrentHashMap();
+
+    final Map<Integer, File> files = new ConcurrentHashMap();
+    final Map<Long, Chat> chats = new ConcurrentHashMap();
+    final NavigableSet<OrderedChat> mainChats = new TreeSet();
+    final Map<Long, TdApi.BasicGroup> basicGroups = new ConcurrentHashMap<>();
+    final Map<Integer, TdApi.Supergroup> supergroups = new ConcurrentHashMap<>();
+    final Map<Integer, TdApi.SecretChat> secretChats = new ConcurrentHashMap<>();
+    private long[] contacts = new long[0];
+    boolean haveFullMainChatList = false;
+
+    final List<ChatsListener> chatsListeners = new ArrayList<>();
+    final List<UsersListener> usersListeners = new ArrayList<>();
+    final List<FilesListener> filesListeners = new ArrayList<>();
+    final List<NewMessageListener> newMessageListeners = new ArrayList<>();
 
     Objects(App app)
     {
@@ -68,10 +61,18 @@ final class Objects
 	    app.getLuwrain().runUiSafely(()->l.onUsersUpdate(user));
     }
 
-        void filesUpdated(File file)
+    void filesUpdated(File file)
     {
 	for(FilesListener l: filesListeners)
 	    app.getLuwrain().runUiSafely(()->l.onFilesUpdate(file));
+    }
+
+    void newMessage(Chat chat, Message message)
+    {
+	NullCheck.notNull(chat, "chat");
+	NullCheck.notNull(message, "message");
+	for(NewMessageListener l: newMessageListeners)
+	    app.getLuwrain().runUiSafely(()->l.onNewMessage(chat, message));
     }
 
     synchronized void setContacts(long[] contacts)

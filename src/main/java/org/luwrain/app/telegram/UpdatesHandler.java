@@ -43,12 +43,24 @@ abstract class UpdatesHandler implements Client.ResultHandler
 	    Log.warning(LOG_COMPONENT, "null update object");
 	switch (object.getConstructor())
 	{
-	    
-	case TdApi.UpdateAuthorizationState.CONSTRUCTOR:
+
+	case UpdateNewMessage.CONSTRUCTOR: {
+		    	    final UpdateNewMessage newMessage = (UpdateNewMessage)object;
+			    final Message message = newMessage.message;
+			    if (message == null)
+				break;
+			    final Chat chat = objects.chats.get(message.chatId);
+			    if (chat == null)
+				break;
+			    objects.newMessage(chat, message);
+	    break;
+	}
+
+	case UpdateAuthorizationState.CONSTRUCTOR:
 	    authStateUpdated(((TdApi.UpdateAuthorizationState) object).authorizationState);
 	    break;
 
-	case TdApi.UpdateFile.CONSTRUCTOR: {
+	case UpdateFile.CONSTRUCTOR: {
 		    	    final TdApi.UpdateFile updateFile = (TdApi.UpdateFile) object;
 			    synchronized(objects) {
 				objects.files.put(updateFile.file.id, updateFile.file);	
@@ -96,55 +108,51 @@ objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGr
 		    //                    secretChats.put(updateSecretChat.secretChat.id, updateSecretChat.secretChat);
                     break;
 
-		                    case UpdateChatPosition.CONSTRUCTOR: {
-                    final UpdateChatPosition updateChat = (UpdateChatPosition) object;
-                    if (updateChat.position.list.getConstructor() != TdApi.ChatListMain.CONSTRUCTOR) 
-                      break;
-                    final Chat chat = objects.chats.get(updateChat.chatId);
-                    synchronized (objects) {
-                        int i;
-                        for (i = 0; i < chat.positions.length; i++)
-			{
-                            if (chat.positions[i].list.getConstructor() == ChatListMain.CONSTRUCTOR)
-                                break;
-                        }
-                        TdApi.ChatPosition[] new_positions = new TdApi.ChatPosition[chat.positions.length + (updateChat.position.order == 0 ? 0 : 1) - (i < chat.positions.length ? 1 : 0)];
-                        int pos = 0;
-                        if (updateChat.position.order != 0) {
-                          new_positions[pos++] = updateChat.position;
-                        }
-                        for (int j = 0; j < chat.positions.length; j++)
-			{
-                            if (j != i)
-                                new_positions[pos++] = chat.positions[j];
-                        }
-			if (pos != new_positions.length)
-			    Log.warning(LOG_COMPONENT, "pos != new_positions.length");
-			Log.debug(LOG_COMPONENT, "new positions: " + chat.title + ": " + new_positions.length);
-                        setChatPositions(chat, new_positions);
-                    }
-		    		    								objects.chatsUpdated(chat);
-                    break;
-                }
+	case UpdateChatPosition.CONSTRUCTOR: {
+	    final UpdateChatPosition updateChat = (UpdateChatPosition) object;
+	    if (updateChat.position.list.getConstructor() != TdApi.ChatListMain.CONSTRUCTOR) 
+		break;
+	    final Chat chat = objects.chats.get(updateChat.chatId);
+	    synchronized (objects) {
+		int i;
+		for (i = 0; i < chat.positions.length; i++)
+		{
+		    if (chat.positions[i].list.getConstructor() == ChatListMain.CONSTRUCTOR)
+			break;
+		}
+		TdApi.ChatPosition[] new_positions = new TdApi.ChatPosition[chat.positions.length + (updateChat.position.order == 0 ? 0 : 1) - (i < chat.positions.length ? 1 : 0)];
+		int pos = 0;
+		if (updateChat.position.order != 0) {
+		    new_positions[pos++] = updateChat.position;
+		}
+		for (int j = 0; j < chat.positions.length; j++)
+		{
+		    if (j != i)
+			new_positions[pos++] = chat.positions[j];
+		}
+		if (pos != new_positions.length)
+		    Log.warning(LOG_COMPONENT, "pos != new_positions.length");
+		setChatPositions(chat, new_positions);
+	    }
+	    objects.chatsUpdated(chat);
+	    break;
+	}
 
+	case UpdateNewChat.CONSTRUCTOR: {
+	    final UpdateNewChat updateNewChat = (UpdateNewChat) object;
+	    final Chat chat = updateNewChat.chat;
+	    synchronized (objects) {
+		objects.chats.put(chat.id, chat);
+		final ChatPosition[] positions = chat.positions;
+		chat.positions = new TdApi.ChatPosition[0];
+		setChatPositions(chat, positions);
+	    }
+	    objects.chatsUpdated(chat);
+	    break;
+	}
 
-		                    case UpdateNewChat.CONSTRUCTOR: {
-                    final UpdateNewChat updateNewChat = (UpdateNewChat) object;
-                    final Chat chat = updateNewChat.chat;
-		    Log.debug(LOG_COMPONENT, "UpdateNewChat: " + chat.title);
-                    synchronized (objects) {
-                        objects.chats.put(chat.id, chat);
-                        final ChatPosition[] positions = chat.positions;
-			Log.debug(LOG_COMPONENT, "New position has " + chat.positions.length + " items");
-                        chat.positions = new TdApi.ChatPosition[0];
-                        setChatPositions(chat, positions);
-                    }
-		    								objects.chatsUpdated(chat);
-                    break;
-				    }
-
-                case TdApi.UpdateChatTitle.CONSTRUCTOR: {
-                    final TdApi.UpdateChatTitle updateChat = (TdApi.UpdateChatTitle) object;
+                case UpdateChatTitle.CONSTRUCTOR: {
+                    final UpdateChatTitle updateChat = (UpdateChatTitle) object;
 		                        synchronized (objects) {
                     final TdApi.Chat chat = objects.chats.get(updateChat.chatId);
                         chat.title = updateChat.title;

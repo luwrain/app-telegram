@@ -98,7 +98,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 		this.activeChat = chat;
 		updateActiveChatHistory();
 		consoleArea.reset(false);
-		app.getLuwrain().setActiveArea(consoleArea);
+		setActiveArea(consoleArea);
 	    });
 	return true;
     }
@@ -226,22 +226,17 @@ if (chat.lastMessage != null)
     private void buildChatsList()
     {
 	final Objects objects = app.getObjects();
-		final List<Chat> res = new LinkedList();
-		synchronized(objects) {
-		    //		    Log.debug(LOG_COMPONENT, "building");
-		for(OrderedChat c: objects.mainChats)
-		{
-		    final Chat chat = objects.chats.get(c.chatId);
-		    if (chat != null)
-		    {
-			//			Log.debug(LOG_COMPONENT, "order " + c.order);
-			res.add(chat);
-		    }
-		}
-		}
+	final List<Chat> res = new LinkedList();
+	synchronized(objects) {
+	    for(OrderedChat c: objects.mainChats)
+	    {
+		final Chat chat = objects.chats.get(c.chatId);
+		if (chat != null)
+		    res.add(chat);
+	    }
+	}
 	this.chats = res.toArray(new Chat[res.size()]);
 	chatsArea.refresh();
-	//	Log.debug(LOG_COMPONENT, "" + res.size() + " items in main layout");
     }
 
     private void updateActiveChatHistory()
@@ -290,9 +285,11 @@ if (chat.lastMessage != null)
 
 
 
+    /*
     void activate()
     {
 			app.getOperations().fillMainChatList(CHAT_NUM_LIMIT);
-	app.getLuwrain().setActiveArea(chatsArea);
+	setActiveArea(chatsArea);
     }
+    */
 }

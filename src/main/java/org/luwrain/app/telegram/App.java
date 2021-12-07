@@ -25,6 +25,8 @@ public final class App extends AppBase<Strings> implements MonoApp
 
     static final String LOG_COMPONENT = "telegram";
 
+    final long startTimeMillis = System.currentTimeMillis();
+
     private Conversations conv = null;
     private File tdlibDir = null;
     private Operations operations = null;
@@ -65,11 +67,8 @@ public final class App extends AppBase<Strings> implements MonoApp
 		getLuwrain().runUiSafely(()->{
 			Log.debug(LOG_COMPONENT, "tdlib is ready");
 			setAreaLayout(mainLayout);
-			
-			//		App.this.mainLayout.activate();
-
-						App.this.operations.fillMainChatList(CHAT_NUM_LIMIT);
-	App.this.mainLayout.setActiveArea(App.this.mainLayout.chatsArea);
+			App.this.operations.fillMainChatList(CHAT_NUM_LIMIT);
+			App.this.mainLayout.setActiveArea(App.this.mainLayout.chatsArea);
 		    });
 	    }
 	    @Override Client getClient()
