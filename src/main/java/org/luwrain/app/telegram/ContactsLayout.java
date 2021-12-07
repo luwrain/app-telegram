@@ -100,7 +100,7 @@ final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, 
     void updateContactsList()
     {
 	app.getOperations().getContacts(()->{
-		final List<Contact> res = new LinkedList();
+		final List<Contact> res = new ArrayList<>();
 		synchronized(app.getObjects()) {
 		    for(long u: app.getObjects().getContacts())
 		    {

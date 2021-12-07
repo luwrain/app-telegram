@@ -38,7 +38,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
     final ListArea<Chat> chatsArea;
     final ConsoleArea<Message> consoleArea;
 
-    private Chat[] chats = new Chat[0];
+    private List<Chat> chats = new ArrayList<>();
     private Chat activeChat = null;
     private Message[] messages = new Message[0];
 
@@ -48,7 +48,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	this.app = app;
 
 	this.chatsArea = new ListArea<Chat>(listParams((params)->{
-		    params.model = new ListUtils.ArrayModel(()->this.chats);
+		    params.model = new ListUtils.ListModel<>(chats);
 		    params.appearance = new ChatsListAppearance(app, params.context);
 		    params.clickHandler = this;
 		    params.name = app.getStrings().chatsAreaName();
@@ -72,7 +72,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 					     );
 
 	this.consoleArea = new ConsoleArea<Message>(consoleParams((params)->{
-		    params.model = new ConsoleUtils.ArrayModel(()->messages);
+		    params.model = new ConsoleUtils.ArrayModel<>(()->messages);
 		    params.appearance = new MessageAppearance(app.getLuwrain(), app.getObjects());
 		    params.name = "Беседа";
 		    params.inputPos = ConsoleArea.InputPos.TOP;
@@ -216,8 +216,9 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
     @Override public void onChatsUpdate(Chat sourceChat)
     {
 	final Objects objects = app.getObjects();
-	final List<Chat> res = new LinkedList();
+	final ArrayList<Chat> res = new ArrayList<>();
 	synchronized(objects) {
+	    res.ensureCapacity(objects.mainChats.size());
 	    for(OrderedChat c: objects.mainChats)
 	    {
 		final Chat chat = objects.chats.get(c.chatId);
@@ -225,7 +226,8 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 		    res.add(chat);
 	    }
 	}
-	this.chats = res.toArray(new Chat[res.size()]);
+	chats.clear();
+	chats.addAll(res);
 	chatsArea.refresh();
     }
 
@@ -248,7 +250,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	if (activeChat == null)
 	    return;
 	app.getOperations().getChatHistory(activeChat, (messagesChat, messages)->{
-		final List<Message> res = new LinkedList();
+		final List<Message> res = new ArrayList<>();
 		if (messagesChat != null && messagesChat.lastMessage != null)
 		    res.add(messagesChat.lastMessage);
 		if (messages != null && messages.messages != null)

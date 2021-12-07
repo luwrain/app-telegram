@@ -268,8 +268,8 @@ abstract class Operations
 private final class DefaultHandler implements Client.ResultHandler
 {
     private final int constructor;
-    private final Consumer onSuccess;
-    DefaultHandler(int constructor, Consumer onSuccess)
+    private final Consumer<Object> onSuccess;
+    DefaultHandler(int constructor, Consumer<Object> onSuccess)
     {
 	this.constructor = constructor;
 	this.onSuccess = onSuccess;

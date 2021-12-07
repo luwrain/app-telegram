@@ -27,11 +27,11 @@ final class Objects
 
     private final App app;
 
-    final Map<Long, User> users = new ConcurrentHashMap();
+    final Map<Long, User> users = new ConcurrentHashMap<>();
 
-    final Map<Integer, File> files = new ConcurrentHashMap();
-    final Map<Long, Chat> chats = new ConcurrentHashMap();
-    final NavigableSet<OrderedChat> mainChats = new TreeSet();
+    final Map<Integer, File> files = new ConcurrentHashMap<>();
+    final Map<Long, Chat> chats = new ConcurrentHashMap<>();
+    final NavigableSet<OrderedChat> mainChats = new TreeSet<>();
     final Map<Long, TdApi.BasicGroup> basicGroups = new ConcurrentHashMap<>();
     final Map<Integer, TdApi.Supergroup> supergroups = new ConcurrentHashMap<>();
     final Map<Integer, TdApi.SecretChat> secretChats = new ConcurrentHashMap<>();
