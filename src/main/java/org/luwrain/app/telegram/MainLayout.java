@@ -28,14 +28,14 @@ import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.app.base.*;
 
-final class MainLayout extends LayoutBase implements ListArea.ClickHandler, ConsoleArea.InputHandler, ConsoleArea.ClickHandler, Objects.ChatsListener
+final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>, ConsoleArea.InputHandler, ConsoleArea.ClickHandler<Message>, Objects.ChatsListener
 {
     static private final String LOG_COMPONENT = App.LOG_COMPONENT;
-    static private final int CHAT_NUM_LIMIT = 100;
+    static private final int CHAT_NUM_LIMIT = 500;
 
     private final App app;
-    private final ListArea chatsArea;
-    private final ConsoleArea consoleArea;
+    final ListArea<Chat> chatsArea;
+    final ConsoleArea<Message> consoleArea;
 
     private Chat[] chats = new Chat[0];
     private Chat activeChat = null;
@@ -43,118 +43,82 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler, Cons
 
     MainLayout(App app)
     {
-	NullCheck.notNull(app, "app");
+	super(app);
 	this.app = app;
-	this.chatsArea = new ListArea(createChatsParams()){
-		private final Actions actions = actions(
-							action("contacts", app.getStrings().actionContacts(), new InputEvent(InputEvent.Special.F6), MainLayout.this::actContacts),
-							action("close-chat", app.getStrings().actionCloseChat(), new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actCloseChat)
-							);
-		@Override public boolean onInputEvent(InputEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (app.onInputEvent(this, event))
-			return true;
-		    return super.onInputEvent(event);
-		}
+
+	this.chatsArea = new ListArea<Chat>(listParams((params)->{
+		    params.model = new ListUtils.ArrayModel(()->this.chats);
+		    params.appearance = new ChatsListAppearance(app, params.context);
+		    params.clickHandler = this;
+		    params.name = app.getStrings().chatsAreaName();
+		})){
 		@Override public boolean onSystemEvent(SystemEvent event)
 		{
 		    NullCheck.notNull(event, "event");
 		    if (event.getType() == SystemEvent.Type.REGULAR)
-		    switch(event.getCode())
-		    {
-		    case PROPERTIES:
-			return onChatProperties();
-		    }
-		    if (app.onSystemEvent(this, event, actions))
-			return true;
+			switch(event.getCode())
+			{
+			case PROPERTIES:
+			    return onChatProperties();
+			}
 		    return super.onSystemEvent(event);
 		}
-		@Override public boolean onAreaQuery(AreaQuery query)
-		{
-		    NullCheck.notNull(query, "query");
-		    if (app.onAreaQuery(this, query))
-			return true;
-		    return super.onAreaQuery(query);
-		}
-		@Override public Action[] getAreaActions()
-		{
-		    return actions.getAreaActions();
-		}
 	    };
-	this.consoleArea = new ConsoleArea(createConsoleParams()){
-		private final Actions actions = actions(
-							action("delete", "Удалить сообщение", new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actDeleteMessage),
-														action("contacts", app.getStrings().actionContacts(), new InputEvent(InputEvent.Special.F6), MainLayout.this::actContacts)
-							);
-		@Override public boolean onInputEvent(InputEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (app.onInputEvent(this, event))
-			return true;
-		    return super.onInputEvent(event);
-		}
-		@Override public boolean onSystemEvent(SystemEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (app.onSystemEvent(this, event, actions))
-			return true;
-		    return super.onSystemEvent(event);
-		}
-		@Override public boolean onAreaQuery(AreaQuery query)
-		{
-		    NullCheck.notNull(query, "query");
-		    if (app.onAreaQuery(this, query))
-			return true;
-		    return super.onAreaQuery(query);
-		}
-		@Override public Action[] getAreaActions()
-		{
-		    return actions.getAreaActions();
-		}
-	    };
+
+	final Actions chatsActions = actions(
+					     action("contacts", app.getStrings().actionContacts(), new InputEvent(InputEvent.Special.F6), MainLayout.this::actContacts),
+					     action("close-chat", app.getStrings().actionCloseChat(), new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actCloseChat)
+					     );
+
+	this.consoleArea = new ConsoleArea<Message>(consoleParams((params)->{
+		    params.model = new ConsoleUtils.ArrayModel(()->messages);
+		    params.appearance = new MessageAppearance(app.getLuwrain(), app.getObjects());
+		    params.name = "Беседа";
+		    params.inputPos = ConsoleArea.InputPos.TOP;
+		    params.inputPrefix = ">";
+		    params.clickHandler = this;
+		    params.inputHandler = this;
+		}));
+
+	final Actions consoleActions = actions(
+					       action("delete", "Удалить сообщение", new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actDeleteMessage),
+					       action("contacts", app.getStrings().actionContacts(), new InputEvent(InputEvent.Special.F6), MainLayout.this::actContacts)
+					       );
+
+	setAreaLayout(AreaLayout.LEFT_RIGHT, chatsArea, chatsActions, consoleArea, consoleActions);
 	synchronized(app.getObjects()) {
-	app.getObjects().chatsListeners.add(this);
+	    app.getObjects().chatsListeners.add(this);
 	}
     }
 
-    @Override public boolean onListClick(ListArea listArea, int index, Object obj)
+    @Override public boolean onListClick(ListArea listArea, int index, Chat chat)
     {
-	if (obj == null)
-	    return false	;
-	if (obj instanceof Chat)
-	{
-	    final Chat chat = (Chat)obj;
-	    app.getOperations().openChat(chat, ()->{
-		    this.activeChat = chat;
-		    updateActiveChatHistory();
-		    consoleArea.reset(false);
-		    app.getLuwrain().setActiveArea(consoleArea);
-		});
-	    return true;
-	}
-	return false;
+	NullCheck.notNull(chat, "chat");
+	app.getOperations().openChat(chat, ()->{
+		this.activeChat = chat;
+		updateActiveChatHistory();
+		consoleArea.reset(false);
+		app.getLuwrain().setActiveArea(consoleArea);
+	    });
+	return true;
     }
 
-        @Override public ConsoleArea.InputHandler.Result onConsoleInput(ConsoleArea area, String text)
+    @Override public ConsoleArea.InputHandler.Result onConsoleInput(ConsoleArea area, String text)
     {
 	NullCheck.notNull(text, "text");
 	if (text.isEmpty() || activeChat == null)
-	    	return ConsoleArea.InputHandler.Result.REJECTED;
+	    return ConsoleArea.InputHandler.Result.REJECTED;
 	app.getOperations().sendMessage(activeChat, text, ()->{
 		consoleArea.setInput("");
 		updateActiveChatHistory();
 		app.getLuwrain().playSound(Sounds.DONE);
 	    });
-return ConsoleArea.InputHandler.Result.OK;
+	return ConsoleArea.InputHandler.Result.OK;
     }
 
-    @Override public boolean onConsoleClick(ConsoleArea consoleArea, int index, Object obj)
+    @Override public boolean onConsoleClick(ConsoleArea consoleArea, int index, Message message)
     {
-	if (obj == null || !(obj instanceof Message))
-	    return false;
-	final Message message = (Message)obj;
-
+	NullCheck.notNull(message, "message");
 	if (message.content != null && message.content instanceof MessageAudio)
 	{
 	    final MessageAudio audio = (MessageAudio)message.content;
@@ -208,8 +172,6 @@ return ConsoleArea.InputHandler.Result.OK;
 		    app.getLuwrain().message("Выполняется доставка файла");//FIXME:
 		    return true;
 	}
-
-
 
 		if (message.content != null && message.content instanceof MessageVoiceNote)
 	{
@@ -325,74 +287,11 @@ if (chat.lastMessage != null)
     }
 
 
-    private ListArea.Params createChatsParams()
-    {
-	final ListArea.Params params = new ListArea.Params();
-	params.context = new DefaultControlContext(app.getLuwrain());
-	params.model = new ListUtils.ArrayModel(()->{return this.chats;});
-	params.appearance = new ChatsListAppearance(app);
-	params.clickHandler = this;
-	params.name = app.getStrings().chatsAreaName();
-	return params;
-    }
 
-        private ConsoleArea.Params createConsoleParams()
-    {
-	final ConsoleArea.Params params = new ConsoleArea.Params();
-	params.context = new DefaultControlContext(app.getLuwrain());
-	params.model = new ConsoleAreaModel();
-	params.appearance = new ConsoleAreaAppearance();
-	params.name = "Беседа";
-	params.inputPos = ConsoleArea.InputPos.TOP;
-	params.inputPrefix = ">";
-	params.clickHandler = this;
-	params.inputHandler = this;
-	return params;
-    }
 
     void activate()
     {
 			app.getOperations().fillMainChatList(CHAT_NUM_LIMIT);
 	app.getLuwrain().setActiveArea(chatsArea);
-    }
-
-    AreaLayout getLayout()
-    {
-	return new AreaLayout(AreaLayout.LEFT_RIGHT, chatsArea, consoleArea);
-    }
-
-    private final class ConsoleAreaModel implements ConsoleArea.Model
-    {
-        @Override public int getItemCount()
-	{
-	    return messages.length;
-	}
-	@Override public Object getItem(int index)
-	{
-	    if (index < 0 || index >= messages.length)
-		throw new IllegalArgumentException("index (" + index + ") must be greater or equal to zero and less than " + String.valueOf(messages.length));
-	    return messages[index];
-	}
-    }
-
-        private final class ConsoleAreaAppearance implements ConsoleArea.Appearance
-    {
-	private final MessageAppearance messageAppearance = new MessageAppearance(app.getLuwrain(), app.getObjects());
-	@Override public void announceItem(Object item)
-	{
-	    NullCheck.notNull(item, "item");
-	    if (!(item instanceof Message))
-	    {
-	    app.getLuwrain().setEventResponse(DefaultEventResponse.text(item.toString()));
-	    }
-	    messageAppearance.announce((Message)item); 
-	}
-	@Override public String getTextAppearance(Object item)
-	{
-	    NullCheck.notNull(item, "item");
-	    if (!(item instanceof Message))
-		return item.toString();
-	    return messageAppearance.getTextAppearance((Message)item);
-	}
     }
 }

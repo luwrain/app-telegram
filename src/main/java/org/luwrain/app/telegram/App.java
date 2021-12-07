@@ -78,7 +78,7 @@ public final class App extends AppBase<Strings> implements MonoApp
 	    @Override public void onReady()
 	    {
 		getLuwrain().runUiSafely(()->{
-		getLayout().setBasicLayout(App.this.mainLayout.getLayout());
+			setAreaLayout(mainLayout);
 		App.this.mainLayout.activate();
 		    });
 	    }
@@ -115,7 +115,7 @@ public final class App extends AppBase<Strings> implements MonoApp
 	return new Layouts(){
 	    @Override public void main()
 	    {
-		getLayout().setBasicLayout(mainLayout.getLayout());
+		setAreaLayout(mainLayout);
 		getLuwrain().announceActiveArea();
 	    }
 	    	    @Override public void contacts()

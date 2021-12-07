@@ -21,7 +21,7 @@ import org.drinkless.tdlib.TdApi.*;
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
 
-final class MessageAppearance
+final class MessageAppearance implements ConsoleArea.Appearance<Message>
 {
     private final Luwrain luwrain;
         private final Objects objects;
@@ -34,7 +34,7 @@ final class MessageAppearance
 	this.objects = objects;
     }
 
-    void announce(Message message)
+@Override public void announceItem(Message message)
     {
 	NullCheck.notNull(message, "message");
 	if (message.content == null)
@@ -95,7 +95,7 @@ final class MessageAppearance
     }
 
 
-    String getTextAppearance(Message message)
+    @Override public String getTextAppearance(Message message)
     {
 	NullCheck.notNull(message, "message");
 	if (message.content == null)
@@ -120,4 +120,5 @@ final class MessageAppearance
 	}
 	return "";
     }
-}
+
+    }
