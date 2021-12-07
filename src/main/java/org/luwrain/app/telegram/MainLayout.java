@@ -18,6 +18,7 @@ import org.drinkless.tdlib.TdApi.MessageText;
 import org.drinkless.tdlib.TdApi.MessageAudio;
 import org.drinkless.tdlib.TdApi.MessagePhoto;
 import org.drinkless.tdlib.TdApi.MessageDocument;
+import org.drinkless.tdlib.TdApi.MessagePhoto;
 import org.drinkless.tdlib.TdApi.MessageVoiceNote;
 import org.drinkless.tdlib.TdApi.VoiceNote;
 import org.drinkless.tdlib.TdApi.Messages;
@@ -198,6 +199,17 @@ return ConsoleArea.InputHandler.Result.OK;
 		    return true;
 	}
 
+				if (message.content != null && message.content instanceof MessagePhoto)
+	{
+	    final MessagePhoto photo = (MessagePhoto)message.content;
+	    if (photo.photo.sizes[3].photo.local.isDownloadingActive)
+		return false;
+		    app.getOperations().downloadFile(photo.photo.sizes[3].photo);
+		    app.getLuwrain().message("Выполняется доставка файла");//FIXME:
+		    return true;
+	}
+
+
 
 		if (message.content != null && message.content instanceof MessageVoiceNote)
 	{
@@ -260,7 +272,7 @@ if (chat.lastMessage != null)
 		    final Chat chat = objects.chats.get(c.chatId);
 		    if (chat != null)
 		    {
-			Log.debug(LOG_COMPONENT, "order " + c.order);
+			//			Log.debug(LOG_COMPONENT, "order " + c.order);
 			res.add(chat);
 		    }
 		}

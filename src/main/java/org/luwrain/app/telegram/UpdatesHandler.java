@@ -85,6 +85,22 @@ objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGr
                     TdApi.UpdateSecretChat updateSecretChat = (TdApi.UpdateSecretChat) object;
 		    //                    secretChats.put(updateSecretChat.secretChat.id, updateSecretChat.secretChat);
                     break;
+
+		                    case TdApi.UpdateNewChat.CONSTRUCTOR: {
+                    final TdApi.UpdateNewChat updateNewChat = (TdApi.UpdateNewChat) object;
+                    final TdApi.Chat chat = updateNewChat.chat;
+                    synchronized (objects) {
+                        objects.chats.put(chat.id, chat);
+                        final TdApi.ChatPosition[] positions = chat.positions;
+                        chat.positions = new TdApi.ChatPosition[0];
+                        setChatPositions(chat, positions);
+                    }
+                    break;
+				    }
+
+
+
+		    /*
                 case TdApi.UpdateNewChat.CONSTRUCTOR: {
                     final TdApi.UpdateNewChat updateNewChat = (TdApi.UpdateNewChat) object;
 		                        final TdApi.Chat chat = updateNewChat.chat;
@@ -98,6 +114,7 @@ objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGr
 								objects.chatsUpdated(chat);
                     break;
                 }
+		    */
                 case TdApi.UpdateChatTitle.CONSTRUCTOR: {
                     final TdApi.UpdateChatTitle updateChat = (TdApi.UpdateChatTitle) object;
 		                        synchronized (objects) {
@@ -116,6 +133,7 @@ objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGr
 		    */
                     break;
                 }
+		    /*
                 case TdApi.UpdateChatChatList.CONSTRUCTOR: {
                     final TdApi.UpdateChatChatList updateChat = (TdApi.UpdateChatChatList) object;
 		    synchronized (objects){
@@ -125,6 +143,7 @@ objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGr
                         }
                     break;
                 }
+		    */
                 case TdApi.UpdateChatLastMessage.CONSTRUCTOR: {
                     final TdApi.UpdateChatLastMessage updateChat = (TdApi.UpdateChatLastMessage) object;
 		    final TdApi.Chat chat;
@@ -136,6 +155,7 @@ chat = objects.chats.get(updateChat.chatId);
 					objects.chatsUpdated(chat);
                     break;
                 }
+		    /*
                 case TdApi.UpdateChatOrder.CONSTRUCTOR: {
                     final TdApi.UpdateChatOrder updateChat = (TdApi.UpdateChatOrder) object;
 		    final TdApi.Chat chat;
@@ -147,17 +167,18 @@ chat = objects.chats.get(updateChat.chatId);
 		    objects.chatsUpdated(chat);
                     break;
                 }
+		    */
+		    /*
                 case TdApi.UpdateChatIsPinned.CONSTRUCTOR: {
                     TdApi.UpdateChatIsPinned updateChat = (TdApi.UpdateChatIsPinned) object;
-		    /*
                     TdApi.Chat chat = chats.get(updateChat.chatId);
                     synchronized (chat) {
                         chat.isPinned = updateChat.isPinned;
                         setChatOrder(chat, updateChat.order);
                     }
-		    */
                     break;
                 }
+	*/
                 case TdApi.UpdateChatReadInbox.CONSTRUCTOR: {
                     final TdApi.UpdateChatReadInbox updateChat = (TdApi.UpdateChatReadInbox) object;
                     synchronized (objects) {
@@ -244,18 +265,17 @@ chat = objects.chats.get(updateChat.chatId);
 		    */
                     break;
                 }
+		    /*
                 case TdApi.UpdateChatIsSponsored.CONSTRUCTOR: {
                     TdApi.UpdateChatIsSponsored updateChat = (TdApi.UpdateChatIsSponsored) object;
-		    /*
                     TdApi.Chat chat = chats.get(updateChat.chatId);
                     synchronized (chat) {
                         chat.isSponsored = updateChat.isSponsored;
                         setChatOrder(chat, updateChat.order);
                     }
-		    */
                     break;
                 }
-
+		    */
                 case TdApi.UpdateUserFullInfo.CONSTRUCTOR:
                     TdApi.UpdateUserFullInfo updateUserFullInfo = (TdApi.UpdateUserFullInfo) object;
 		    //                    usersFullInfo.put(updateUserFullInfo.userId, updateUserFullInfo.userFullInfo);
@@ -372,6 +392,29 @@ this.authorizationState = authorizationState;
                     break;
                 default:
                     Log.error(LOG_COMPONENT, "Receive wrong response from TDLib: " + object);
+            }
+        }
+    }
+
+	    private void setChatPositions(TdApi.Chat chat, TdApi.ChatPosition[] positions)
+    {
+        synchronized (objects) {
+            synchronized (chat) {
+                for (TdApi.ChatPosition position : chat.positions) {
+                    if (position.list.getConstructor() == TdApi.ChatListMain.CONSTRUCTOR) {
+                        boolean isRemoved = objects.mainChats.remove(new OrderedChat(chat.id, position));
+                        assert isRemoved;
+                    }
+                }
+
+                chat.positions = positions;
+
+                for (TdApi.ChatPosition position : chat.positions) {
+                    if (position.list.getConstructor() == TdApi.ChatListMain.CONSTRUCTOR) {
+                        boolean isAdded = objects.mainChats.add(new OrderedChat(chat.id, position));
+                        assert isAdded;
+                    }
+                }
             }
         }
     }

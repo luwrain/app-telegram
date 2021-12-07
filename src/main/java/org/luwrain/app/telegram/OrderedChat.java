@@ -8,27 +8,34 @@
 
 package org.luwrain.app.telegram;
 
+import org.drinkless.tdlib.TdApi.ChatPosition;
+
 final class OrderedChat implements Comparable<OrderedChat>
 {
-    final long order;
     final long chatId;
+    final ChatPosition position;
 
-    OrderedChat(long order, long chatId)
+    OrderedChat(long chatId, ChatPosition position)
     {
-	this.order = order;
 	this.chatId = chatId;
+	this.position = position;
     }
 
-    @Override public int compareTo(OrderedChat o)
-    {
-	if (this.chatId == o.chatId)
-	    return 0;
-	return -1 * new Long(this.order).compareTo(new Long(o.order));
-    }
+    
+        @Override
+        public int compareTo(OrderedChat o) {
+            if (this.position.order != o.position.order) {
+                return o.position.order < this.position.order ? -1 : 1;
+            }
+            if (this.chatId != o.chatId) {
+                return o.chatId < this.chatId ? -1 : 1;
+            }
+            return 0;
+        }
 
-    @Override public boolean equals(Object obj)
-    {
-	final OrderedChat o = (OrderedChat) obj;
-	return this.chatId == o.chatId;
-    }
+        @Override
+        public boolean equals(Object obj) {
+            OrderedChat o = (OrderedChat) obj;
+            return this.chatId == o.chatId && this.position.order == o.position.order;
+        }
 }

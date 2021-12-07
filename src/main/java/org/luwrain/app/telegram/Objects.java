@@ -34,13 +34,13 @@ final class Objects
 	void onFilesUpdate(File file);
     }
 
-    final ConcurrentMap<Integer, User> users = new ConcurrentHashMap();
-    private int[] contacts = new int[0];
+    final ConcurrentMap<Long, User> users = new ConcurrentHashMap();
+    private long[] contacts = new long[0];
     final ConcurrentMap<Integer, File> files = new ConcurrentHashMap();
     final ConcurrentMap<Long, Chat> chats = new ConcurrentHashMap();
     final NavigableSet<OrderedChat> mainChats = new TreeSet();
     boolean haveFullMainChatList = false;
-    final ConcurrentMap<Integer, TdApi.BasicGroup> basicGroups = new ConcurrentHashMap<Integer, TdApi.BasicGroup>();
+    final ConcurrentMap<Long, TdApi.BasicGroup> basicGroups = new ConcurrentHashMap<>();
     final ConcurrentMap<Integer, TdApi.Supergroup> supergroups = new ConcurrentHashMap<Integer, TdApi.Supergroup>();
     final ConcurrentMap<Integer, TdApi.SecretChat> secretChats = new ConcurrentHashMap<Integer, TdApi.SecretChat>();
 
@@ -74,13 +74,13 @@ final class Objects
 	    app.getLuwrain().runUiSafely(()->l.onFilesUpdate(file));
     }
 
-    synchronized void setContacts(int[] contacts)
+    synchronized void setContacts(long[] contacts)
     {
 	NullCheck.notNull(contacts, "contacts");
 	this.contacts = contacts.clone();
     }
 
-    synchronized int[] getContacts()
+    synchronized long[] getContacts()
     {
 	return this.contacts.clone();
     }
