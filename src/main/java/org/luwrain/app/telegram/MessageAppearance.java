@@ -71,7 +71,7 @@ final class MessageAppearance implements ConsoleArea.Appearance<Message>
 	} else
 	    user = null;
 	final StringBuilder b = new StringBuilder();
-		b.append(text.text.text);
+	b.append(luwrain.getSpeakableText(text.text.text, Luwrain.SpeakableTextType.PROGRAMMING ));
 	if (user != null && user.firstName != null && !user.firstName.trim().isEmpty())
 	    b.append(" ").append(user.firstName.trim());
 	final java.util.Date date = new java.util.Date(message.date);

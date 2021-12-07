@@ -28,7 +28,8 @@ import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.app.base.*;
 
-final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>, ConsoleArea.InputHandler, ConsoleArea.ClickHandler<Message>, Objects.ChatsListener
+final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>, ConsoleArea.InputHandler, ConsoleArea.ClickHandler<Message>,
+						     Objects.ChatsListener, Objects.NewMessageListener
 {
     static private final String LOG_COMPONENT = App.LOG_COMPONENT;
     static private final int CHAT_NUM_LIMIT = 500;
@@ -88,6 +89,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	setAreaLayout(AreaLayout.LEFT_RIGHT, chatsArea, chatsActions, consoleArea, consoleActions);
 	synchronized(app.getObjects()) {
 	    app.getObjects().chatsListeners.add(this);
+	    app.getObjects().newMessageListeners.add(this);
 	}
     }
 
@@ -199,15 +201,32 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	return false;
     }
 
-    @Override public void onChatsUpdate(Chat chat)
+    @Override public void onNewMessage(Chat chat, Message message)
     {
-buildChatsList();
-if (chat.lastMessage != null)
-{
-    final String text = MessageAppearance.getMessageText(chat.lastMessage);
-    if (!text.trim().isEmpty())
-	app.getLuwrain().speak(text.trim(), Sounds.CHAT_MESSAGE);
-}
+		if (message.content instanceof MessageText)
+	{
+		    final MessageText text = (MessageText)message.content;
+		    getLuwrain().speak(text.text.text, Sounds.CHAT_MESSAGE);
+		    return;
+		}
+
+	
+    }
+
+    @Override public void onChatsUpdate(Chat sourceChat)
+    {
+	final Objects objects = app.getObjects();
+	final List<Chat> res = new LinkedList();
+	synchronized(objects) {
+	    for(OrderedChat c: objects.mainChats)
+	    {
+		final Chat chat = objects.chats.get(c.chatId);
+		if (chat != null)
+		    res.add(chat);
+	    }
+	}
+	this.chats = res.toArray(new Chat[res.size()]);
+	chatsArea.refresh();
     }
 
     private boolean actDeleteMessage()
@@ -223,21 +242,6 @@ if (chat.lastMessage != null)
 	return true;
     }
 
-    private void buildChatsList()
-    {
-	final Objects objects = app.getObjects();
-	final List<Chat> res = new LinkedList();
-	synchronized(objects) {
-	    for(OrderedChat c: objects.mainChats)
-	    {
-		final Chat chat = objects.chats.get(c.chatId);
-		if (chat != null)
-		    res.add(chat);
-	    }
-	}
-	this.chats = res.toArray(new Chat[res.size()]);
-	chatsArea.refresh();
-    }
 
     private void updateActiveChatHistory()
     {
