@@ -102,7 +102,7 @@ final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, 
 	app.getOperations().getContacts(()->{
 		final List<Contact> res = new LinkedList();
 		synchronized(app.getObjects()) {
-		    for(int u: app.getObjects().getContacts())
+		    for(long u: app.getObjects().getContacts())
 		    {
 			final User user = app.getObjects().users.get(u);
 			if (user == null)

@@ -97,7 +97,7 @@ final class ChatPropertiesLayout extends LayoutBase
     {
 	NullCheck.notNull(chat, "chat");
 	propsArea.addLine("Тип: " + chat.type.getClass().getName());
-	propsArea.addLine(chat.chatList.getClass().getName());
+	//	propsArea.addLine(chat.chatList.getClass().getName());
 	propsArea.addLine("Имя: " + chat.title);
 	propsArea.addLine("Unread: " + chat.isMarkedAsUnread);
 	propsArea.addLine("canBeDeletedOnlyForSelf: " + chat.canBeDeletedOnlyForSelf);

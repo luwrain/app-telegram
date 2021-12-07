@@ -15,6 +15,9 @@ import org.drinkless.tdlib.TdApi.Message;
 import org.drinkless.tdlib.TdApi.MessageText;
 import org.drinkless.tdlib.TdApi.MessageAudio;
 
+import org.drinkless.tdlib.TdApi;
+import org.drinkless.tdlib.TdApi.*;
+
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
 
@@ -61,12 +64,17 @@ final class MessageAppearance
     {
 	NullCheck.notNull(message, "message");
 	NullCheck.notNull(text, "text");
-	final User user = objects.users.get(message.senderUserId);
+	final User user;
+	if (message.sender instanceof TdApi.MessageSenderUser)
+	{
+	    user = objects.users.get(((TdApi.MessageSenderUser)message.sender).userId);
+	} else
+	    user = null;
 	final StringBuilder b = new StringBuilder();
 		b.append(text.text.text);
 	if (user != null && user.firstName != null && !user.firstName.trim().isEmpty())
 	    b.append(" ").append(user.firstName.trim());
-	final Date date = new Date(message.date);
+	final java.util.Date date = new java.util.Date(message.date);
 	b.append(" ").append(message.date);
 	luwrain.setEventResponse(DefaultEventResponse.listItem(new String(b)));
     }
@@ -75,7 +83,7 @@ final class MessageAppearance
     {
 	NullCheck.notNull(message, "message");
 	NullCheck.notNull(audio, "audio");
-	final User user = objects.users.get(message.senderUserId);
+	final User user =null;// objects.users.get(message.senderUserId);
 	final StringBuilder b = new StringBuilder();
 	b.append("аудио ");
 	b.append(audio.audio.audio.local.downloadedSize).append("/").append(audio.audio.audio.expectedSize);

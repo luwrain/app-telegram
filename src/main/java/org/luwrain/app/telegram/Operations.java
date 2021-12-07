@@ -145,7 +145,7 @@ abstract class Operations
     }
 
 
-    void getSupergroup(int supergroupId, SupergroupCallback callback)
+    void getSupergroup(long supergroupId, SupergroupCallback callback)
     {
 	NullCheck.notNull(callback, "callback");
 	getClient().send(new TdApi.GetSupergroup(supergroupId),
@@ -154,7 +154,7 @@ abstract class Operations
 			 }));
     }
 
-        void getBasicGroup(int basicGroupId, BasicGroupCallback callback)
+        void getBasicGroup(long basicGroupId, BasicGroupCallback callback)
     {
 	NullCheck.notNull(callback, "callback");
 	getClient().send(new TdApi.GetBasicGroup(basicGroupId),
@@ -164,7 +164,7 @@ abstract class Operations
     }
 
 
-    void createPrivateChat(int userId, Runnable onSuccess)
+    void createPrivateChat(long userId, Runnable onSuccess)
     {
 	NullCheck.notNull(onSuccess, "onSuccess");
 	getClient().send(new TdApi.CreatePrivateChat(userId, false),
