@@ -21,6 +21,8 @@ import org.luwrain.app.base.*;
 
 public final class App extends AppBase<Strings> implements MonoApp
 {
+    static private final int CHAT_NUM_LIMIT = 200;
+
     static final String LOG_COMPONENT = "telegram";
 
     private Conversations conv = null;
@@ -32,12 +34,9 @@ public final class App extends AppBase<Strings> implements MonoApp
     private AuthLayout authLayout = null;
     private Client client = null;
 
-    public App()
-    {
-	super(Strings.NAME, Strings.class, "luwrain.telegram");
-    }
+    public App() { super(Strings.NAME, Strings.class, "luwrain.telegram"); }
 
-    @Override public AreaLayout onAppInit()
+    @Override protected AreaLayout onAppInit()
     {
 	this.conv = new Conversations(this);
 	this.tdlibDir = new File(getLuwrain().getAppDataDir("luwrain.telegram").toFile(), "tdlib");
@@ -46,7 +45,7 @@ public final class App extends AppBase<Strings> implements MonoApp
 	this.mainLayout = new MainLayout(this);
 	this.contactsLayout = new ContactsLayout(this);
 	this.authLayout = new AuthLayout(this);
-	this.client = Client.create(newResultHandler(), null, null); // recreate client after previous has closed
+	this.client = Client.create(newResultHandler(), null, null);
         Client.execute(new TdApi.SetLogVerbosityLevel(0));
 	final String logFile = new File(getLuwrain().getFileProperty("luwrain.dir.userhome"), "td.log").getAbsolutePath();
 	Log.debug(LOG_COMPONENT, "tdlib log file is " + logFile);
@@ -57,20 +56,6 @@ public final class App extends AppBase<Strings> implements MonoApp
 	return authLayout.getLayout();
     }
 
-        Conversations getConv()
-    {
-	return this.conv;
-    }
-
-    Objects getObjects()
-    {
-	return this.objects;
-    }
-
-    Operations getOperations()
-    {
-	return this.operations;
-    }
 
     private Client.ResultHandler newResultHandler()
     {
@@ -78,8 +63,13 @@ public final class App extends AppBase<Strings> implements MonoApp
 	    @Override public void onReady()
 	    {
 		getLuwrain().runUiSafely(()->{
+			Log.debug(LOG_COMPONENT, "tdlib is ready");
 			setAreaLayout(mainLayout);
-		App.this.mainLayout.activate();
+			
+			//		App.this.mainLayout.activate();
+
+						App.this.operations.fillMainChatList(CHAT_NUM_LIMIT);
+	App.this.mainLayout.setActiveArea(App.this.mainLayout.chatsArea);
 		    });
 	    }
 	    @Override Client getClient()
@@ -153,4 +143,9 @@ public final class App extends AppBase<Strings> implements MonoApp
     void main();
     void contacts();
     }
+
+            Conversations getConv() { return this.conv; }
+    Objects getObjects() { return this.objects; }
+    Operations getOperations() { return this.operations; }
+
 }

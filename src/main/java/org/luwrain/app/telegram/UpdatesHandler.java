@@ -12,6 +12,7 @@ import java.util.*;
 import java.io.*;
 
 import org.drinkless.tdlib.*;
+import org.drinkless.tdlib.TdApi.*;
 
 import org.luwrain.core.*;
 import org.luwrain.core.Log;
@@ -20,12 +21,12 @@ abstract class UpdatesHandler implements Client.ResultHandler
 {
     static private final String LOG_COMPONENT = App.LOG_COMPONENT;
 
-    private final File tdlibDir;
+    private final java.io.File tdlibDir;
     private final Objects objects;
         private TdApi.AuthorizationState authorizationState = null;
         volatile private  boolean haveAuthorization = false;
 
-    UpdatesHandler(File tdlibDir, Objects objects)
+    UpdatesHandler(java.io.File tdlibDir, Objects objects)
     {
 	NullCheck.notNull(tdlibDir, "tdlibDir");
 	NullCheck.notNull(objects, "objects");
@@ -40,13 +41,13 @@ abstract class UpdatesHandler implements Client.ResultHandler
     {
 	if (object == null)
 	    Log.warning(LOG_COMPONENT, "null update object");
-	//			    Log.debug(LOG_COMPONENT, "handling " + object.toString());
-	//..	Log.debug(LOG_COMPONENT, "test update");
 	switch (object.getConstructor())
 	{
+	    
 	case TdApi.UpdateAuthorizationState.CONSTRUCTOR:
 	    authStateUpdated(((TdApi.UpdateAuthorizationState) object).authorizationState);
 	    break;
+
 	case TdApi.UpdateFile.CONSTRUCTOR: {
 		    	    final TdApi.UpdateFile updateFile = (TdApi.UpdateFile) object;
 			    synchronized(objects) {
@@ -55,15 +56,21 @@ abstract class UpdatesHandler implements Client.ResultHandler
 			    objects.filesUpdated(updateFile.file);
 			    break;
 	}
-	case TdApi.UpdateUser.CONSTRUCTOR: {
-	    final TdApi.UpdateUser updateUser = (TdApi.UpdateUser) object;
+
+	case UpdateOption.CONSTRUCTOR: {
+	    break;
+	}
+
+	case UpdateUser.CONSTRUCTOR: {
+	    final UpdateUser updateUser = (UpdateUser) object;
 	    synchronized(objects){
 		                        objects.users.put(updateUser.user.id, updateUser.user);
 	    }
 	    					objects.usersUpdated(updateUser.user);
                     break;
 	}
-                case TdApi.UpdateUserStatus.CONSTRUCTOR:  {
+
+                case UpdateUserStatus.CONSTRUCTOR:  {
                     final TdApi.UpdateUserStatus updateUserStatus = (TdApi.UpdateUserStatus) object;
                     synchronized (objects) {
 					                        final TdApi.User user = objects.users.get(updateUserStatus.userId);
@@ -71,50 +78,71 @@ abstract class UpdatesHandler implements Client.ResultHandler
                     }
                     break;
                 }
+
                 case TdApi.UpdateBasicGroup.CONSTRUCTOR:
                     final TdApi.UpdateBasicGroup updateBasicGroup = (TdApi.UpdateBasicGroup) object;
 		    synchronized(objects){
 objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGroup);
 		    }
                     break;
+
                 case TdApi.UpdateSupergroup.CONSTRUCTOR:
                     TdApi.UpdateSupergroup updateSupergroup = (TdApi.UpdateSupergroup) object;
 		    //                    supergroups.put(updateSupergroup.supergroup.id, updateSupergroup.supergroup);
                     break;
+
                 case TdApi.UpdateSecretChat.CONSTRUCTOR:
                     TdApi.UpdateSecretChat updateSecretChat = (TdApi.UpdateSecretChat) object;
 		    //                    secretChats.put(updateSecretChat.secretChat.id, updateSecretChat.secretChat);
                     break;
 
-		                    case TdApi.UpdateNewChat.CONSTRUCTOR: {
-                    final TdApi.UpdateNewChat updateNewChat = (TdApi.UpdateNewChat) object;
-                    final TdApi.Chat chat = updateNewChat.chat;
+		                    case UpdateChatPosition.CONSTRUCTOR: {
+                    final UpdateChatPosition updateChat = (UpdateChatPosition) object;
+                    if (updateChat.position.list.getConstructor() != TdApi.ChatListMain.CONSTRUCTOR) 
+                      break;
+                    final Chat chat = objects.chats.get(updateChat.chatId);
+                    synchronized (objects) {
+                        int i;
+                        for (i = 0; i < chat.positions.length; i++)
+			{
+                            if (chat.positions[i].list.getConstructor() == ChatListMain.CONSTRUCTOR)
+                                break;
+                        }
+                        TdApi.ChatPosition[] new_positions = new TdApi.ChatPosition[chat.positions.length + (updateChat.position.order == 0 ? 0 : 1) - (i < chat.positions.length ? 1 : 0)];
+                        int pos = 0;
+                        if (updateChat.position.order != 0) {
+                          new_positions[pos++] = updateChat.position;
+                        }
+                        for (int j = 0; j < chat.positions.length; j++)
+			{
+                            if (j != i)
+                                new_positions[pos++] = chat.positions[j];
+                        }
+			if (pos != new_positions.length)
+			    Log.warning(LOG_COMPONENT, "pos != new_positions.length");
+			Log.debug(LOG_COMPONENT, "new positions: " + chat.title + ": " + new_positions.length);
+                        setChatPositions(chat, new_positions);
+                    }
+		    		    								objects.chatsUpdated(chat);
+                    break;
+                }
+
+
+		                    case UpdateNewChat.CONSTRUCTOR: {
+                    final UpdateNewChat updateNewChat = (UpdateNewChat) object;
+                    final Chat chat = updateNewChat.chat;
+		    Log.debug(LOG_COMPONENT, "UpdateNewChat: " + chat.title);
                     synchronized (objects) {
                         objects.chats.put(chat.id, chat);
-                        final TdApi.ChatPosition[] positions = chat.positions;
+                        final ChatPosition[] positions = chat.positions;
+			Log.debug(LOG_COMPONENT, "New position has " + chat.positions.length + " items");
                         chat.positions = new TdApi.ChatPosition[0];
                         setChatPositions(chat, positions);
                     }
+		    								objects.chatsUpdated(chat);
                     break;
 				    }
 
-
-
-		    /*
-                case TdApi.UpdateNewChat.CONSTRUCTOR: {
-                    final TdApi.UpdateNewChat updateNewChat = (TdApi.UpdateNewChat) object;
-		                        final TdApi.Chat chat = updateNewChat.chat;
-		                        synchronized (objects) {
-                        objects.chats.put(chat.id, chat);
-			objects.mainChats.add(new OrderedChat(chat.order, chat.id));
-			//			                        final long order = chat.order;
-			//                        chat.order = 0;
-			//			                        setChatOrder(chat, order);
-                    }
-								objects.chatsUpdated(chat);
-                    break;
-                }
-		    */
                 case TdApi.UpdateChatTitle.CONSTRUCTOR: {
                     final TdApi.UpdateChatTitle updateChat = (TdApi.UpdateChatTitle) object;
 		                        synchronized (objects) {
@@ -123,7 +151,8 @@ objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGr
                     }
                     break;
                 }
-                case TdApi.UpdateChatPhoto.CONSTRUCTOR: {
+
+                case UpdateChatPhoto.CONSTRUCTOR: {
                     TdApi.UpdateChatPhoto updateChat = (TdApi.UpdateChatPhoto) object;
 		    /*
                     TdApi.Chat chat = chats.get(updateChat.chatId);
@@ -133,20 +162,10 @@ objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGr
 		    */
                     break;
                 }
-		    /*
-                case TdApi.UpdateChatChatList.CONSTRUCTOR: {
-                    final TdApi.UpdateChatChatList updateChat = (TdApi.UpdateChatChatList) object;
-		    synchronized (objects){
-                    final TdApi.Chat chat = objects.chats.get(updateChat.chatId);
-                            assert chat.order == 0; // guaranteed by TDLib
-                            chat.chatList = updateChat.chatList;
-                        }
-                    break;
-                }
-		    */
-                case TdApi.UpdateChatLastMessage.CONSTRUCTOR: {
-                    final TdApi.UpdateChatLastMessage updateChat = (TdApi.UpdateChatLastMessage) object;
-		    final TdApi.Chat chat;
+
+                case UpdateChatLastMessage.CONSTRUCTOR: {
+                    final UpdateChatLastMessage updateChat = (UpdateChatLastMessage) object;
+		    final Chat chat;
 		                        synchronized (objects) {
 chat = objects.chats.get(updateChat.chatId);
                         chat.lastMessage = updateChat.lastMessage;
@@ -155,31 +174,8 @@ chat = objects.chats.get(updateChat.chatId);
 					objects.chatsUpdated(chat);
                     break;
                 }
-		    /*
-                case TdApi.UpdateChatOrder.CONSTRUCTOR: {
-                    final TdApi.UpdateChatOrder updateChat = (TdApi.UpdateChatOrder) object;
-		    final TdApi.Chat chat;
-		    synchronized (objects) {
-chat = objects.chats.get(updateChat.chatId);
-					    objects.mainChats.remove(new OrderedChat(0, chat.id));
-					    objects.mainChats.add(new OrderedChat(updateChat.order, chat.id));
-                    }
-		    objects.chatsUpdated(chat);
-                    break;
-                }
-		    */
-		    /*
-                case TdApi.UpdateChatIsPinned.CONSTRUCTOR: {
-                    TdApi.UpdateChatIsPinned updateChat = (TdApi.UpdateChatIsPinned) object;
-                    TdApi.Chat chat = chats.get(updateChat.chatId);
-                    synchronized (chat) {
-                        chat.isPinned = updateChat.isPinned;
-                        setChatOrder(chat, updateChat.order);
-                    }
-                    break;
-                }
-	*/
-                case TdApi.UpdateChatReadInbox.CONSTRUCTOR: {
+
+                case UpdateChatReadInbox.CONSTRUCTOR: {
                     final TdApi.UpdateChatReadInbox updateChat = (TdApi.UpdateChatReadInbox) object;
                     synchronized (objects) {
                     final TdApi.Chat chat = objects.chats.get(updateChat.chatId);
@@ -188,7 +184,8 @@ chat = objects.chats.get(updateChat.chatId);
                     }
                     break;
                 }
-                case TdApi.UpdateChatReadOutbox.CONSTRUCTOR: {
+
+                case UpdateChatReadOutbox.CONSTRUCTOR: {
                     final TdApi.UpdateChatReadOutbox updateChat = (TdApi.UpdateChatReadOutbox) object;
 		                        synchronized (objects) {
                     final TdApi.Chat chat = objects.chats.get(updateChat.chatId);
@@ -196,7 +193,8 @@ chat = objects.chats.get(updateChat.chatId);
                     }
                     break;
                 }
-                case TdApi.UpdateChatUnreadMentionCount.CONSTRUCTOR: {
+
+	case UpdateChatUnreadMentionCount.CONSTRUCTOR: {
                     TdApi.UpdateChatUnreadMentionCount updateChat = (TdApi.UpdateChatUnreadMentionCount) object;
 		    /*
                     TdApi.Chat chat = chats.get(updateChat.chatId);
@@ -206,7 +204,8 @@ chat = objects.chats.get(updateChat.chatId);
 		    */
                     break;
                 }
-                case TdApi.UpdateMessageMentionRead.CONSTRUCTOR: {
+
+	case UpdateMessageMentionRead.CONSTRUCTOR: {
                     final TdApi.UpdateMessageMentionRead updateChat = (TdApi.UpdateMessageMentionRead) object;
 		                        synchronized (objects) {
                     final TdApi.Chat chat = objects.chats.get(updateChat.chatId);
@@ -214,7 +213,8 @@ chat = objects.chats.get(updateChat.chatId);
                     }
                     break;
                 }
-                case TdApi.UpdateChatReplyMarkup.CONSTRUCTOR: {
+
+	case UpdateChatReplyMarkup.CONSTRUCTOR: {
                     TdApi.UpdateChatReplyMarkup updateChat = (TdApi.UpdateChatReplyMarkup) object;
 		    /*
                     TdApi.Chat chat = chats.get(updateChat.chatId);
@@ -224,7 +224,8 @@ chat = objects.chats.get(updateChat.chatId);
 		    */
                     break;
                 }
-                case TdApi.UpdateChatDraftMessage.CONSTRUCTOR: {
+
+	case UpdateChatDraftMessage.CONSTRUCTOR: {
                     TdApi.UpdateChatDraftMessage updateChat = (TdApi.UpdateChatDraftMessage) object;
 		    /*
                     TdApi.Chat chat = chats.get(updateChat.chatId);
@@ -235,7 +236,8 @@ chat = objects.chats.get(updateChat.chatId);
 		    */
                     break;
                 }
-                case TdApi.UpdateChatNotificationSettings.CONSTRUCTOR: {
+
+	case TdApi.UpdateChatNotificationSettings.CONSTRUCTOR: {
                     TdApi.UpdateChatNotificationSettings update = (TdApi.UpdateChatNotificationSettings) object;
 		    /*
                     TdApi.Chat chat = chats.get(update.chatId);
@@ -245,7 +247,8 @@ chat = objects.chats.get(updateChat.chatId);
 		    */
                     break;
                 }
-                case TdApi.UpdateChatDefaultDisableNotification.CONSTRUCTOR: {
+
+	case TdApi.UpdateChatDefaultDisableNotification.CONSTRUCTOR: {
                     TdApi.UpdateChatDefaultDisableNotification update = (TdApi.UpdateChatDefaultDisableNotification) object;
 		    /*
                     TdApi.Chat chat = chats.get(update.chatId);
@@ -255,7 +258,8 @@ chat = objects.chats.get(updateChat.chatId);
 		    >*/
                     break;
                 }
-                case TdApi.UpdateChatIsMarkedAsUnread.CONSTRUCTOR: {
+
+	case TdApi.UpdateChatIsMarkedAsUnread.CONSTRUCTOR: {
                     TdApi.UpdateChatIsMarkedAsUnread update = (TdApi.UpdateChatIsMarkedAsUnread) object;
 		    /*
                     TdApi.Chat chat = chats.get(update.chatId);
@@ -265,18 +269,8 @@ chat = objects.chats.get(updateChat.chatId);
 		    */
                     break;
                 }
-		    /*
-                case TdApi.UpdateChatIsSponsored.CONSTRUCTOR: {
-                    TdApi.UpdateChatIsSponsored updateChat = (TdApi.UpdateChatIsSponsored) object;
-                    TdApi.Chat chat = chats.get(updateChat.chatId);
-                    synchronized (chat) {
-                        chat.isSponsored = updateChat.isSponsored;
-                        setChatOrder(chat, updateChat.order);
-                    }
-                    break;
-                }
-		    */
-                case TdApi.UpdateUserFullInfo.CONSTRUCTOR:
+
+	case UpdateUserFullInfo.CONSTRUCTOR:
                     TdApi.UpdateUserFullInfo updateUserFullInfo = (TdApi.UpdateUserFullInfo) object;
 		    //                    usersFullInfo.put(updateUserFullInfo.userId, updateUserFullInfo.userFullInfo);
                     break;
@@ -284,12 +278,14 @@ chat = objects.chats.get(updateChat.chatId);
                     TdApi.UpdateBasicGroupFullInfo updateBasicGroupFullInfo = (TdApi.UpdateBasicGroupFullInfo) object;
 		    //                    basicGroupsFullInfo.put(updateBasicGroupFullInfo.basicGroupId, updateBasicGroupFullInfo.basicGroupFullInfo);
                     break;
-                case TdApi.UpdateSupergroupFullInfo.CONSTRUCTOR:
+
+	case UpdateSupergroupFullInfo.CONSTRUCTOR:
                     TdApi.UpdateSupergroupFullInfo updateSupergroupFullInfo = (TdApi.UpdateSupergroupFullInfo) object;
 		    //                    supergroupsFullInfo.put(updateSupergroupFullInfo.supergroupId, updateSupergroupFullInfo.supergroupFullInfo);
                     break;
-                default:
-                    // print("Unsupported update:" + newLine + object);
+
+	default:
+	    Log.debug(LOG_COMPONENT, "Unsupported update: " + object);
             }
     }
 
@@ -396,30 +392,19 @@ this.authorizationState = authorizationState;
         }
     }
 
-	    private void setChatPositions(TdApi.Chat chat, TdApi.ChatPosition[] positions)
+    private void setChatPositions(TdApi.Chat chat, TdApi.ChatPosition[] positions)
     {
-        synchronized (objects) {
-            synchronized (chat) {
-                for (TdApi.ChatPosition position : chat.positions) {
-                    if (position.list.getConstructor() == TdApi.ChatListMain.CONSTRUCTOR) {
-                        boolean isRemoved = objects.mainChats.remove(new OrderedChat(chat.id, position));
-                        assert isRemoved;
-                    }
-                }
-
-                chat.positions = positions;
-
-                for (TdApi.ChatPosition position : chat.positions) {
-                    if (position.list.getConstructor() == TdApi.ChatListMain.CONSTRUCTOR) {
-                        boolean isAdded = objects.mainChats.add(new OrderedChat(chat.id, position));
-                        assert isAdded;
-                    }
-                }
-            }
-        }
+	for (ChatPosition position : chat.positions)
+	    if (position.list.getConstructor() == ChatListMain.CONSTRUCTOR)
+		objects.mainChats.remove(new OrderedChat(chat.id, position));
+	chat.positions = positions;
+	for (ChatPosition position : chat.positions)
+	{
+	    if (position.list.getConstructor() == ChatListMain.CONSTRUCTOR)
+	    {
+		Log.debug(LOG_COMPONENT, "Adding " + chat.title);
+		objects.mainChats.add(new OrderedChat(chat.id, position));
+	    }
+	}
     }
-
-    
 }
-
-

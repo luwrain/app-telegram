@@ -228,7 +228,7 @@ if (chat.lastMessage != null)
 	final Objects objects = app.getObjects();
 		final List<Chat> res = new LinkedList();
 		synchronized(objects) {
-		    Log.debug(LOG_COMPONENT, "building");
+		    //		    Log.debug(LOG_COMPONENT, "building");
 		for(OrderedChat c: objects.mainChats)
 		{
 		    final Chat chat = objects.chats.get(c.chatId);
@@ -240,7 +240,8 @@ if (chat.lastMessage != null)
 		}
 		}
 	this.chats = res.toArray(new Chat[res.size()]);
-	chatsArea.refresh();Log.debug(LOG_COMPONENT, "" + res.size() + " items in main layout");
+	chatsArea.refresh();
+	//	Log.debug(LOG_COMPONENT, "" + res.size() + " items in main layout");
     }
 
     private void updateActiveChatHistory()
