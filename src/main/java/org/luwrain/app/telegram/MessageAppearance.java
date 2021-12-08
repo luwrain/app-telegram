@@ -24,7 +24,7 @@ import org.luwrain.controls.*;
 final class MessageAppearance implements ConsoleArea.Appearance<Message>
 {
     private final Luwrain luwrain;
-        private final Objects objects;
+    private final Objects objects;
 
     MessageAppearance(Luwrain luwrain, Objects objects)
     {
@@ -34,31 +34,30 @@ final class MessageAppearance implements ConsoleArea.Appearance<Message>
 	this.objects = objects;
     }
 
-@Override public void announceItem(Message message)
+    @Override public void announceItem(Message message)
     {
 	NullCheck.notNull(message, "message");
 	if (message.content == null)
 	{
 	    luwrain.setEventResponse(DefaultEventResponse.hint(Hint.EMPTY_LINE));
 	    return;
-	    }
+	}
 	if (message.content instanceof MessageText)
 	{
-		    final MessageText text = (MessageText)message.content;
-		    announceMessageText(message, text);
-		    return;
-		}
-
-		if (message.content instanceof MessageAudio)
-	{
-		    final MessageAudio audio = (MessageAudio)message.content;
-		    announceMessageAudio(message, audio);
-		    return;
-		}
-
-		
-	luwrain.setEventResponse(DefaultEventResponse.text(message.content.getClass().getName()));
+	    final MessageText text = (MessageText)message.content;
+	    announceMessageText(message, text);
+	    return;
 	}
+
+	if (message.content instanceof MessageAudio)
+	{
+	    final MessageAudio audio = (MessageAudio)message.content;
+	    announceMessageAudio(message, audio);
+	    return;
+	}
+
+	luwrain.setEventResponse(DefaultEventResponse.text(message.content.getClass().getName()));
+    }
 
     void announceMessageText(Message message, MessageText text)
     {
@@ -72,14 +71,22 @@ final class MessageAppearance implements ConsoleArea.Appearance<Message>
 	    user = null;
 	final StringBuilder b = new StringBuilder();
 	b.append(luwrain.getSpeakableText(text.text.text, Luwrain.SpeakableTextType.PROGRAMMING ));
+	String name = "";
 	if (user != null && user.firstName != null && !user.firstName.trim().isEmpty())
-	    b.append(" ").append(user.firstName.trim());
-	final java.util.Date date = new java.util.Date(message.date);
-	b.append(" ").append(message.date);
+	    name = user.firstName.trim();
+	name += " ";
+    	if (user != null && user.lastName != null && !user.lastName.trim().isEmpty())
+	    name += user.lastName.trim();
+	name = name.trim();
+	if (!name.isEmpty())
+	    b.append(", ").append(name);
+	long date = message.date;
+	date *= 1000;
+	b.append(", ").append(luwrain.i18n().getPastTimeBrief(new java.util.Date(date)));
 	luwrain.setEventResponse(DefaultEventResponse.listItem(new String(b)));
     }
 
-        void announceMessageAudio(Message message, MessageAudio audio)
+    void announceMessageAudio(Message message, MessageAudio audio)
     {
 	NullCheck.notNull(message, "message");
 	NullCheck.notNull(audio, "audio");
@@ -93,7 +100,6 @@ final class MessageAppearance implements ConsoleArea.Appearance<Message>
 	    b.append(" ").append(user.firstName.trim());
 	luwrain.setEventResponse(DefaultEventResponse.listItem(new String(b)));
     }
-
 
     @Override public String getTextAppearance(Message message)
     {
@@ -120,5 +126,4 @@ final class MessageAppearance implements ConsoleArea.Appearance<Message>
 	}
 	return "";
     }
-
     }
