@@ -76,7 +76,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 		    params.appearance = new MessageAppearance(app.getLuwrain(), app.getObjects());
 		    params.name = "Беседа";
 		    params.inputPos = ConsoleArea.InputPos.TOP;
-		    params.inputPrefix = ">";
+		    params.inputPrefix = "";
 		    params.clickHandler = this;
 		    params.inputHandler = this;
 		}));
@@ -99,6 +99,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	app.getOperations().openChat(chat, ()->{
 		this.activeChat = chat;
 		updateActiveChatHistory();
+		consoleArea.setInputPrefix(chat.title + ">");
 		consoleArea.reset(false);
 		setActiveArea(consoleArea);
 	    });
