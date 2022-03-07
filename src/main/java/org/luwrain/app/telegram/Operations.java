@@ -48,14 +48,15 @@ abstract class Operations
     }
 
 
-    private final App app;
-    private final Objects objects;
+    private final Luwrain luwrain;
+        private final Objects objects;
 
-    Operations(App app)
+    Operations(Luwrain luwrain, Objects objects)
     {
-	NullCheck.notNull(app, "app");
-	this.app = app;
-	this.objects = app.getObjects();
+	NullCheck.notNull(luwrain, "luwrain");
+	NullCheck.notNull(objects, "objects");
+	this.luwrain = luwrain;
+	this.objects = objects;
     }
 
     abstract Client getClient();
@@ -69,7 +70,7 @@ abstract class Operations
 	final TdApi.Contact contact = new TdApi.Contact(phone, firstName, lastName, "", 0);
 	getClient().send(new TdApi.ImportContacts(new TdApi.Contact[]{contact}),
 			 new DefaultHandler(TdApi.ImportedContacts.CONSTRUCTOR, (obj)->{
-				 app.getLuwrain().runUiSafely(onSuccess);
+				 luwrain.runUiSafely(onSuccess);
 			 }));
     }
 
@@ -84,7 +85,7 @@ abstract class Operations
 	//	getClient().send(new TdApi.SendMessage(chat.id, 0, null, replyMarkup, content),
 	getClient().send(new TdApi.SendMessage(chat.id, 0, 0, null, replyMarkup, content),
 			 new DefaultHandler(TdApi.Message.CONSTRUCTOR, (obj)->{
-				 app.getLuwrain().runUiSafely(()->onSuccess.run());
+				 luwrain.runUiSafely(()->onSuccess.run());
 			 }));
     }
 
@@ -98,7 +99,7 @@ abstract class Operations
 	    ids[i] = messages[i].id;
 	getClient().send(new TdApi.DeleteMessages(chat.id, ids, true),
 			 new DefaultHandler(TdApi.Message.CONSTRUCTOR, (obj)->{
-				 app.getLuwrain().runUiSafely(()->onSuccess.run());
+				 luwrain.runUiSafely(()->onSuccess.run());
 			 }));
     }
 
@@ -110,7 +111,7 @@ abstract class Operations
 			 new DefaultHandler(TdApi.Users.CONSTRUCTOR, (obj)->{
 				 final TdApi.Users users = (TdApi.Users)obj;
 				 objects.setContacts(users.userIds);
-				 app.getLuwrain().runUiSafely(()->onSuccess.run());
+				 luwrain.runUiSafely(()->onSuccess.run());
 			 }));
     }
 
@@ -120,7 +121,7 @@ abstract class Operations
 	NullCheck.notNull(onSuccess, "onSuccess");
 	getClient().send(new TdApi.OpenChat(chat.id),
 			 new DefaultHandler(TdApi.Ok.CONSTRUCTOR, (obj)->{
-				 app.getLuwrain().runUiSafely(onSuccess);
+				 luwrain.runUiSafely(onSuccess);
 			 }));
     }
 
@@ -130,7 +131,7 @@ abstract class Operations
 	NullCheck.notNull(onSuccess, "onSuccess");
 	getClient().send(new TdApi.CloseChat(chat.id),
 			 new DefaultHandler(TdApi.Ok.CONSTRUCTOR, (obj)->{
-				 app.getLuwrain().runUiSafely(onSuccess);
+				 luwrain.runUiSafely(onSuccess);
 			 }));
     }
 
@@ -140,7 +141,7 @@ abstract class Operations
 	NullCheck.notNull(onSuccess, "onSuccess");
 	getClient().send(new TdApi.LeaveChat(chat.id),
 			 new DefaultHandler(TdApi.Ok.CONSTRUCTOR, (obj)->{
-				 app.getLuwrain().runUiSafely(onSuccess);
+				 luwrain.runUiSafely(onSuccess);
 			 }));
     }
 
@@ -150,7 +151,7 @@ abstract class Operations
 	NullCheck.notNull(callback, "callback");
 	getClient().send(new TdApi.GetSupergroup(supergroupId),
 			 new DefaultHandler(TdApi.Supergroup.CONSTRUCTOR, (obj)->{
-				 app.getLuwrain().runUiSafely(()->callback.onSupergroup((Supergroup)obj));
+				 luwrain.runUiSafely(()->callback.onSupergroup((Supergroup)obj));
 			 }));
     }
 
@@ -159,7 +160,7 @@ abstract class Operations
 	NullCheck.notNull(callback, "callback");
 	getClient().send(new TdApi.GetBasicGroup(basicGroupId),
 			 new DefaultHandler(TdApi.BasicGroup.CONSTRUCTOR, (obj)->{
-				 app.getLuwrain().runUiSafely(()->callback.onBasicGroup((BasicGroup)obj));
+				 luwrain.runUiSafely(()->callback.onBasicGroup((BasicGroup)obj));
 			 }));
     }
 
@@ -169,7 +170,7 @@ abstract class Operations
 	NullCheck.notNull(onSuccess, "onSuccess");
 	getClient().send(new TdApi.CreatePrivateChat(userId, false),
 			 new DefaultHandler(TdApi.Chat.CONSTRUCTOR, (obj)->{
-				 app.getLuwrain().runUiSafely(onSuccess);
+				 luwrain.runUiSafely(onSuccess);
 			 }));
     }
 
@@ -188,7 +189,7 @@ abstract class Operations
 	NullCheck.notNull(callback, "callback");
 	getClient().send(new TdApi.GetChatHistory(chat.id, chat.lastMessage != null?chat.lastMessage.id:0, 0, 100, false),
 			 new DefaultHandler(TdApi.Messages.CONSTRUCTOR, (obj)->{
-				 app.getLuwrain().runUiSafely(()->callback.onChatHistoryMessages(chat, (TdApi.Messages)obj));
+				 luwrain.runUiSafely(()->callback.onChatHistoryMessages(chat, (TdApi.Messages)obj));
 			 }));
     }
 

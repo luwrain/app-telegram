@@ -42,7 +42,7 @@ public final class App extends AppBase<Strings> implements MonoApp
     {
 	this.conv = new Conversations(this);
 	this.tdlibDir = new File(getLuwrain().getAppDataDir("luwrain.telegram").toFile(), "tdlib");
-	this.objects = new Objects(this);
+	this.objects = new Objects(getLuwrain());
 	this.operations = newOperations();
 	this.mainLayout = new MainLayout(this);
 	this.contactsLayout = new ContactsLayout(this);
@@ -82,7 +82,7 @@ public final class App extends AppBase<Strings> implements MonoApp
 
         private Operations newOperations()
     {
-	return new Operations(this){
+	return new Operations(getLuwrain(), objects){
 	    @Override Client getClient()
 	    {
 		if (App.this.client == null)

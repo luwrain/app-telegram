@@ -25,7 +25,7 @@ final class Objects
     interface FilesListener { void onFilesUpdate(File file); }
     interface NewMessageListener { void onNewMessage(Chat chat, Message message); }
 
-    private final App app;
+    private final Luwrain luwrain;
 
     final Map<Long, User> users = new ConcurrentHashMap<>();
 
@@ -43,28 +43,28 @@ final class Objects
     final List<FilesListener> filesListeners = new ArrayList<>();
     final List<NewMessageListener> newMessageListeners = new ArrayList<>();
 
-    Objects(App app)
+    Objects(Luwrain luwrain)
     {
-	NullCheck.notNull(app, "app");
-	this.app = app;
+	NullCheck.notNull(luwrain, "luwrain");
+	this.luwrain = luwrain;
     }
 
     void chatsUpdated(Chat chat)
     {
 	for(ChatsListener l: chatsListeners)
-	    app.getLuwrain().runUiSafely(()->l.onChatsUpdate(chat));
+	    luwrain.runUiSafely(()->l.onChatsUpdate(chat));
     }
 
     void usersUpdated(User user)
     {
 	for(UsersListener l: usersListeners)
-	    app.getLuwrain().runUiSafely(()->l.onUsersUpdate(user));
+	    luwrain.runUiSafely(()->l.onUsersUpdate(user));
     }
 
     void filesUpdated(File file)
     {
 	for(FilesListener l: filesListeners)
-	    app.getLuwrain().runUiSafely(()->l.onFilesUpdate(file));
+	    luwrain.runUiSafely(()->l.onFilesUpdate(file));
     }
 
     void newMessage(Chat chat, Message message)
@@ -72,7 +72,7 @@ final class Objects
 	NullCheck.notNull(chat, "chat");
 	NullCheck.notNull(message, "message");
 	for(NewMessageListener l: newMessageListeners)
-	    app.getLuwrain().runUiSafely(()->l.onNewMessage(chat, message));
+	    luwrain.runUiSafely(()->l.onNewMessage(chat, message));
     }
 
     synchronized void setContacts(long[] contacts)

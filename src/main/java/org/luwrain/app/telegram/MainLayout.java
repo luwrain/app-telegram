@@ -16,6 +16,7 @@ import org.drinkless.tdlib.TdApi.User;
 import org.drinkless.tdlib.TdApi.Message;
 import org.drinkless.tdlib.TdApi.MessageText;
 import org.drinkless.tdlib.TdApi.MessageAudio;
+import org.drinkless.tdlib.TdApi.PhotoSize;
 import org.drinkless.tdlib.TdApi.MessagePhoto;
 import org.drinkless.tdlib.TdApi.MessageDocument;
 import org.drinkless.tdlib.TdApi.MessagePhoto;
@@ -169,9 +170,12 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 				if (message.content != null && message.content instanceof MessagePhoto)
 	{
 	    final MessagePhoto photo = (MessagePhoto)message.content;
-	    if (photo.photo.sizes[3].photo.local.isDownloadingActive)
+	    if (photo.photo.sizes.length == 0)
 		return false;
-		    app.getOperations().downloadFile(photo.photo.sizes[3].photo);
+PhotoSize size = photo.photo.sizes[photo.photo.sizes.length - 1];
+	    if (size.photo.local.isDownloadingActive)
+		return false;
+		    app.getOperations().downloadFile(size.photo);
 		    app.getLuwrain().message("Выполняется доставка файла");//FIXME:
 		    return true;
 	}
