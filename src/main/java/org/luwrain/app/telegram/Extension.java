@@ -11,7 +11,10 @@ import org.luwrain.core.*;
 
 public final class Extension extends EmptyExtension
 {
-    static private final String LOG_COMPONENT = App.LOG_COMPONENT;
+    static private final String
+	LOG_COMPONENT = Core.LOG_COMPONENT;
+
+    private Core core = null;
 
     @Override public String init(Luwrain luwrain)
     {
@@ -21,6 +24,7 @@ public final class Extension extends EmptyExtension
 	    Log.warning(LOG_COMPONENT, "unable to load tdjni");
 	    return "Unable to load tdjni";
 	}
+	this.core = new Core(luwrain, ()->{});
 	return null;
     }
 
@@ -31,6 +35,19 @@ public final class Extension extends EmptyExtension
 
     @Override public ExtensionObject[] getExtObjects(Luwrain luwrain)
     {
-	return new Shortcut[]{ new SimpleShortcut("telegram", App.class) };
-    }
+	return new Shortcut[]{
+	    new Shortcut(){
+		@Override public String getExtObjName() { return "telegram"; }
+		@Override public Application[] prepareApp(String[] args)
+		{
+		    NullCheck.notNull(args, "args");
+		    if (core == null)
+		    {
+			luwrain.message("No core", Luwrain.MessageType.ERROR);
+		    }
+		    return new Application[]{new App(core)};
+		}
+	    }
+	};
+}
 }

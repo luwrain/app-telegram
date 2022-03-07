@@ -12,9 +12,6 @@ import java.util.concurrent.*;
 
 import org.drinkless.tdlib.*;
 import org.drinkless.tdlib.TdApi.*;
-//import org.drinkless.tdlib.TdApi.User;
-//import org.drinkless.tdlib.TdApi.Chat;
-//import org.drinkless.tdlib.TdApi.File;
 
 import org.luwrain.core.*;
 
@@ -28,7 +25,6 @@ final class Objects
     private final Luwrain luwrain;
 
     final Map<Long, User> users = new ConcurrentHashMap<>();
-
     final Map<Integer, File> files = new ConcurrentHashMap<>();
     final Map<Long, Chat> chats = new ConcurrentHashMap<>();
     final NavigableSet<OrderedChat> mainChats = new TreeSet<>();

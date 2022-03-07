@@ -31,6 +31,7 @@ final class Core
     final Operations operations;
     final Objects objects;
     final Client client;
+    private boolean ready = false;
 
     Core(Luwrain luwrain, Runnable onReady)
     {
@@ -48,14 +49,18 @@ final class Core
             throw new IOError(new IOException("Write access to the current directory is required"));
     }
 
-    private Client.ResultHandler newResultHandler(Runnable onReady)
+    private Client.ResultHandler newResultHandler(Runnable onReadyFunc)
     {
-	NullCheck.notNull(onReady, "onReady");
+	NullCheck.notNull(onReadyFunc, "onReadyFunc");
 	return new UpdatesHandler(tdlibDir, objects){
 	    @Override public void onReady()
 	    {
-		luwrain.runUiSafely(onReady);
-			    }
+		Core.this.ready = true;
+		luwrain.runUiSafely(()->{
+			operations.fillMainChatList(CHAT_NUM_LIMIT);
+			onReadyFunc.run();
+		    });
+	    }
 	    @Override Client getClient()
 	    {
 		if (Core.this.client == null)
@@ -65,7 +70,7 @@ final class Core
 	};
     }
 
-        private Operations newOperations()
+    private Operations newOperations()
     {
 	return new Operations(luwrain, objects){
 	    @Override Client getClient()
@@ -77,4 +82,5 @@ final class Core
 	};
     }
 
+    boolean isReady() { return ready; }
 }

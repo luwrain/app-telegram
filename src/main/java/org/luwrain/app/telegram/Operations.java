@@ -30,26 +30,15 @@ import org.luwrain.app.base.*;
 
 abstract class Operations
 {
-    static private final String LOG_COMPONENT = App.LOG_COMPONENT;
+    static private final String
+	LOG_COMPONENT = Core.LOG_COMPONENT;
 
-    interface ChatHistoryCallback
-    {
-	void onChatHistoryMessages(TdApi.Chat chat, TdApi.Messages messages);
-    }
-
-    interface SupergroupCallback
-    {
-	void onSupergroup(Supergroup supergroup);
-    }
-
-        interface BasicGroupCallback
-    {
-	void onBasicGroup(BasicGroup basicGroup);
-    }
-
+    interface ChatHistoryCallback { void onChatHistoryMessages(TdApi.Chat chat, TdApi.Messages messages); }
+    interface SupergroupCallback { void onSupergroup(Supergroup supergroup); }
+    interface BasicGroupCallback { void onBasicGroup(BasicGroup basicGroup); }
 
     private final Luwrain luwrain;
-        private final Objects objects;
+    private final Objects objects;
 
     Operations(Luwrain luwrain, Objects objects)
     {

@@ -39,7 +39,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
     final ListArea<Chat> chatsArea;
     final ConsoleArea<Message> consoleArea;
 
-    private List<Chat> chats = new ArrayList<>();
+    private ArrayList<Chat> chats = new ArrayList<>();
     private Chat activeChat = null;
     private Message[] messages = new Message[0];
 
@@ -48,6 +48,15 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	super(app);
 	this.app = app;
 
+	chats.ensureCapacity(app.getObjects().mainChats.size());
+	for(OrderedChat o: app.getObjects().mainChats)
+	{
+	    final Chat c = app.getObjects().chats.get(o.chatId);
+	    if (c != null)
+		chats.add(c);
+	}
+
+	
 	this.chatsArea = new ListArea<Chat>(listParams((params)->{
 		    params.model = new ListUtils.ListModel<>(chats);
 		    params.appearance = new ChatsListAppearance(app, params.context);

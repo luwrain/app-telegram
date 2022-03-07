@@ -28,29 +28,33 @@ public final class App extends AppBase<Strings> implements MonoApp
 
     final long startTimeMillis = System.currentTimeMillis();
 
+    private final Core core;
     private Conversations conv = null;
-    private Core core = null;
     private MainLayout mainLayout = null;
     private ContactsLayout contactsLayout = null;
     private AuthLayout authLayout = null;
 
-    public App() { super(Strings.NAME, Strings.class, "luwrain.telegram"); }
+    public App(Core core)
+    {
+	super(Strings.NAME, Strings.class, "luwrain.telegram");
+	NullCheck.notNull(core, "core");
+	this.core = core;
+    }
 
     @Override protected AreaLayout onAppInit()
     {
 	this.conv = new Conversations(this);
-	this.core = new Core(getLuwrain(), this::onReady);
 	this.mainLayout = new MainLayout(this);
 	this.contactsLayout = new ContactsLayout(this);
 	this.authLayout = new AuthLayout(this);
 	setAppName(getStrings().appName());
-	return authLayout.getLayout();
+	return core.isReady()?mainLayout.getAreaLayout():authLayout.getLayout();
     }
 
     private void onReady()
     {
 	setAreaLayout(mainLayout);
-core.operations.fillMainChatList(CHAT_NUM_LIMIT);
+
 mainLayout.setActiveArea(App.this.mainLayout.chatsArea);
     }
 
