@@ -23,73 +23,35 @@ public final class App extends AppBase<Strings> implements MonoApp
 {
     static private final int CHAT_NUM_LIMIT = 200;
 
-    static final String LOG_COMPONENT = "telegram";
+    static final String
+	LOG_COMPONENT = Core.LOG_COMPONENT;
 
     final long startTimeMillis = System.currentTimeMillis();
 
     private Conversations conv = null;
-    private File tdlibDir = null;
-    private Operations operations = null;
-    private Objects objects = null;
+    private Core core = null;
     private MainLayout mainLayout = null;
     private ContactsLayout contactsLayout = null;
     private AuthLayout authLayout = null;
-    private Client client = null;
 
     public App() { super(Strings.NAME, Strings.class, "luwrain.telegram"); }
 
     @Override protected AreaLayout onAppInit()
     {
 	this.conv = new Conversations(this);
-	this.tdlibDir = new File(getLuwrain().getAppDataDir("luwrain.telegram").toFile(), "tdlib");
-	this.objects = new Objects(getLuwrain());
-	this.operations = newOperations();
+	this.core = new Core(getLuwrain(), this::onReady);
 	this.mainLayout = new MainLayout(this);
 	this.contactsLayout = new ContactsLayout(this);
 	this.authLayout = new AuthLayout(this);
-	this.client = Client.create(newResultHandler(), null, null);
-        Client.execute(new TdApi.SetLogVerbosityLevel(0));
-	final String logFile = new File(getLuwrain().getFileProperty("luwrain.dir.userhome"), "td.log").getAbsolutePath();
-	Log.debug(LOG_COMPONENT, "tdlib log file is " + logFile);
-        if (Client.execute(new TdApi.SetLogStream(new TdApi.LogStreamFile(logFile, 1 << 27, true))) instanceof TdApi.Error) {
-            throw new IOError(new IOException("Write access to the current directory is required"));
-        }
 	setAppName(getStrings().appName());
 	return authLayout.getLayout();
     }
 
-
-    private Client.ResultHandler newResultHandler()
+    private void onReady()
     {
-	return new UpdatesHandler(tdlibDir, objects){
-	    @Override public void onReady()
-	    {
-		getLuwrain().runUiSafely(()->{
-			Log.debug(LOG_COMPONENT, "tdlib is ready");
-			setAreaLayout(mainLayout);
-			App.this.operations.fillMainChatList(CHAT_NUM_LIMIT);
-			App.this.mainLayout.setActiveArea(App.this.mainLayout.chatsArea);
-		    });
-	    }
-	    @Override Client getClient()
-	    {
-		if (App.this.client == null)
-		    Log.warning(LOG_COMPONENT, "providing a null pointer as a client to the updates handler");
-		return App.this.client;
-	    }
-	};
-    }
-
-        private Operations newOperations()
-    {
-	return new Operations(getLuwrain(), objects){
-	    @Override Client getClient()
-	    {
-		if (App.this.client == null)
-		    Log.warning(LOG_COMPONENT, "providing a null pointer as a client to operations");
-		return App.this.client;
-	    }
-	};
+	setAreaLayout(mainLayout);
+core.operations.fillMainChatList(CHAT_NUM_LIMIT);
+mainLayout.setActiveArea(App.this.mainLayout.chatsArea);
     }
 
     void layout(AreaLayout layout)
@@ -124,10 +86,6 @@ public final class App extends AppBase<Strings> implements MonoApp
 
     @Override public void closeApp()
     {
-	Log.debug(LOG_COMPONENT, "finishing the session");
-	if (client != null)
-	    //	    client.close();
-	Log.debug(LOG_COMPONENT, "client closed");
 	super.closeApp();
     }
 
@@ -144,7 +102,7 @@ public final class App extends AppBase<Strings> implements MonoApp
     }
 
             Conversations getConv() { return this.conv; }
-    Objects getObjects() { return this.objects; }
-    Operations getOperations() { return this.operations; }
+    Objects getObjects() { return this.core.objects; }
+    Operations getOperations() { return this.core.operations; }
 
 }
