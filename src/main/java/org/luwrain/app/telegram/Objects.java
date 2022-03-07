@@ -1,5 +1,5 @@
 //
-// Copyright 2020 Michael Pozhidaev <msp@luwrain.org>
+// Copyright 2020-2022 Michael Pozhidaev <msp@luwrain.org>
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -43,6 +43,14 @@ final class Objects
     {
 	NullCheck.notNull(luwrain, "luwrain");
 	this.luwrain = luwrain;
+    }
+
+    void clearListeners()
+    {
+	chatsListeners.clear();
+	usersListeners.clear();
+	filesListeners.clear();
+	newMessageListeners.clear();
     }
 
     void chatsUpdated(Chat chat)

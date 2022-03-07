@@ -1,5 +1,5 @@
 //
-// Copyright 2020 Michael Pozhidaev <msp@luwrain.org>
+// Copyright 2020-2022 Michael Pozhidaev <msp@luwrain.org>
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -90,6 +90,7 @@ mainLayout.setActiveArea(App.this.mainLayout.chatsArea);
 
     @Override public void closeApp()
     {
+	core.objects.clearListeners();
 	super.closeApp();
     }
 
@@ -99,14 +100,13 @@ mainLayout.setActiveArea(App.this.mainLayout.chatsArea);
 	return MonoApp.Result.BRING_FOREGROUND;
     }
 
-    interface Layouts
-{
-    void main();
-    void contacts();
-    }
-
             Conversations getConv() { return this.conv; }
     Objects getObjects() { return this.core.objects; }
     Operations getOperations() { return this.core.operations; }
 
+        interface Layouts
+{
+    void main();
+    void contacts();
+    }
 }
