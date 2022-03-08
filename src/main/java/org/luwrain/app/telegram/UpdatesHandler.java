@@ -19,11 +19,13 @@ import org.luwrain.core.Log;
 
 abstract class UpdatesHandler implements Client.ResultHandler
 {
-    static private final String LOG_COMPONENT = App.LOG_COMPONENT;
+    static private final String
+	LOG_COMPONENT = Core.LOG_COMPONENT;
 
     private final java.io.File tdlibDir;
     private final Objects objects;
-        private TdApi.AuthorizationState authorizationState = null;
+        private AuthorizationState authorizationState = null;
+    private InputWaiter inputWaiter = null;
         volatile private  boolean haveAuthorization = false;
 
     UpdatesHandler(java.io.File tdlibDir, Objects objects)
@@ -40,7 +42,10 @@ abstract class UpdatesHandler implements Client.ResultHandler
     @Override public void onResult(TdApi.Object object)
     {
 	if (object == null)
+	{
 	    Log.warning(LOG_COMPONENT, "null update object");
+	    return;
+	}
 	switch (object.getConstructor())
 	{
 
@@ -61,7 +66,7 @@ abstract class UpdatesHandler implements Client.ResultHandler
 	    break;
 
 	case UpdateFile.CONSTRUCTOR: {
-		    	    final TdApi.UpdateFile updateFile = (TdApi.UpdateFile) object;
+		    	    final UpdateFile updateFile = (TdApi.UpdateFile) object;
 			    synchronized(objects) {
 				objects.files.put(updateFile.file.id, updateFile.file);	
 			    }
@@ -83,7 +88,7 @@ abstract class UpdatesHandler implements Client.ResultHandler
 	}
 
                 case UpdateUserStatus.CONSTRUCTOR:  {
-                    final TdApi.UpdateUserStatus updateUserStatus = (TdApi.UpdateUserStatus) object;
+                    final UpdateUserStatus updateUserStatus = (TdApi.UpdateUserStatus) object;
                     synchronized (objects) {
 					                        final TdApi.User user = objects.users.get(updateUserStatus.userId);
                         user.status = updateUserStatus.status;
@@ -91,15 +96,15 @@ abstract class UpdatesHandler implements Client.ResultHandler
                     break;
                 }
 
-                case TdApi.UpdateBasicGroup.CONSTRUCTOR:
+                case UpdateBasicGroup.CONSTRUCTOR:
                     final TdApi.UpdateBasicGroup updateBasicGroup = (TdApi.UpdateBasicGroup) object;
 		    synchronized(objects){
 objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGroup);
 		    }
                     break;
 
-                case TdApi.UpdateSupergroup.CONSTRUCTOR:
-                    TdApi.UpdateSupergroup updateSupergroup = (TdApi.UpdateSupergroup) object;
+                case UpdateSupergroup.CONSTRUCTOR:
+                    final UpdateSupergroup updateSupergroup = (UpdateSupergroup) object;
 		    //                    supergroups.put(updateSupergroup.supergroup.id, updateSupergroup.supergroup);
                     break;
 
@@ -110,7 +115,7 @@ objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGr
 
 	case UpdateChatPosition.CONSTRUCTOR: {
 	    final UpdateChatPosition updateChat = (UpdateChatPosition) object;
-	    if (updateChat.position.list.getConstructor() != TdApi.ChatListMain.CONSTRUCTOR) 
+	    if (updateChat.position.list.getConstructor() != ChatListMain.CONSTRUCTOR) 
 		break;
 	    final Chat chat = objects.chats.get(updateChat.chatId);
 	    synchronized (objects) {
@@ -177,7 +182,6 @@ objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGr
 		                        synchronized (objects) {
 chat = objects.chats.get(updateChat.chatId);
                         chat.lastMessage = updateChat.lastMessage;
-			//                        setChatOrder(chat, updateChat.order);
                     }
 					objects.chatsUpdated(chat);
                     break;
@@ -202,16 +206,16 @@ chat = objects.chats.get(updateChat.chatId);
                     break;
                 }
 
+		    /*
 	case UpdateChatUnreadMentionCount.CONSTRUCTOR: {
                     TdApi.UpdateChatUnreadMentionCount updateChat = (TdApi.UpdateChatUnreadMentionCount) object;
-		    /*
                     TdApi.Chat chat = chats.get(updateChat.chatId);
                     synchronized (chat) {
                         chat.unreadMentionCount = updateChat.unreadMentionCount;
                     }
-		    */
                     break;
                 }
+		    */
 
 	case UpdateMessageMentionRead.CONSTRUCTOR: {
                     final TdApi.UpdateMessageMentionRead updateChat = (TdApi.UpdateMessageMentionRead) object;
@@ -222,50 +226,50 @@ chat = objects.chats.get(updateChat.chatId);
                     break;
                 }
 
+	    /*
 	case UpdateChatReplyMarkup.CONSTRUCTOR: {
                     TdApi.UpdateChatReplyMarkup updateChat = (TdApi.UpdateChatReplyMarkup) object;
-		    /*
                     TdApi.Chat chat = chats.get(updateChat.chatId);
                     synchronized (chat) {
                         chat.replyMarkupMessageId = updateChat.replyMarkupMessageId;
                     }
-		    */
                     break;
                 }
+	    */
 
+	    /*
 	case UpdateChatDraftMessage.CONSTRUCTOR: {
                     TdApi.UpdateChatDraftMessage updateChat = (TdApi.UpdateChatDraftMessage) object;
-		    /*
                     TdApi.Chat chat = chats.get(updateChat.chatId);
                     synchronized (chat) {
                         chat.draftMessage = updateChat.draftMessage;
                         setChatOrder(chat, updateChat.order);
                     }
-		    */
                     break;
                 }
+	    */
 
+	    /*
 	case TdApi.UpdateChatNotificationSettings.CONSTRUCTOR: {
                     TdApi.UpdateChatNotificationSettings update = (TdApi.UpdateChatNotificationSettings) object;
-		    /*
                     TdApi.Chat chat = chats.get(update.chatId);
                     synchronized (chat) {
                         chat.notificationSettings = update.notificationSettings;
                     }
-		    */
                     break;
                 }
+	    */
 
+	    /*
 	case TdApi.UpdateChatDefaultDisableNotification.CONSTRUCTOR: {
                     TdApi.UpdateChatDefaultDisableNotification update = (TdApi.UpdateChatDefaultDisableNotification) object;
-		    /*
                     TdApi.Chat chat = chats.get(update.chatId);
                     synchronized (chat) {
                         chat.defaultDisableNotification = update.defaultDisableNotification;
                     }
-		    >*/
                     break;
                 }
+	    */
 
 	case TdApi.UpdateChatIsMarkedAsUnread.CONSTRUCTOR: {
                     TdApi.UpdateChatIsMarkedAsUnread update = (TdApi.UpdateChatIsMarkedAsUnread) object;
@@ -301,11 +305,10 @@ chat = objects.chats.get(updateChat.chatId);
     {
         if (authorizationState != null)
 this.authorizationState = authorizationState;
-	Log.debug(LOG_COMPONENT, "handling " + this.authorizationState.getClass().getName());
         switch (this.authorizationState.getConstructor())
 	{
-	case TdApi.AuthorizationStateWaitTdlibParameters.CONSTRUCTOR:
-	    TdApi.TdlibParameters parameters = new TdApi.TdlibParameters();
+	case AuthorizationStateWaitTdlibParameters.CONSTRUCTOR:
+	    final TdlibParameters parameters = new TdApi.TdlibParameters();
 	    parameters.databaseDirectory = tdlibDir.getAbsolutePath();
 	    parameters.useMessageDatabase = true;
 	    parameters.useSecretChats = true;
@@ -322,10 +325,8 @@ this.authorizationState = authorizationState;
 	    getClient().send(new TdApi.CheckDatabaseEncryptionKey(), new AuthorizationRequestHandler());
 	    break;
 	case TdApi.AuthorizationStateWaitPhoneNumber.CONSTRUCTOR: {
-	    /*TODO
-	    String phoneNumber = promptString("Please enter phone number: ");
-	    client.send(new TdApi.SetAuthenticationPhoneNumber(phoneNumber, null), new AuthorizationRequestHandler());
-	    */
+	    this.inputWaiter = new InputWaiter(InputWaiter.Type.PhoneNumber);
+	    getClient().send(new TdApi.SetAuthenticationPhoneNumber(this.inputWaiter.getValue(), null), new AuthorizationRequestHandler());
 	    break;
 	}
 	case TdApi.AuthorizationStateWaitOtherDeviceConfirmation.CONSTRUCTOR: {
@@ -348,7 +349,7 @@ this.authorizationState = authorizationState;
 	    */
 	    break;
 	}
-	case TdApi.AuthorizationStateWaitPassword.CONSTRUCTOR: {
+	case AuthorizationStateWaitPassword.CONSTRUCTOR: {
 	    /*
 	    String password = promptString("Please enter password: ");
 	    client.send(new TdApi.CheckAuthenticationPassword(password), new AuthorizationRequestHandler());
@@ -415,4 +416,37 @@ this.authorizationState = authorizationState;
 	    }
 	}
     }
+
+static final class InputWaiter
+{
+    enum Type {
+	PhoneNumber,
+	AuthCode
+    };
+    final Type type;
+    private volatile String value = null;
+    InputWaiter(Type type)
+    {
+	NullCheck.notNull(type, "type");
+	this.type = type;
+    }
+    synchronized String getValue()
+    {
+	try {
+	    while(this.value == null)
+		wait();
+	    }
+	catch(InterruptedException e)
+	{
+	    Thread.currentThread().interrupt();
+	}
+	return this.value;
+    }
+    synchronized void setValue(String value)
+    {
+	NullCheck.notNull(value, "value");
+	this.value = value;
+	notifyAll();
+    }
+}
 }
