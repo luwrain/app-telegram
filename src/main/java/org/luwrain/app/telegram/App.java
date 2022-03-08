@@ -48,7 +48,7 @@ public final class App extends AppBase<Strings> implements MonoApp
 	this.contactsLayout = new ContactsLayout(this);
 	this.authLayout = new AuthLayout(this);
 	setAppName(getStrings().appName());
-	return core.isReady()?mainLayout.getAreaLayout():authLayout.getLayout();
+	return core.isReady()?mainLayout.getAreaLayout():authLayout.getAreaLayout();
     }
 
     private void onReady()

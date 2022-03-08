@@ -11,58 +11,39 @@ import java.util.*;
 
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
-import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
+import org.luwrain.controls.WizardArea.*;
 import org.luwrain.app.base.*;
+import org.luwrain.app.telegram.UpdatesHandler.InputWaiter;
 
-final class AuthLayout extends LayoutBase
+final class AuthLayout extends LayoutBase implements Objects.NewInputWaiterListener
 {
-    static private final String LOG_COMPONENT = App.LOG_COMPONENT;
+    static private final String
+	LOG_COMPONENT = Core.LOG_COMPONENT;
 
     private final App app;
-    private final FormArea formArea;
-    private boolean busy = true;
+    final WizardArea wizardArea;
 
     AuthLayout(App app)
     {
-	NullCheck.notNull(app, "app");
+	super(app);
 	this.app = app;
-	this.formArea = new FormArea(new DefaultControlContext(app.getLuwrain()), app.getStrings().appName()) {
-		@Override public boolean onInputEvent(InputEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (app.onInputEvent(this, event))
-			return true;
-		    return super.onInputEvent(event);
-		}
-		@Override public boolean onSystemEvent(SystemEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (app.onSystemEvent(this, event))
-			return true;
-		    return super.onSystemEvent(event);
-		}
-		@Override public boolean onAreaQuery(AreaQuery query)
-		{
-		    NullCheck.notNull(query, "query");
-		    			    switch(query.getQueryCode())
-		    {
-		    case AreaQuery.BACKGROUND_SOUND:
-			if (busy)
-			{
-			    ((BackgroundSoundQuery)query).answer(new BackgroundSoundQuery.Answer(BkgSounds.FETCHING));
-			    return true;
-			}
-		    }
-		    if (app.onAreaQuery(this, query))
-			return true;
-		    return super.onAreaQuery(query);
-		}
-	    };
+	this.wizardArea = new WizardArea(getControlContext());
+	setAreaLayout(wizardArea, null);
+	app.getObjects().newInputWaiterListeners.add(this);
     }
 
-    AreaLayout getLayout()
+    @Override public void onNewInputWaiter(InputWaiter inputWaiter)
     {
-	return new AreaLayout(formArea);
+	NullCheck.notNull(inputWaiter, "inputWaiter");
+	switch(inputWaiter.type)
+	{
+	case PhoneNumber: {
+	    final Frame frame = wizardArea.newFrame();
+	    wizardArea.show(frame);
+	    break;
+	}
+	}
     }
+
 }

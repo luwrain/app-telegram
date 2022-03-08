@@ -326,6 +326,7 @@ this.authorizationState = authorizationState;
 	    break;
 	case TdApi.AuthorizationStateWaitPhoneNumber.CONSTRUCTOR: {
 	    this.inputWaiter = new InputWaiter(InputWaiter.Type.PhoneNumber);
+	    objects.newInputWaiter(inputWaiter);
 	    getClient().send(new TdApi.SetAuthenticationPhoneNumber(this.inputWaiter.getValue(), null), new AuthorizationRequestHandler());
 	    break;
 	}

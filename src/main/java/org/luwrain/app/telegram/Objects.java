@@ -21,6 +21,7 @@ final class Objects
     interface UsersListener { void onUsersUpdate(User user); }
     interface FilesListener { void onFilesUpdate(File file); }
     interface NewMessageListener { void onNewMessage(Chat chat, Message message); }
+    interface NewInputWaiterListener{ void onNewInputWaiter(UpdatesHandler.InputWaiter inputWaiter); }
 
     private final Luwrain luwrain;
 
@@ -38,6 +39,7 @@ final class Objects
     final List<UsersListener> usersListeners = new ArrayList<>();
     final List<FilesListener> filesListeners = new ArrayList<>();
     final List<NewMessageListener> newMessageListeners = new ArrayList<>();
+	    final List<NewInputWaiterListener> newInputWaiterListeners = new ArrayList<>();
 
     Objects(Luwrain luwrain)
     {
@@ -78,6 +80,14 @@ final class Objects
 	for(NewMessageListener l: newMessageListeners)
 	    luwrain.runUiSafely(()->l.onNewMessage(chat, message));
     }
+
+        void newInputWaiter(UpdatesHandler.InputWaiter inputWaiter)
+    {
+	NullCheck.notNull(inputWaiter, "ionputWaiter");
+	for(NewInputWaiterListener l: newInputWaiterListeners)
+	    luwrain.runUiSafely(()->l.onNewInputWaiter(inputWaiter));
+    }
+
 
     synchronized void setContacts(long[] contacts)
     {
