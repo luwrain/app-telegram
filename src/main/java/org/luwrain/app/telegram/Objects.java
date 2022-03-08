@@ -53,6 +53,7 @@ final class Objects
 	usersListeners.clear();
 	filesListeners.clear();
 	newMessageListeners.clear();
+	newInputWaiterListeners.clear();
     }
 
     void chatsUpdated(Chat chat)

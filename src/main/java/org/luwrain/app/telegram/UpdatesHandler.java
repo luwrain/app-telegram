@@ -324,22 +324,25 @@ this.authorizationState = authorizationState;
 	case TdApi.AuthorizationStateWaitEncryptionKey.CONSTRUCTOR:
 	    getClient().send(new TdApi.CheckDatabaseEncryptionKey(), new AuthorizationRequestHandler());
 	    break;
-	case TdApi.AuthorizationStateWaitPhoneNumber.CONSTRUCTOR: {
+	case AuthorizationStateWaitPhoneNumber.CONSTRUCTOR: {
 	    this.inputWaiter = new InputWaiter(InputWaiter.Type.PhoneNumber);
 	    objects.newInputWaiter(inputWaiter);
-	    getClient().send(new TdApi.SetAuthenticationPhoneNumber(this.inputWaiter.getValue(), null), new AuthorizationRequestHandler());
+	    final String res = this.inputWaiter.getValue();
+	    this.inputWaiter = null;
+	    getClient().send(new TdApi.SetAuthenticationPhoneNumber(res, null), new AuthorizationRequestHandler());
 	    break;
 	}
-	case TdApi.AuthorizationStateWaitOtherDeviceConfirmation.CONSTRUCTOR: {
+	case AuthorizationStateWaitOtherDeviceConfirmation.CONSTRUCTOR: {
 	    String link = ((TdApi.AuthorizationStateWaitOtherDeviceConfirmation) this.authorizationState).link;
 	    System.out.println("Please confirm this login link on another device: " + link);
 	    break;
 	}
-	case TdApi.AuthorizationStateWaitCode.CONSTRUCTOR: {
-	    /*
-	    String code = promptString("Please enter authentication code: ");
-	    client.send(new TdApi.CheckAuthenticationCode(code), new AuthorizationRequestHandler());
-	    */
+	case AuthorizationStateWaitCode.CONSTRUCTOR: {
+	    	    this.inputWaiter = new InputWaiter(InputWaiter.Type.AuthCode);
+	    objects.newInputWaiter(inputWaiter);
+	    final String res = this.inputWaiter.getValue();
+	    this.inputWaiter = null;
+	    getClient().send(new TdApi.CheckAuthenticationCode(res), new AuthorizationRequestHandler());
 	    break;
 	}
 	case TdApi.AuthorizationStateWaitRegistration.CONSTRUCTOR: {
@@ -380,6 +383,11 @@ this.authorizationState = authorizationState;
 	default:
 	    Log.error(LOG_COMPONENT, "Unsupported authorization state: " + this.authorizationState);
         }
+    }
+
+    InputWaiter getInputWaiter()
+    {
+	return inputWaiter;
     }
 
 

@@ -31,6 +31,9 @@ final class AuthLayout extends LayoutBase implements Objects.NewInputWaiterListe
 	this.wizardArea = new WizardArea(getControlContext());
 	setAreaLayout(wizardArea, null);
 	app.getObjects().newInputWaiterListeners.add(this);
+	//If the input waiter was created before the app launch
+	if (app.core.getInputWaiter() != null)
+	    onNewInputWaiter(app.core.getInputWaiter());
     }
 
     @Override public void onNewInputWaiter(InputWaiter inputWaiter)
@@ -39,10 +42,27 @@ final class AuthLayout extends LayoutBase implements Objects.NewInputWaiterListe
 	switch(inputWaiter.type)
 	{
 	case PhoneNumber: {
-	    final Frame frame = wizardArea.newFrame();
+	    final Frame frame = wizardArea.newFrame()
+	    .addInput("Номер телефона:", "")
+	    .addClickable("Продолжить", (values)->{
+		    inputWaiter.setValue(values.getText(0));
+		    return true;
+		});
 	    wizardArea.show(frame);
 	    break;
 	}
+	    	case AuthCode: {
+	    final Frame frame = wizardArea.newFrame()
+	    .addInput("Код авторизации:", "")
+	    .addClickable("Продолжить", (values)->{
+		    inputWaiter.setValue(values.getText(0));
+		    return true;
+		});
+	    wizardArea.show(frame);
+	    break;
+	}
+
+		    
 	}
     }
 

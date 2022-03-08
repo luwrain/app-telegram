@@ -31,6 +31,7 @@ final class Core
     final Operations operations;
     final Objects objects;
     final Client client;
+    final UpdatesHandler updatesHandler;
     private boolean ready = false;
 
     Core(Luwrain luwrain, Runnable onReady)
@@ -41,7 +42,8 @@ final class Core
 	this.tdlibDir = new File(luwrain.getAppDataDir("luwrain.telegram").toFile(), "tdlib");
 	this.objects = new Objects(luwrain);
 	this.operations = newOperations();
-	this.client = Client.create(newResultHandler(onReady), null, null);
+		this.updatesHandler = newUpdatesHandler(onReady);
+		this.client = Client.create(updatesHandler, null, null);
         Client.execute(new TdApi.SetLogVerbosityLevel(0));
 	final String logFile = new File(luwrain.getFileProperty("luwrain.dir.userhome"), "td.log").getAbsolutePath();
 	Log.debug(LOG_COMPONENT, "tdlib log file is " + logFile);
@@ -49,7 +51,7 @@ final class Core
             throw new IOError(new IOException("Write access to the current directory is required"));
     }
 
-    private Client.ResultHandler newResultHandler(Runnable onReadyFunc)
+    private UpdatesHandler newUpdatesHandler(Runnable onReadyFunc)
     {
 	NullCheck.notNull(onReadyFunc, "onReadyFunc");
 	return new UpdatesHandler(tdlibDir, objects){
@@ -83,4 +85,5 @@ final class Core
     }
 
     boolean isReady() { return ready; }
+    UpdatesHandler.InputWaiter getInputWaiter(){ return updatesHandler.getInputWaiter(); }
 }

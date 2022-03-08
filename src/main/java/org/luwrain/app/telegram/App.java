@@ -28,7 +28,7 @@ public final class App extends AppBase<Strings> implements MonoApp
 
     final long startTimeMillis = System.currentTimeMillis();
 
-    private final Core core;
+    final Core core;
     private Conversations conv = null;
     private MainLayout mainLayout = null;
     private ContactsLayout contactsLayout = null;
