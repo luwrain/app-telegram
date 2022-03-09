@@ -64,9 +64,9 @@ final class MessageAppearance implements ConsoleArea.Appearance<Message>
 	NullCheck.notNull(message, "message");
 	NullCheck.notNull(text, "text");
 	final User user;
-	if (message.sender instanceof TdApi.MessageSenderUser)
+	if (message.senderId instanceof TdApi.MessageSenderUser)
 	{
-	    user = objects.users.get(((TdApi.MessageSenderUser)message.sender).userId);
+	    user = objects.users.get(((TdApi.MessageSenderUser)message.senderId).userId);
 	} else
 	    user = null;
 	final StringBuilder b = new StringBuilder();
