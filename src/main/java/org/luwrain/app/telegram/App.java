@@ -33,6 +33,7 @@ public final class App extends AppBase<Strings> implements MonoApp
     private MainLayout mainLayout = null;
     private ContactsLayout contactsLayout = null;
     private AuthLayout authLayout = null;
+    private SearchChatsLayout searchChatsLayout = null;
 
     public App(Core core)
     {
@@ -47,6 +48,7 @@ public final class App extends AppBase<Strings> implements MonoApp
 	this.mainLayout = new MainLayout(this);
 	this.contactsLayout = new ContactsLayout(this);
 	this.authLayout = new AuthLayout(this);
+	this.searchChatsLayout = new SearchChatsLayout(this);
 	setAppName(getStrings().appName());
 	return core.isReady()?mainLayout.getAreaLayout():authLayout.getAreaLayout();
     }
@@ -68,16 +70,25 @@ mainLayout.setActiveArea(App.this.mainLayout.chatsArea);
     Layouts layouts()
     {
 	return new Layouts(){
-	    @Override public void main()
+	    @Override public boolean main()
 	    {
 		setAreaLayout(mainLayout);
 		getLuwrain().announceActiveArea();
+		return true;
 	    }
-	    	    @Override public void contacts()
+	    	    @Override public boolean contacts()
 	    {
 		getLayout().setBasicLayout(contactsLayout.getLayout());
 		getLuwrain().announceActiveArea();
 		contactsLayout.updateContactsList();
+		return true;
+	    }
+	    	    	    @Override public boolean searchChats()
+	    {
+		setAreaLayout(searchChatsLayout);
+		getLuwrain().announceActiveArea();
+		contactsLayout.updateContactsList();
+		return true;
 	    }
 	};
     }
@@ -106,7 +117,8 @@ mainLayout.setActiveArea(App.this.mainLayout.chatsArea);
 
         interface Layouts
 {
-    void main();
-    void contacts();
+    boolean main();
+    boolean contacts();
+    boolean searchChats();
     }
 }

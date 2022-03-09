@@ -47,6 +47,10 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
     {
 	super(app);
 	this.app = app;
+	final ActionInfo
+	searchChatsAction = 					     action("search-chats", "Поиск групп и каналов", new InputEvent(InputEvent.Special.F6), app.layouts()::searchChats),
+	contactsAction = action("contacts", app.getStrings().actionContacts(), new InputEvent(InputEvent.Special.F9), MainLayout.this::actContacts);
+
 
 	chats.ensureCapacity(app.getObjects().mainChats.size());
 	for(OrderedChat o: app.getObjects().mainChats)
@@ -56,7 +60,6 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 		chats.add(c);
 	}
 
-	
 	this.chatsArea = new ListArea<Chat>(listParams((params)->{
 		    params.model = new ListUtils.ListModel<>(chats);
 		    params.appearance = new ChatsListAppearance(app, params.context);
@@ -76,8 +79,8 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 		}
 	    };
 
-	final Actions chatsActions = actions(
-					     action("contacts", app.getStrings().actionContacts(), new InputEvent(InputEvent.Special.F6), MainLayout.this::actContacts),
+
+	final Actions chatsActions = actions(searchChatsAction, contactsAction,
 					     action("close-chat", app.getStrings().actionCloseChat(), new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actCloseChat)
 					     );
 
@@ -93,8 +96,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 
 	final Actions consoleActions = actions(
 					       action("delete", "Удалить сообщение", new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actDeleteMessage),
-					       action("contacts", app.getStrings().actionContacts(), new InputEvent(InputEvent.Special.F6), MainLayout.this::actContacts)
-					       );
+					       searchChatsAction, contactsAction);
 
 	setAreaLayout(AreaLayout.LEFT_RIGHT, chatsArea, chatsActions, consoleArea, consoleActions);
 	synchronized(app.getObjects()) {
