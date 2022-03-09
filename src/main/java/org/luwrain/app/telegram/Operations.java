@@ -12,20 +12,18 @@ import java.util.function.Consumer;
 import java.io.*;
 
 import org.drinkless.tdlib.*;
-import org.drinkless.tdlib.TdApi.Chat;
-import org.drinkless.tdlib.TdApi.Message;
-import org.drinkless.tdlib.TdApi.User;
-import org.drinkless.tdlib.TdApi.Contact;
-import org.drinkless.tdlib.TdApi.Supergroup;
-import org.drinkless.tdlib.TdApi.BasicGroup;
+import org.drinkless.tdlib.TdApi.*;
+//import org.drinkless.tdlib.TdApi.Chat;
+//import org.drinkless.tdlib.TdApi.Message;
+//import org.drinkless.tdlib.TdApi.User;
+//import org.drinkless.tdlib.TdApi.Contact;
+//import org.drinkless.tdlib.TdApi.Supergroup;
+//import org.drinkless.tdlib.TdApi.BasicGroup;
 
 import org.luwrain.core.*;
-import org.luwrain.core.Log;
-
-import org.luwrain.core.*;
-import org.luwrain.core.events.*;
-import org.luwrain.core.queries.*;
-import org.luwrain.controls.*;
+//import org.luwrain.core.events.*;
+//import org.luwrain.core.queries.*;
+//import org.luwrain.controls.*;
 import org.luwrain.app.base.*;
 
 abstract class Operations
@@ -65,9 +63,6 @@ abstract class Operations
 
     void sendMessage(TdApi.Chat chat, String text, Runnable onSuccess)
     {
-	NullCheck.notNull(chat, "chat");
-	NullCheck.notEmpty(text, "text");
-	NullCheck.notNull(onSuccess, "onSuccess");
 	TdApi.InlineKeyboardButton[] row = {new TdApi.InlineKeyboardButton("https://telegram.org?1", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?2", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?3", new TdApi.InlineKeyboardButtonTypeUrl())};
         TdApi.ReplyMarkup replyMarkup = new TdApi.ReplyMarkupInlineKeyboard(new TdApi.InlineKeyboardButton[][]{row, row, row});
 	final TdApi.InputMessageContent content = new TdApi.InputMessageText(new TdApi.FormattedText(text, null), false, true);
@@ -92,10 +87,8 @@ abstract class Operations
 			 }));
     }
 
-
     void getContacts(Runnable onSuccess)
     {
-	NullCheck.notNull(onSuccess, "onSuccess");
 	getClient().send(new TdApi.GetContacts(),
 			 new DefaultHandler(TdApi.Users.CONSTRUCTOR, (obj)->{
 				 final TdApi.Users users = (TdApi.Users)obj;
@@ -103,6 +96,17 @@ abstract class Operations
 				 luwrain.runUiSafely(()->onSuccess.run());
 			 }));
     }
+
+    void searchChats(String query, Consumer<Chats> onSuccess)
+    {
+	getClient().send(new SearchPublicChats(query
+					 ), //search limit
+			 new DefaultHandler(Chats.CONSTRUCTOR, (obj)->{
+				 final Chats chats = (Chats)obj;
+				 luwrain.runUiSafely(()->onSuccess.accept(chats));
+			 }));
+    }
+
 
     void openChat(Chat chat, Runnable onSuccess)
     {
@@ -255,30 +259,30 @@ abstract class Operations
 	}
 	}
 
-private final class DefaultHandler implements Client.ResultHandler
-{
-    private final int constructor;
-    private final Consumer<Object> onSuccess;
-    DefaultHandler(int constructor, Consumer<Object> onSuccess)
+    private final class DefaultHandler implements Client.ResultHandler
     {
-	this.constructor = constructor;
-	this.onSuccess = onSuccess;
+	private final int constructor;
+	private final Consumer<TdApi.Object> onSuccess;
+	DefaultHandler(int constructor, Consumer<TdApi.Object> onSuccess)
+	{
+	    this.constructor = constructor;
+	    this.onSuccess = onSuccess;
+	}
+	@Override public void onResult(TdApi.Object object)
+	{
+	    if (object == null)
+		return;
+	    if (object.getConstructor() == constructor)
+	    {
+		onSuccess.accept(object);
+		return;
+	    }
+	    if (object.getConstructor() == TdApi.Error.CONSTRUCTOR)
+	    {
+		org.luwrain.core.Log.error(LOG_COMPONENT, "TdApi error: " + String.valueOf(constructor) + ": " + object.toString());
+		return;
+	    }
+	    org.luwrain.core.Log.error(LOG_COMPONENT, "the wrong response for " + String.valueOf(constructor) + ": " + object.toString());
+	}
     }
-		@Override public void onResult(TdApi.Object object)
-    {
-	if (object == null)
-	    return;
-	if (object.getConstructor() == constructor)
-	{
-	    onSuccess.accept(object);
-	    return;
-	}
-	if (object.getConstructor() == TdApi.Error.CONSTRUCTOR)
-	{
-	    Log.error(LOG_COMPONENT, "Receive an error for " + String.valueOf(constructor) + ":" + object.toString());
-			return;
-	}
-	Log.error(LOG_COMPONENT, "Receive wrong response for " + String.valueOf(constructor) + ":" + object.toString());
-		    }
-}
 }

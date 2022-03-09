@@ -9,9 +9,9 @@ package org.luwrain.app.telegram;
 
 import java.util.*;
 
-import org.drinkless.tdlib.TdApi.User;
-import org.drinkless.tdlib.TdApi.Contact;
-import org.drinkless.tdlib.TdApi.UserStatusOnline;
+import org.drinkless.tdlib.TdApi;
+//import org.drinkless.tdlib.TdApi.Contact;
+//import org.drinkless.tdlib.TdApi.UserStatusOnline;
 
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
@@ -19,6 +19,8 @@ import org.luwrain.controls.*;
 import org.luwrain.controls.ConsoleArea.*;
 import org.luwrain.controls.ConsoleUtils.*;
 import org.luwrain.app.base.*;
+
+import static org.luwrain.core.DefaultEventResponse.*;
 
 final class SearchChatsLayout extends LayoutBase implements InputHandler
 {
@@ -36,14 +38,39 @@ final class SearchChatsLayout extends LayoutBase implements InputHandler
 	this.searchArea = new ConsoleArea(consoleParams((params)->{
 		    params.name = "Поиск  групп и каналов";
 		    params.model = new ListModel(items);
+		    params.appearance = new Appearance();
 		    params.inputHandler = this;
+		    params.inputPrefix = "ПОИСК>";
 		}));
 	setAreaLayout(searchArea, null);
     }
 
     @Override public InputHandler.Result onConsoleInput(ConsoleArea area, String text)
     {
+	if (text.trim().isEmpty())
+	    return InputHandler.Result.REJECTED;
+	app.getOperations().searchChats(text.trim(), (chats)->{
+		app.message("" + chats.totalCount);
+		this.items.clear();
+		for(long l: chats.chatIds)
+		    items.add(app.getObjects().chats.get(l));
+		searchArea.refresh();
+		searchArea.reset(false);
+	    });
 	return InputHandler.Result.OK;
     }
 
+private final class Appearance implements ConsoleArea.Appearance
+{
+    @Override public void announceItem(Object item)
+    {
+	final TdApi.Chat chat = (TdApi.Chat)item;
+	app.setEventResponse(text(chat.title));
+    }
+    @Override public String getTextAppearance(Object item)
+    {
+	
+	return "";
+    }
+}
     }
