@@ -10,8 +10,7 @@ package org.luwrain.app.telegram;
 import java.util.*;
 
 import org.drinkless.tdlib.TdApi;
-//import org.drinkless.tdlib.TdApi.Contact;
-//import org.drinkless.tdlib.TdApi.UserStatusOnline;
+import org.drinkless.tdlib.TdApi.*;
 
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
@@ -28,16 +27,16 @@ final class SearchChatsLayout extends LayoutBase implements InputHandler
 	LOG_COMPONENT = Core.LOG_COMPONENT;
 
     private final App app;
-    final ConsoleArea searchArea;
-    private final List items = new ArrayList();
+    final ConsoleArea<Chat> searchArea;
+    private final List<Chat> items = new ArrayList<>();
 
     SearchChatsLayout(App app)
     {
 	super(app);
 	this.app = app;
-	this.searchArea = new ConsoleArea(consoleParams((params)->{
+	this.searchArea = new ConsoleArea<>(consoleParams((params)->{
 		    params.name = "Поиск  групп и каналов";
-		    params.model = new ListModel(items);
+		    params.model = new ListModel<>(items);
 		    params.appearance = new Appearance();
 		    params.inputHandler = this;
 		    params.inputPrefix = "ПОИСК>";
@@ -60,17 +59,15 @@ final class SearchChatsLayout extends LayoutBase implements InputHandler
 	return InputHandler.Result.OK;
     }
 
-private final class Appearance implements ConsoleArea.Appearance
-{
-    @Override public void announceItem(Object item)
+    private final class Appearance implements ConsoleArea.Appearance<Chat>
     {
-	final TdApi.Chat chat = (TdApi.Chat)item;
-	app.setEventResponse(text(chat.title));
-    }
-    @Override public String getTextAppearance(Object item)
-    {
-	
-	return "";
+	@Override public void announceItem(Chat chat)
+	{
+	    app.setEventResponse(text(chat.title));
+	}
+	@Override public String getTextAppearance(Chat chat)
+	{
+	    return chat.title;
+	}
     }
 }
-    }
