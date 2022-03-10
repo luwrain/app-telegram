@@ -15,12 +15,16 @@ import org.luwrain.core.Log;
 
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
-import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
 import org.luwrain.app.base.*;
 
 public final class App extends AppBase<Strings> implements MonoApp
 {
+    static final InputEvent
+	HOTKEY_MAIN = new InputEvent(InputEvent.Special.F5),
+    	HOTKEY_SEARCH_CHATS = new InputEvent(InputEvent.Special.F6),
+	HOTKEY_CONTACTS = new InputEvent(InputEvent.Special.F9);
+
     static private final int CHAT_NUM_LIMIT = 200;
 
     static final String

@@ -48,9 +48,8 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	super(app);
 	this.app = app;
 	final ActionInfo
-	searchChatsAction = 					     action("search-chats", "Поиск групп и каналов", new InputEvent(InputEvent.Special.F6), app.layouts()::searchChats),
-	contactsAction = action("contacts", app.getStrings().actionContacts(), new InputEvent(InputEvent.Special.F9), MainLayout.this::actContacts);
-
+	searchChatsAction = 					     action("search-chats", "Поиск групп и каналов", App.HOTKEY_SEARCH_CHATS, app.layouts()::searchChats),
+	contactsAction = action("contacts", app.getStrings().actionContacts(), App.HOTKEY_CONTACTS, MainLayout.this::actContacts);
 
 	chats.ensureCapacity(app.getObjects().mainChats.size());
 	for(OrderedChat o: app.getObjects().mainChats)
