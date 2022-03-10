@@ -296,6 +296,7 @@ abstract class Operations
 	    {
 		final TdApi.Error error = (TdApi.Error)object;
 		org.luwrain.core.Log.error(LOG_COMPONENT, "TdApi error: " + String.valueOf(constructor) + ": " + object.toString());
+		//FIXME: Through the Objects  listeners to show only if the app is launched
 		luwrain.message(error.message, Luwrain.MessageType.ERROR);
 		return;
 	    }

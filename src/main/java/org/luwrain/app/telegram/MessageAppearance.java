@@ -9,17 +9,13 @@ package org.luwrain.app.telegram;
 
 import java.util.*;
 
-import org.drinkless.tdlib.TdApi.Chat;
-import org.drinkless.tdlib.TdApi.User;
-import org.drinkless.tdlib.TdApi.Message;
-import org.drinkless.tdlib.TdApi.MessageText;
-import org.drinkless.tdlib.TdApi.MessageAudio;
-
-import org.drinkless.tdlib.TdApi;
+import org.drinkless.tdlib.*;
 import org.drinkless.tdlib.TdApi.*;
 
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
+
+import static org.luwrain.core.DefaultEventResponse.*;
 
 final class MessageAppearance implements ConsoleArea.Appearance<Message>
 {
@@ -39,51 +35,25 @@ final class MessageAppearance implements ConsoleArea.Appearance<Message>
 	NullCheck.notNull(message, "message");
 	if (message.content == null)
 	{
-	    luwrain.setEventResponse(DefaultEventResponse.hint(Hint.EMPTY_LINE));
+	    luwrain.setEventResponse(hint(Hint.EMPTY_LINE));
+	    return;
+	}
+	if (message.content instanceof MessagePhoto)
+	{
+	    announcePhoto(message, (MessagePhoto)message.content);
 	    return;
 	}
 	if (message.content instanceof MessageText)
 	{
-	    final MessageText text = (MessageText)message.content;
-	    announceMessageText(message, text);
+	    announceText(message, (MessageText)message.content);
 	    return;
 	}
-
 	if (message.content instanceof MessageAudio)
 	{
-	    final MessageAudio audio = (MessageAudio)message.content;
-	    announceMessageAudio(message, audio);
+	    announceMessageAudio(message, (MessageAudio)message.content);
 	    return;
 	}
-
 	luwrain.setEventResponse(DefaultEventResponse.text(message.content.getClass().getName()));
-    }
-
-    void announceMessageText(Message message, MessageText text)
-    {
-	NullCheck.notNull(message, "message");
-	NullCheck.notNull(text, "text");
-	final User user;
-	if (message.senderId instanceof TdApi.MessageSenderUser)
-	{
-	    user = objects.users.get(((TdApi.MessageSenderUser)message.senderId).userId);
-	} else
-	    user = null;
-	final StringBuilder b = new StringBuilder();
-	b.append(luwrain.getSpeakableText(text.text.text, Luwrain.SpeakableTextType.PROGRAMMING ));
-	String name = "";
-	if (user != null && user.firstName != null && !user.firstName.trim().isEmpty())
-	    name = user.firstName.trim();
-	name += " ";
-    	if (user != null && user.lastName != null && !user.lastName.trim().isEmpty())
-	    name += user.lastName.trim();
-	name = name.trim();
-	if (!name.isEmpty())
-	    b.append(", ").append(name);
-	long date = message.date;
-	date *= 1000;
-	b.append(", ").append(luwrain.i18n().getPastTimeBrief(new java.util.Date(date)));
-	luwrain.setEventResponse(DefaultEventResponse.listItem(new String(b)));
     }
 
     void announceMessageAudio(Message message, MessageAudio audio)
@@ -114,7 +84,32 @@ final class MessageAppearance implements ConsoleArea.Appearance<Message>
 	return message.content.getClass().getName();
     }
 
-    static String getMessageText(Message message)
+            private String getAnnouncementSuffix(Message message)
+    {
+	final User user;
+	if (message.senderId instanceof TdApi.MessageSenderUser)
+	    user = objects.users.get(((MessageSenderUser)message.senderId).userId); else
+	    user = null;
+	final StringBuilder b = new StringBuilder();
+	if (user != null)
+	{
+	if (user.firstName != null && !user.firstName.trim().isEmpty())
+	    b.append(user.firstName.trim()).append(" ");
+    	if (user.lastName != null && !user.lastName.trim().isEmpty())
+	    b.append(user.lastName.trim()).append(" ");
+	}
+	long date = message.date;
+	date *= 1000;
+	b.append(luwrain.i18n().getPastTimeBrief(new java.util.Date(date)));
+	return new String(b);
+    }
+
+        private void announceText(Message message, MessageText text)
+    {
+	luwrain.setEventResponse(listItem(luwrain.getSpeakableText(text.text.text, Luwrain.SpeakableTextType.NATURAL) + ", " + getAnnouncementSuffix(message), Suggestions.CLICKABLE_LIST_ITEM));
+    }
+
+static String getMessageText(Message message)
     {
 	NullCheck.notNull(message, "message");
 	if (message.content == null)
@@ -125,5 +120,20 @@ final class MessageAppearance implements ConsoleArea.Appearance<Message>
 	    return text.text.text;
 	}
 	return "";
+    }
+
+    private void announcePhoto(Message message, MessagePhoto photo)
+    {
+	luwrain.setEventResponse(listItem(Sounds.PICTURE, photo.caption.text + ", " + getAnnouncementSuffix(message), Suggestions.CLICKABLE_LIST_ITEM));
+    }
+
+    
+
+        static final class ForList extends ListUtils.AbstractAppearance<Message>
+    {
+		private final MessageAppearance appearance;
+	ForList(App app) { this.appearance = new MessageAppearance(app.getLuwrain(), app.getObjects()); }
+	@Override public void announceItem(Message message, Set<Flags> flags) { appearance.announceItem(message); }
+	@Override public String getScreenAppearance(Message message, Set<Flags> flags) { return appearance.getTextAppearance(message); }
     }
     }

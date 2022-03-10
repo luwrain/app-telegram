@@ -39,7 +39,7 @@ final class ChatPreviewLayout extends LayoutBase implements ClickHandler<Message
 		    params.name = "Просмотр";
 		    params.model = new ListModel<>(items);
 		    params.clickHandler = this;
-		    params.appearance = new Appearance();
+		    params.appearance = new MessageAppearance.ForList(app);
 		}));
 	setCloseHandler(closing);
 	setAreaLayout(historyArea, null);
@@ -53,10 +53,4 @@ final class ChatPreviewLayout extends LayoutBase implements ClickHandler<Message
     }
     
 
-    private final class Appearance extends AbstractAppearance<Message>
-    {
-	private final MessageAppearance appearance = new MessageAppearance(getLuwrain(), app.getObjects());
-	@Override public void announceItem(Message message, Set<Flags> flags) { appearance.announceItem(message); }
-	@Override public String getScreenAppearance(Message message, Set<Flags> flags) { return appearance.getTextAppearance(message); }
-    }
 }
