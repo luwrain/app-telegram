@@ -21,7 +21,7 @@ import org.luwrain.app.base.*;
 
 import static org.luwrain.core.DefaultEventResponse.*;
 
-final class ChatPreviewLayout extends LayoutBase
+final class ChatPreviewLayout extends LayoutBase implements ClickHandler<Message>
 {
     static private final String
 	LOG_COMPONENT = Core.LOG_COMPONENT;
@@ -38,11 +38,20 @@ final class ChatPreviewLayout extends LayoutBase
 	this.historyArea = new ListArea<>(listParams((params)->{
 		    params.name = "Просмотр";
 		    params.model = new ListModel<>(items);
+		    params.clickHandler = this;
 		    params.appearance = new Appearance();
 		}));
 	setCloseHandler(closing);
 	setAreaLayout(historyArea, null);
     }
+
+    @Override public boolean onListClick(ListArea area, int index, Message message)
+    {
+	final MessageClicks c = new MessageClicks(app);
+	return c.onMessageClick(message);
+	
+    }
+    
 
     private final class Appearance extends AbstractAppearance<Message>
     {
