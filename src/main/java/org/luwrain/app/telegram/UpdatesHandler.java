@@ -90,27 +90,34 @@ abstract class UpdatesHandler implements Client.ResultHandler
                 case UpdateUserStatus.CONSTRUCTOR:  {
                     final UpdateUserStatus updateUserStatus = (TdApi.UpdateUserStatus) object;
                     synchronized (objects) {
-					                        final TdApi.User user = objects.users.get(updateUserStatus.userId);
+					                        final User user = objects.users.get(updateUserStatus.userId);
                         user.status = updateUserStatus.status;
                     }
                     break;
                 }
 
-                case UpdateBasicGroup.CONSTRUCTOR:
-                    final TdApi.UpdateBasicGroup updateBasicGroup = (TdApi.UpdateBasicGroup) object;
+	case UpdateBasicGroup.CONSTRUCTOR:{
+                    final UpdateBasicGroup updateBasicGroup = (UpdateBasicGroup) object;
 		    synchronized(objects){
 objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGroup);
 		    }
+	}
                     break;
 
-                case UpdateSupergroup.CONSTRUCTOR:
+	case UpdateSupergroup.CONSTRUCTOR: {
                     final UpdateSupergroup updateSupergroup = (UpdateSupergroup) object;
-		    //                    supergroups.put(updateSupergroup.supergroup.id, updateSupergroup.supergroup);
+		    synchronized (object) {
+		                        objects.supergroups.put(updateSupergroup.supergroup.id, updateSupergroup.supergroup);
+		    }
+	}
                     break;
 
-                case TdApi.UpdateSecretChat.CONSTRUCTOR:
-                    TdApi.UpdateSecretChat updateSecretChat = (TdApi.UpdateSecretChat) object;
-		    //                    secretChats.put(updateSecretChat.secretChat.id, updateSecretChat.secretChat);
+	case UpdateSecretChat.CONSTRUCTOR: {
+final UpdateSecretChat updateSecretChat = (UpdateSecretChat) object;
+synchronized (objects) {
+		                        objects.secretChats.put(updateSecretChat.secretChat.id, updateSecretChat.secretChat);
+}
+	}
                     break;
 
 	case UpdateChatPosition.CONSTRUCTOR: {
@@ -159,14 +166,14 @@ objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGr
                 case UpdateChatTitle.CONSTRUCTOR: {
                     final UpdateChatTitle updateChat = (UpdateChatTitle) object;
 		                        synchronized (objects) {
-                    final TdApi.Chat chat = objects.chats.get(updateChat.chatId);
+                    final Chat chat = objects.chats.get(updateChat.chatId);
                         chat.title = updateChat.title;
                     }
                     break;
                 }
 
                 case UpdateChatPhoto.CONSTRUCTOR: {
-                    TdApi.UpdateChatPhoto updateChat = (TdApi.UpdateChatPhoto) object;
+                    final UpdateChatPhoto updateChat = (UpdateChatPhoto) object;
 		    /*
                     TdApi.Chat chat = chats.get(updateChat.chatId);
                     synchronized (chat) {
@@ -380,6 +387,10 @@ this.authorizationState = authorizationState;
 	    }
 	    */
 	    break;
+
+	    //Skipping
+	case 		 UpdateConnectionState.CONSTRUCTOR:
+	    	    break;
 	default:
 	    Log.error(LOG_COMPONENT, "Unsupported authorization state: " + this.authorizationState);
         }
@@ -420,7 +431,6 @@ this.authorizationState = authorizationState;
 	{
 	    if (position.list.getConstructor() == ChatListMain.CONSTRUCTOR)
 	    {
-		Log.debug(LOG_COMPONENT, "Adding " + chat.title);
 		objects.mainChats.add(new OrderedChat(chat.id, position));
 	    }
 	}

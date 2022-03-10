@@ -112,8 +112,16 @@ abstract class Operations
     {
 	NullCheck.notNull(chat, "chat");
 	NullCheck.notNull(onSuccess, "onSuccess");
-	getClient().send(new TdApi.OpenChat(chat.id),
-			 new DefaultHandler(TdApi.Ok.CONSTRUCTOR, (obj)->{
+	getClient().send(new OpenChat(chat.id),
+			 new DefaultHandler(Ok.CONSTRUCTOR, (obj)->{
+				 luwrain.runUiSafely(onSuccess);
+			 }));
+    }
+
+    void addChatToList(Chat chat, ChatList chatList, Runnable onSuccess)
+    {
+	getClient().send(new AddChatToList(chat.id, chatList),
+			 new DefaultHandler(Ok.CONSTRUCTOR, (obj)->{
 				 luwrain.runUiSafely(onSuccess);
 			 }));
     }
@@ -167,6 +175,15 @@ abstract class Operations
 			 }));
     }
 
+        void createSupergroupChat(long supergroupId, Consumer<Chat> onSuccess)
+    {
+	getClient().send(new CreateSupergroupChat(supergroupId, false),
+			 new DefaultHandler(Chat.CONSTRUCTOR, (obj)->{
+				 luwrain.runUiSafely(()->onSuccess.accept((Chat)obj));
+			 }));
+    }
+
+
         void downloadFile(TdApi.File file)
     {
 	NullCheck.notNull(file, "file");
@@ -176,13 +193,11 @@ abstract class Operations
     }
 
 
-    void getChatHistory(TdApi.Chat chat, ChatHistoryCallback callback)
+    void getChatHistory(Chat chat, ChatHistoryCallback callback)
     {
-	NullCheck.notNull(chat, "chat");
-	NullCheck.notNull(callback, "callback");
-	getClient().send(new TdApi.GetChatHistory(chat.id, chat.lastMessage != null?chat.lastMessage.id:0, 0, 100, false),
-			 new DefaultHandler(TdApi.Messages.CONSTRUCTOR, (obj)->{
-				 luwrain.runUiSafely(()->callback.onChatHistoryMessages(chat, (TdApi.Messages)obj));
+	getClient().send(new GetChatHistory(chat.id, chat.lastMessage != null?chat.lastMessage.id:0, 0, 100, false),
+			 new DefaultHandler(Messages.CONSTRUCTOR, (obj)->{
+				 luwrain.runUiSafely(()->callback.onChatHistoryMessages(chat, (Messages)obj));
 			 }));
     }
 
@@ -279,7 +294,9 @@ abstract class Operations
 	    }
 	    if (object.getConstructor() == TdApi.Error.CONSTRUCTOR)
 	    {
+		final TdApi.Error error = (TdApi.Error)object;
 		org.luwrain.core.Log.error(LOG_COMPONENT, "TdApi error: " + String.valueOf(constructor) + ": " + object.toString());
+		luwrain.message(error.message, Luwrain.MessageType.ERROR);
 		return;
 	    }
 	    org.luwrain.core.Log.error(LOG_COMPONENT, "the wrong response for " + String.valueOf(constructor) + ": " + object.toString());

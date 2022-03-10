@@ -107,7 +107,6 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 
     @Override public boolean onListClick(ListArea listArea, int index, Chat chat)
     {
-	NullCheck.notNull(chat, "chat");
 	app.getOperations().openChat(chat, ()->{
 		this.activeChat = chat;
 		updateActiveChatHistory();

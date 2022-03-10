@@ -21,7 +21,7 @@ import org.luwrain.app.base.*;
 
 import static org.luwrain.core.DefaultEventResponse.*;
 
-final class SearchChatsLayout extends LayoutBase implements InputHandler
+final class SearchChatsLayout extends LayoutBase implements InputHandler, ClickHandler<Chat>
 {
     static private final String
 	LOG_COMPONENT = Core.LOG_COMPONENT;
@@ -39,6 +39,7 @@ final class SearchChatsLayout extends LayoutBase implements InputHandler
 		    params.model = new ListModel<>(items);
 		    params.appearance = new Appearance();
 		    params.inputHandler = this;
+		    params.clickHandler = this;
 		    params.inputPrefix = "ПОИСК>";
 		}));
 	setAreaLayout(searchArea, null);
@@ -59,15 +60,36 @@ final class SearchChatsLayout extends LayoutBase implements InputHandler
 	return InputHandler.Result.OK;
     }
 
+    @Override public boolean onConsoleClick(ConsoleArea area, int index, Chat chat)
+    {
+		app.getOperations().getChatHistory(chat, (messagesChat, messages)->{
+			final ChatPreviewLayout layout = new ChatPreviewLayout(app, messages.messages, ()->{
+				app.setAreaLayout(SearchChatsLayout.this);
+				getLuwrain().announceActiveArea();
+				return true;
+			    });
+			app.setAreaLayout(layout);
+			getLuwrain().announceActiveArea();
+		    });
+	return true;
+    }
+
     private final class Appearance implements ConsoleArea.Appearance<Chat>
     {
 	@Override public void announceItem(Chat chat)
 	{
-	    app.setEventResponse(text(chat.title));
+
+	    	    final StringBuilder b = new StringBuilder();
+	    b.append(chat.title).append(" ");
+	    if (chat.type != null)
+		b.append(chat.type.getClass().getSimpleName());
+
+	    
+	    app.setEventResponse(text(new String(b)));
 	}
 	@Override public String getTextAppearance(Chat chat)
 	{
-	    return chat.title;
+return chat.title;
 	}
     }
 }

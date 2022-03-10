@@ -29,9 +29,10 @@ final class Objects
     final Map<Integer, File> files = new ConcurrentHashMap<>();
     final Map<Long, Chat> chats = new ConcurrentHashMap<>();
     final NavigableSet<OrderedChat> mainChats = new TreeSet<>();
-    final Map<Long, TdApi.BasicGroup> basicGroups = new ConcurrentHashMap<>();
-    final Map<Integer, TdApi.Supergroup> supergroups = new ConcurrentHashMap<>();
-    final Map<Integer, TdApi.SecretChat> secretChats = new ConcurrentHashMap<>();
+    final Map<Long, BasicGroup> basicGroups = new ConcurrentHashMap<>();
+    final Map<Long, Supergroup> supergroups = new ConcurrentHashMap<>();
+    final Map<Integer, SecretChat> secretChats = new ConcurrentHashMap<>();
+
     private long[] contacts = new long[0];
     boolean haveFullMainChatList = false;
 
