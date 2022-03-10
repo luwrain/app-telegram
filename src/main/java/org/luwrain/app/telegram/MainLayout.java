@@ -47,9 +47,6 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
     {
 	super(app);
 	this.app = app;
-	final ActionInfo
-	searchChatsAction = 					     action("search-chats", "Поиск групп и каналов", App.HOTKEY_SEARCH_CHATS, app.layouts()::searchChats),
-	contactsAction = action("contacts", app.getStrings().actionContacts(), App.HOTKEY_CONTACTS, MainLayout.this::actContacts);
 
 	chats.ensureCapacity(app.getObjects().mainChats.size());
 	for(OrderedChat o: app.getObjects().mainChats)
@@ -78,11 +75,6 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 		}
 	    };
 
-
-	final Actions chatsActions = actions(searchChatsAction, contactsAction,
-					     action("close-chat", app.getStrings().actionCloseChat(), new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actCloseChat)
-					     );
-
 	this.consoleArea = new ConsoleArea<Message>(consoleParams((params)->{
 		    params.model = new ConsoleUtils.ArrayModel<>(()->messages);
 		    params.appearance = new MessageAppearance(app.getLuwrain(), app.getObjects());
@@ -93,11 +85,18 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 		    params.inputHandler = this;
 		}));
 
-	final Actions consoleActions = actions(
-					       action("delete", "Удалить сообщение", new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actDeleteMessage),
-					       searchChatsAction, contactsAction);
+	final ActionInfo
+	searchChatsAction = 					     action("search-chats", "Поиск групп и каналов", App.HOTKEY_SEARCH_CHATS, app.layouts()::searchChats),
+	contactsAction = action("contacts", app.getStrings().actionContacts(), App.HOTKEY_CONTACTS, MainLayout.this::actContacts);
 
-	setAreaLayout(AreaLayout.LEFT_RIGHT, chatsArea, chatsActions, consoleArea, consoleActions);
+	setAreaLayout(AreaLayout.LEFT_RIGHT, chatsArea, actions(
+								action("close-chat", app.getStrings().actionCloseChat(), new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actCloseChat),
+								searchChatsAction, contactsAction),
+
+		      consoleArea, actions(
+					   action("delete", app.getStrings().actionDeleteMessage(), new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actDeleteMessage),
+					   searchChatsAction, contactsAction)
+		      );
 	synchronized(app.getObjects()) {
 	    app.getObjects().chatsListeners.add(this);
 	    app.getObjects().newMessageListeners.add(this);

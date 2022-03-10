@@ -42,11 +42,10 @@ final class SearchChatsLayout extends LayoutBase implements InputHandler, ClickH
 		    params.clickHandler = this;
 		    params.inputPrefix = "ПОИСК>";
 		}));
-	setAreaLayout(searchArea,
-		      actions(
-			      action("Главные чаты", "main-chats", App.HOTKEY_MAIN, app.layouts()::main),
-			      			      action("Поиск групп и каналов", "search-chats", App.HOTKEY_SEARCH_CHATS, app.layouts()::searchChats)
-			      ));
+	setAreaLayout(searchArea, actions(
+					  action(app.getStrings().actionMainChats(), "main-chats", App.HOTKEY_MAIN, app.layouts()::main),
+					  action("contacts", app.getStrings().actionContacts(), App.HOTKEY_CONTACTS, app.layouts()::contacts)
+					  ));
     }
 
     @Override public InputHandler.Result onConsoleInput(ConsoleArea area, String text)

@@ -13,11 +13,15 @@ public interface Strings
 {
     static final String NAME = "luwrain.telegram";
 
-    String actionChats();
-    String actionCloseChat();
-    String actionContacts();
-    String actionNewContact();
     String appName();
+    String actionMainChats();
+    String actionContacts();
+    String actionSearchChats();
+
+    String actionCloseChat();
+    String actionDeleteMessage();
+    String actionNewContact();
+
     String chatsAreaName();
     String chatPropsAreaName();
     String contactsAreaName();
