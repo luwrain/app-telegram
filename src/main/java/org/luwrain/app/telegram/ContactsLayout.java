@@ -16,54 +16,34 @@ import org.drinkless.tdlib.TdApi.UserStatusOnline;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
+import org.luwrain.controls.ListArea.*;
+import org.luwrain.controls.ListUtils.*;
 import org.luwrain.app.base.*;
 
-final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, Objects.UsersListener
+final class ContactsLayout extends LayoutBase implements ClickHandler<Contact>, Objects.UsersListener
 {
-    static private final String LOG_COMPONENT = App.LOG_COMPONENT;
+    static private final String
+	LOG_COMPONENT = Core.LOG_COMPONENT;
 
     private final App app;
-    private final ListArea contactsArea;
-
-    private Contact[] contacts = new Contact[0];
+final ListArea<Contact> contactsArea;
+    private List<Contact> contacts = new ArrayList<>();
 
     ContactsLayout(App app)
     {
-	NullCheck.notNull(app, "app");
+	super(app);
 	this.app = app;
-	this.contactsArea = new ListArea(createContactsParams()){
-		private final Actions actions = actions(
-							action("main-chats", app.getStrings().actionMainChats(), app.layouts()::main),
-							action(app.getStrings().actionSearchChats(), "search-chats", App.HOTKEY_SEARCH_CHATS, app.layouts()::searchChats),
-							
-							action("new-contact", app.getStrings().actionNewContact(), new InputEvent(InputEvent.Special.INSERT), ContactsLayout.this::actNewContact)
-							);
-		@Override public boolean onInputEvent(InputEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (app.onInputEvent(this, event))
-			return true;
-		    return super.onInputEvent(event);
-		}
-		@Override public boolean onSystemEvent(SystemEvent event)
-		{
-		    NullCheck.notNull(event, "event");
-		    if (app.onSystemEvent(this, event, actions))
-			return true;
-		    return super.onSystemEvent(event);
-		}
-		@Override public boolean onAreaQuery(AreaQuery query)
-		{
-		    NullCheck.notNull(query, "query");
-		    if (app.onAreaQuery(this, query))
-			return true;
-		    return super.onAreaQuery(query);
-		}
-		@Override public Action[] getAreaActions()
-		{
-		    return actions.getAreaActions();
-		}
-	    };
+	this.contactsArea = new ListArea<>(listParams((params)->{
+		    params.model = new ListModel<>(contacts);
+	params.appearance = new ContactsAppearance();
+	params.clickHandler = this;
+	params.name = app.getStrings().contactsAreaName();
+		}));
+	setAreaLayout(contactsArea, actions(
+															action("main-chats", app.getStrings().actionMainChats(), app.layouts()::main),
+															action(app.getStrings().actionSearchChats(), "search-chats", App.HOTKEY_SEARCH_CHATS, app.layouts()::searchChats),
+																						action("new-contact", app.getStrings().actionNewContact(), new InputEvent(InputEvent.Special.INSERT), ContactsLayout.this::actNewContact)
+					    ));
 	synchronized(app.getObjects()) {
 	app.getObjects().usersListeners.add(this);
 	}
@@ -84,17 +64,8 @@ final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, 
 	return true;
     }
 
-    private boolean actChats()
+    @Override public boolean onListClick(ListArea listArea, int index, Contact contact)
     {
-	app.layouts().main();
-	return true;
-    }
-
-    @Override public boolean onListClick(ListArea listArea, int index, Object obj)
-    {
-	if (obj == null || !(obj instanceof Contact))
-	    return false	;
-	final Contact contact = (Contact)obj;
 	app.getOperations().createPrivateChat(contact.userId, ()->app.layouts().main());
 		return true;
     }
@@ -112,8 +83,9 @@ final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, 
 			res.add(new Contact(user.phoneNumber, user.firstName, user.lastName, "", user.id));
 		    }
 		};
-		this.contacts = res.toArray(new Contact[res.size()]);
-		Arrays.sort(contacts, new ContactsComparator());
+		this.contacts.clear();
+		this.contacts.addAll(res);
+		Collections.sort(contacts, new ContactsComparator());
 		contactsArea.refresh();
 	    });
     }
@@ -122,31 +94,10 @@ final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, 
     {
     }
 
-    private ListArea.Params createContactsParams()
+    private final class ContactsAppearance extends AbstractAppearance<Contact>
     {
-	final ListArea.Params params = new ListArea.Params();
-	params.context = new DefaultControlContext(app.getLuwrain());
-	params.model = new ListUtils.ArrayModel(()->{return this.contacts;});
-	params.appearance = new ContactsAppearance();
-	params.clickHandler = this;
-	params.name = app.getStrings().contactsAreaName();
-	return params;
-    }
-
-    AreaLayout getLayout()
-    {
-	return new AreaLayout(contactsArea);
-    }
-
-    private final class ContactsAppearance implements ListArea.Appearance<Object>
-    {
-	@Override public void announceItem(Object item, Set<Flags> flags)
+	@Override public void announceItem(Contact contact, Set<Flags> flags)
 	{
-	    	    NullCheck.notNull(item, "item");
-		    NullCheck.notNull(flags, "flags");
-		    if (item instanceof Contact)
-		    {
-			final Contact contact = (Contact)item;
 			final boolean online;
 			final User user = app.getObjects().users.get(contact.userId);
 			if (user != null)
@@ -161,26 +112,10 @@ final class ContactsLayout extends LayoutBase implements ListArea.ClickHandler, 
 											Utils.getContactTitle(contact),
 											Suggestions.CLICKABLE_LIST_ITEM));
 			return;
-		    }
-		    app.getLuwrain().setEventResponse(DefaultEventResponse.listItem(item.toString()));
 	}
-	@Override public String getScreenAppearance(Object item, Set<Flags> flags)
+	@Override public String getScreenAppearance(Contact contact, Set<Flags> flags)
 	{
-	    NullCheck.notNull(item, "item");
-	    NullCheck.notNull(flags, "flags");
-	    if (item instanceof Contact)
-		return Utils.getContactTitle((Contact)item);
-	    return item.toString();
-	}
-	@Override public int getObservableLeftBound(Object item)
-	{
-	    	    NullCheck.notNull(item, "item");
-	    return 0;
-	}
-	@Override public int getObservableRightBound(Object item)
-	{
-	    	    NullCheck.notNull(item, "item");
-	    return getScreenAppearance(item, EnumSet.noneOf(Flags.class)).length();
+		return Utils.getContactTitle(contact);
 	}
     }
 

@@ -82,7 +82,7 @@ mainLayout.setActiveArea(App.this.mainLayout.chatsArea);
 	    }
 	    	    @Override public boolean contacts()
 	    {
-		getLayout().setBasicLayout(contactsLayout.getLayout());
+		setAreaLayout(contactsLayout);
 		getLuwrain().announceActiveArea();
 		contactsLayout.updateContactsList();
 		return true;
