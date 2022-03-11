@@ -295,9 +295,8 @@ abstract class Operations
 	    if (object.getConstructor() == TdApi.Error.CONSTRUCTOR)
 	    {
 		final TdApi.Error error = (TdApi.Error)object;
-		org.luwrain.core.Log.error(LOG_COMPONENT, "TdApi error: " + String.valueOf(constructor) + ": " + object.toString());
-		//FIXME: Through the Objects  listeners to show only if the app is launched
-		luwrain.message(error.message, Luwrain.MessageType.ERROR);
+		org.luwrain.core.Log.error(LOG_COMPONENT, "TdApi error: " + String.valueOf(constructor) + ": " + error.toString());
+		objects.error(error);
 		return;
 	    }
 	    org.luwrain.core.Log.error(LOG_COMPONENT, "the wrong response for " + String.valueOf(constructor) + ": " + object.toString());

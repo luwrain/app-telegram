@@ -53,6 +53,9 @@ public final class App extends AppBase<Strings> implements MonoApp
 	this.contactsLayout = new ContactsLayout(this);
 	this.authLayout = new AuthLayout(this);
 	this.searchChatsLayout = new SearchChatsLayout(this);
+	this.core.objects.errorListeners.add((error)->{
+		message(error.message, Luwrain.MessageType.ERROR);
+	    });
 	setAppName(getStrings().appName());
 	return core.isReady()?mainLayout.getAreaLayout():authLayout.getAreaLayout();
     }

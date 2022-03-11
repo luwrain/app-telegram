@@ -26,7 +26,7 @@ final class ContactsLayout extends LayoutBase implements ClickHandler<Contact>, 
 	LOG_COMPONENT = Core.LOG_COMPONENT;
 
     private final App app;
-final ListArea<Contact> contactsArea;
+    final ListArea<Contact> contactsArea;
     private List<Contact> contacts = new ArrayList<>();
 
     ContactsLayout(App app)
@@ -35,17 +35,17 @@ final ListArea<Contact> contactsArea;
 	this.app = app;
 	this.contactsArea = new ListArea<>(listParams((params)->{
 		    params.model = new ListModel<>(contacts);
-	params.appearance = new ContactsAppearance();
-	params.clickHandler = this;
-	params.name = app.getStrings().contactsAreaName();
+		    params.appearance = new ContactsAppearance();
+		    params.clickHandler = this;
+		    params.name = app.getStrings().contactsAreaName();
 		}));
 	setAreaLayout(contactsArea, actions(
-															action("main-chats", app.getStrings().actionMainChats(), app.layouts()::main),
-															action(app.getStrings().actionSearchChats(), "search-chats", App.HOTKEY_SEARCH_CHATS, app.layouts()::searchChats),
-																						action("new-contact", app.getStrings().actionNewContact(), new InputEvent(InputEvent.Special.INSERT), ContactsLayout.this::actNewContact)
+					    action("new-contact", app.getStrings().actionNewContact(), new InputEvent(InputEvent.Special.INSERT), ContactsLayout.this::actNewContact),
+					    action("main-chats", app.getStrings().actionMainChats(), app.HOTKEY_MAIN, app.layouts()::main),
+					    action(app.getStrings().actionSearchChats(), "search-chats", App.HOTKEY_SEARCH_CHATS, app.layouts()::searchChats)
 					    ));
 	synchronized(app.getObjects()) {
-	app.getObjects().usersListeners.add(this);
+	    app.getObjects().usersListeners.add(this);
 	}
     }
 
@@ -67,7 +67,7 @@ final ListArea<Contact> contactsArea;
     @Override public boolean onListClick(ListArea listArea, int index, Contact contact)
     {
 	app.getOperations().createPrivateChat(contact.userId, ()->app.layouts().main());
-		return true;
+	return true;
     }
 
     void updateContactsList()
@@ -98,24 +98,24 @@ final ListArea<Contact> contactsArea;
     {
 	@Override public void announceItem(Contact contact, Set<Flags> flags)
 	{
-			final boolean online;
-			final User user = app.getObjects().users.get(contact.userId);
-			if (user != null)
-			{
-			    if (user.status != null && user.status instanceof UserStatusOnline)
-			    online = true; else
-					       online = false;
-			} else
-			online = false;
-			app.getLuwrain().setEventResponse(DefaultEventResponse.listItem(
-											online?Sounds.SELECTED:Sounds.LIST_ITEM,
-											Utils.getContactTitle(contact),
-											Suggestions.CLICKABLE_LIST_ITEM));
-			return;
+	    final boolean online;
+	    final User user = app.getObjects().users.get(contact.userId);
+	    if (user != null)
+	    {
+		if (user.status != null && user.status instanceof UserStatusOnline)
+		    online = true; else
+		    online = false;
+	    } else
+		online = false;
+	    app.getLuwrain().setEventResponse(DefaultEventResponse.listItem(
+									    online?Sounds.SELECTED:Sounds.LIST_ITEM,
+									    Utils.getContactTitle(contact),
+									    Suggestions.CLICKABLE_LIST_ITEM));
+	    return;
 	}
 	@Override public String getScreenAppearance(Contact contact, Set<Flags> flags)
 	{
-		return Utils.getContactTitle(contact);
+	    return Utils.getContactTitle(contact);
 	}
     }
 
@@ -126,4 +126,4 @@ final ListArea<Contact> contactsArea;
 	    return Utils.getContactTitle(c1).compareTo(Utils.getContactTitle(c2));
 	}
     }
-    }
+}
