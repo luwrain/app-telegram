@@ -26,7 +26,7 @@ import org.luwrain.core.*;
 //import org.luwrain.controls.*;
 import org.luwrain.app.base.*;
 
-abstract class Operations
+public abstract class Operations
 {
     static private final String
 	LOG_COMPONENT = Core.LOG_COMPONENT;
@@ -48,7 +48,7 @@ abstract class Operations
 
     abstract Client getClient();
 
-    void callFunc(TdApi.Function func, int constructor, Consumer<TdApi.Object> res)
+    public void callFunc(TdApi.Function func, int constructor, Consumer<TdApi.Object> res)
     {
 		getClient().send(func,
 			 new Handler(constructor, (obj)->res.accept(obj)));

@@ -23,6 +23,7 @@ final class Objects
     interface NewMessageListener { void onNewMessage(Chat chat, Message message); }
     interface NewInputWaiterListener{ void onNewInputWaiter(UpdatesHandler.InputWaiter inputWaiter); }
         interface ErrorListener{ void onError(TdApi.Error error); }
+    interface ActivationListener { void onActivation(); }
 
     private final Luwrain luwrain;
 

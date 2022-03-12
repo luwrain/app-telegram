@@ -23,6 +23,7 @@ final class AuthLayout extends LayoutBase implements Objects.NewInputWaiterListe
 
     private final App app;
     final WizardArea wizardArea;
+    private String phoneNumber = "";
 
     AuthLayout(App app)
     {
@@ -43,8 +44,10 @@ final class AuthLayout extends LayoutBase implements Objects.NewInputWaiterListe
 	{
 	case PhoneNumber: {
 	    final Frame frame = wizardArea.newFrame()
-	    .addInput("Номер телефона:", "")
-	    .addClickable("Продолжить", (values)->{
+	    .addText(app.getStrings().authPhoneNumberIntro())
+	    .addInput(app.getStrings().authPhoneNumberInput(), this.phoneNumber)
+	    .addClickable(app.getStrings().authContinue(), (values)->{
+		    this.phoneNumber = values.getText(0);
 		    inputWaiter.setValue(values.getText(0));
 		    return true;
 		});

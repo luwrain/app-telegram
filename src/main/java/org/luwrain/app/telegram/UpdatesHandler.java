@@ -20,18 +20,22 @@ import org.luwrain.core.Log;
 abstract class UpdatesHandler implements Client.ResultHandler
 {
     static private final String
-	LOG_COMPONENT = Core.LOG_COMPONENT;
+	LOG_COMPONENT = Core.LOG_COMPONENT,
+	PHONE_NUMBER_BANNED = "PHONE_NUMBER_BANNED";
 
+    private final Luwrain luwrain;
     private final java.io.File tdlibDir;
     private final Objects objects;
         private AuthorizationState authorizationState = null;
     private InputWaiter inputWaiter = null;
         volatile private  boolean haveAuthorization = false;
 
-    UpdatesHandler(java.io.File tdlibDir, Objects objects)
+    UpdatesHandler(Luwrain luwrain, java.io.File tdlibDir, Objects objects)
     {
+	NullCheck.notNull(luwrain, "luwrain");
 	NullCheck.notNull(tdlibDir, "tdlibDir");
 	NullCheck.notNull(objects, "objects");
+	this.luwrain = luwrain;
 	this.tdlibDir = tdlibDir;
 	this.objects = objects;
     }
@@ -325,7 +329,7 @@ this.authorizationState = authorizationState;
 	    parameters.useSecretChats = true;
 	    parameters.apiId = 94575;
 	    parameters.apiHash = "a3406de8d171bb422bb6ddf3bbd800e2";
-	    parameters.systemLanguageCode = "en";
+	    parameters.systemLanguageCode = "ru";
 	    parameters.deviceModel = "Desktop";
 	    parameters.systemVersion = "Unknown";
 	    parameters.applicationVersion = "1.0";
@@ -412,9 +416,14 @@ this.authorizationState = authorizationState;
 	    {
             switch (object.getConstructor())
 	    {
-                case TdApi.Error.CONSTRUCTOR:
-                    Log.error(LOG_COMPONENT, object.toString());
+	    case TdApi.Error.CONSTRUCTOR: {
+		final TdApi.Error err = (TdApi.Error)object;
+		                    Log.error(LOG_COMPONENT, object.toString());
+				    if (err.message.equals(PHONE_NUMBER_BANNED))
+					luwrain.message("Номер телефона заблокирован", Luwrain.MessageType.ERROR); else //FIXME:
+		luwrain.message(err.message, Luwrain.MessageType.ERROR);
                     authStateUpdated(null); // repeat last action
+	    }
                     break;
                 case TdApi.Ok.CONSTRUCTOR:
                     // result is already received through UpdateAuthorizationState, nothing to do

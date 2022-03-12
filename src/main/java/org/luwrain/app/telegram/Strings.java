@@ -27,6 +27,12 @@ public interface Strings
     String chatPropsAreaName();
     String contactsAreaName();
 
+    String authPhoneNumberIntro();
+    String authPhoneNumberInput();
+    String authCodeIntro();
+    String authContinue();
+    
+
     String actionNewChannel();
     String newChannelPopupName();
     String newChannelTitlePopupPrefix();

@@ -54,7 +54,7 @@ public final class Core
     private UpdatesHandler newUpdatesHandler(Runnable onReadyFunc)
     {
 	NullCheck.notNull(onReadyFunc, "onReadyFunc");
-	return new UpdatesHandler(tdlibDir, objects){
+	return new UpdatesHandler(luwrain, tdlibDir, objects){
 	    @Override public void onReady()
 	    {
 		Core.this.ready = true;

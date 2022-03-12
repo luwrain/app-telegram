@@ -119,8 +119,8 @@ mainLayout.setActiveArea(App.this.mainLayout.chatsArea);
     }
 
             Conversations getConv() { return this.conv; }
-    Objects getObjects() { return this.core.objects; }
-    Operations getOperations() { return this.core.operations; }
+    public Objects getObjects() { return this.core.objects; }
+    public Operations getOperations() { return this.core.operations; }
 
         interface Layouts
 {

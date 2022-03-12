@@ -20,23 +20,33 @@ import org.luwrain.app.telegram.*;
 public final class SupergroupPropertiesLayout extends LayoutBase
 {
     static private final String
-	LOG_COMPONENT = Core.LOG_COMPONENT;
+	LOG_COMPONENT = Core.LOG_COMPONENT,
+	EDIT_USERNAME = "username";
 
     private final App app;
-    final FormArea formArea;
+    private final FormArea formArea;
+    private final Chat chat;
+    private final Supergroup supergroup;
+    private final SupergroupFullInfo fullInfo;
 
     public SupergroupPropertiesLayout(App app, Chat chat, Supergroup supergroup, SupergroupFullInfo fullInfo, ActionHandler closing)
     {
 	super(app);
 	this.app = app;
+	this.chat = chat;
+	this.supergroup = supergroup;
+	this.fullInfo = fullInfo;
 
 	this.formArea = new FormArea(getControlContext(), chat.title);
 	setCloseHandler(closing);
+	setOkHandler(this::onOk);
 
 	formArea.addStatic("Title: " + chat.title);
 	if (supergroup.isChannel)
 	    formArea.addStatic("Type: channel"); else
 	    formArea.addStatic("Type: group");
+	if (fullInfo.canSetUsername)
+	    formArea.addEdit(EDIT_USERNAME, "User name: ", supergroup.username); else
 	formArea.addStatic("Username: " + supergroup.username);
 	formArea.addStatic("Description: " + fullInfo.description);
 	formArea.addStatic("Member count: " + supergroup.memberCount);
@@ -45,4 +55,11 @@ public final class SupergroupPropertiesLayout extends LayoutBase
 	    formArea.addStatic("Invite link: " + fullInfo.inviteLink.inviteLink);
 	setAreaLayout(formArea, null);
     }
+
+    private boolean onOk()
+    {
+	if (fullInfo.canSetUsername && !formArea.getEnteredText(EDIT_USERNAME).equals(supergroup.username))
+	    app.getOperations().callFunc(new SetSupergroupUsername(supergroup.id, formArea.getEnteredText(EDIT_USERNAME)), Ok.CONSTRUCTOR, (res)->{});
+	return true;
+	 }
 }
