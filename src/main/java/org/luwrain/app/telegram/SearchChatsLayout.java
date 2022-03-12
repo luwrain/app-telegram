@@ -43,6 +43,7 @@ final class SearchChatsLayout extends LayoutBase implements InputHandler, ClickH
 		    params.inputPrefix = "ПОИСК>";
 		}));
 	setAreaLayout(searchArea, actions(
+					  action("join", app.getStrings().actionJoin(), new InputEvent(InputEvent.Special.INSERT), this::actJoin),
 					  action(app.getStrings().actionMainChats(), "main-chats", App.HOTKEY_MAIN, app.layouts()::main),
 					  action("contacts", app.getStrings().actionContacts(), App.HOTKEY_CONTACTS, app.layouts()::contacts)
 					  ));
@@ -63,6 +64,24 @@ final class SearchChatsLayout extends LayoutBase implements InputHandler, ClickH
 	return InputHandler.Result.OK;
     }
 
+    private boolean actJoin()
+    {
+	final Chat chat = searchArea.selected();
+	if (chat == null)
+	    return false;
+
+	for(Map.Entry<Long, User> u: app.getObjects().users.entrySet())
+	    if (u.getValue().lastName != null && u.getValue().lastName.equals("Pozhidaev"))
+		{
+		    app.getOperations().addChatMember(chat.id, u.getValue().id, ()->{
+		app.message("Подписка добавлена", Luwrain.MessageType.OK);
+	    });
+	
+	return true;
+		}
+		return false;
+    }
+
     @Override public boolean onConsoleClick(ConsoleArea area, int index, Chat chat)
     {
 		app.getOperations().getChatHistory(chat, (messagesChat, messages)->{
@@ -81,13 +100,10 @@ final class SearchChatsLayout extends LayoutBase implements InputHandler, ClickH
     {
 	@Override public void announceItem(Chat chat)
 	{
-
 	    	    final StringBuilder b = new StringBuilder();
 	    b.append(chat.title).append(" ");
 	    if (chat.type != null)
 		b.append(chat.type.getClass().getSimpleName());
-
-	    
 	    app.setEventResponse(text(new String(b)));
 	}
 	@Override public String getTextAppearance(Chat chat)

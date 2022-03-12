@@ -25,6 +25,17 @@ final class Conversations
 	this.strings = app.getStrings();
     }
 
+    String newChannelTitle()
+    {
+	return Popups.textNotEmpty(luwrain, strings.newChannelPopupName(), strings.newChannelTitlePopupPrefix(), "");
+    }
+
+        String newChannelDescr()
+    {
+	return Popups.text(luwrain, strings.newChannelPopupName(), strings.newChannelDescrPopupPrefix(), "");
+    }
+
+
     String newContactFirstName()
     {
 	return Popups.textNotEmpty(luwrain, "Новый контакт", "Имя человека:", "");

@@ -95,6 +95,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 
 		      consoleArea, actions(
 					   action("delete", app.getStrings().actionDeleteMessage(), new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actDeleteMessage),
+					   					   action("new-channel", app.getStrings().actionNewChannel(), MainLayout.this::actNewChannel),
 					   searchChatsAction, contactsAction)
 		      );
 	synchronized(app.getObjects()) {
@@ -130,88 +131,22 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 
     @Override public boolean onConsoleClick(ConsoleArea consoleArea, int index, Message message)
     {
-	NullCheck.notNull(message, "message");
-	if (message.content != null && message.content instanceof MessageAudio)
-	{
-	    final MessageAudio audio = (MessageAudio)message.content;
-	    if (audio.audio.audio.local.isDownloadingActive)
-		return false;
-	    	    if (audio.audio.audio.local.isDownloadingCompleted)
-		    {
-			if (audio.audio.audio.local.path == null || audio.audio.audio.local.path.isEmpty())
-			    return false;
-			if (app.getLuwrain().getPlayer() == null)
-			    return false;
-			app.getLuwrain().getPlayer().play(new org.luwrain.player.FixedPlaylist(new String[]{
-				    org.luwrain.util.UrlUtils.fileToUrl(new java.io.File(audio.audio.audio.local.path))
-			    }), 0, 0, org.luwrain.player.Player.DEFAULT_FLAGS, new Properties());
-		return true;
-		    }
-		    app.getOperations().downloadFile(audio.audio.audio);
-		    app.getLuwrain().message("Выполняется доставка файла");//FIXME:
-		    return true;
-	}
+	final MessageClicks clicks = new MessageClicks(app);
+	return clicks.onMessageClick(message);
+    }
 
-		if (message.content != null && message.content instanceof MessageDocument)
-	{
-	    final MessageDocument doc = (MessageDocument)message.content;
-	    if (doc.document.document.local.isDownloadingActive)
-		return false;
-	    /*
-	    	    if (audio.audio.audio.local.isDownloadingCompleted)
-		    {
-			if (audio.audio.audio.local.path == null || audio.audio.audio.local.path.isEmpty())
-			    return false;
-			if (app.getLuwrain().getPlayer() == null)
-			    return false;
-			app.getLuwrain().getPlayer().play(new org.luwrain.player.FixedPlaylist(new String[]{
-				    org.luwrain.util.UrlUtils.fileToUrl(new java.io.File(audio.audio.audio.local.path))
-			    }), 0, 0, org.luwrain.player.Player.DEFAULT_FLAGS, new Properties());
-		return true;
-		    }
-	    */
-		    app.getOperations().downloadFile(doc.document.document);
-		    app.getLuwrain().message("Выполняется доставка файла");//FIXME:
-		    return true;
-	}
-
-				if (message.content != null && message.content instanceof MessagePhoto)
-	{
-	    final MessagePhoto photo = (MessagePhoto)message.content;
-	    if (photo.photo.sizes.length == 0)
-		return false;
-PhotoSize size = photo.photo.sizes[photo.photo.sizes.length - 1];
-	    if (size.photo.local.isDownloadingActive)
-		return false;
-		    app.getOperations().downloadFile(size.photo);
-		    app.getLuwrain().message("Выполняется доставка файла");//FIXME:
-		    return true;
-	}
-
-		if (message.content != null && message.content instanceof MessageVoiceNote)
-	{
-	    final MessageVoiceNote voiceNoteContent = (MessageVoiceNote)message.content;
-	    final VoiceNote voiceNote = voiceNoteContent.voiceNote;
-	    if (voiceNote.voice.local.isDownloadingActive)
-		return false;
-	    	    if (voiceNote.voice.local.isDownloadingCompleted)
-		    {
-			final LocalFile localFile = voiceNote.voice.local;
-			if (localFile.path == null || localFile.path.isEmpty())
-			    return false;
-			if (app.getLuwrain().getPlayer() == null)
-			    return false;
-			app.getLuwrain().getPlayer().play(new org.luwrain.player.FixedPlaylist(new String[]{
-				    org.luwrain.util.UrlUtils.fileToUrl(new java.io.File(localFile.path))
-			    }), 0, 0, org.luwrain.player.Player.DEFAULT_FLAGS, new Properties());
-		return true;
-		    }
-		    app.getOperations().downloadFile(voiceNote.voice);
-		    app.getLuwrain().message("Выполняется доставка файла");//FIXME:
-		    return true;
-	}
-
-	return false;
+    private boolean actNewChannel()
+    {
+	final String title = app.getConv().newChannelTitle();
+	if (title == null)
+	    return true;
+	final String descr = app.getConv().newChannelDescr();
+	if (descr == null)
+	    return true;
+	app.getOperations().createSupergroupChat(title, descr, true, (chat)->{
+		app.message(app.getStrings().channelCreated(chat.title), Luwrain.MessageType.OK);
+	    });
+	return true;
     }
 
     @Override public void onNewMessage(Chat chat, Message message)

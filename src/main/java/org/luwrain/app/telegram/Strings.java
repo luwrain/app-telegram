@@ -17,6 +17,7 @@ public interface Strings
     String actionMainChats();
     String actionContacts();
     String actionSearchChats();
+    String actionJoin();
 
     String actionCloseChat();
     String actionDeleteMessage();
@@ -25,4 +26,10 @@ public interface Strings
     String chatsAreaName();
     String chatPropsAreaName();
     String contactsAreaName();
+
+    String actionNewChannel();
+    String newChannelPopupName();
+    String newChannelTitlePopupPrefix();
+        String newChannelDescrPopupPrefix();
+    String channelCreated(String title);
 }
