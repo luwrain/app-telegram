@@ -112,6 +112,15 @@ objects.basicGroups.put(updateBasicGroup.basicGroup.id, updateBasicGroup.basicGr
 	}
                     break;
 
+		    	case UpdateSupergroupFullInfo.CONSTRUCTOR: {
+                    final UpdateSupergroupFullInfo fullInfo = (UpdateSupergroupFullInfo) object;
+		    synchronized (object) {
+		                        objects.supergroupsFullInfo.put(fullInfo.supergroupId, fullInfo.supergroupFullInfo);
+		    }
+	}
+                    break;
+
+
 	case UpdateSecretChat.CONSTRUCTOR: {
 final UpdateSecretChat updateSecretChat = (UpdateSecretChat) object;
 synchronized (objects) {
@@ -296,11 +305,6 @@ chat = objects.chats.get(updateChat.chatId);
                 case TdApi.UpdateBasicGroupFullInfo.CONSTRUCTOR:
                     TdApi.UpdateBasicGroupFullInfo updateBasicGroupFullInfo = (TdApi.UpdateBasicGroupFullInfo) object;
 		    //                    basicGroupsFullInfo.put(updateBasicGroupFullInfo.basicGroupId, updateBasicGroupFullInfo.basicGroupFullInfo);
-                    break;
-
-	case UpdateSupergroupFullInfo.CONSTRUCTOR:
-                    TdApi.UpdateSupergroupFullInfo updateSupergroupFullInfo = (TdApi.UpdateSupergroupFullInfo) object;
-		    //                    supergroupsFullInfo.put(updateSupergroupFullInfo.supergroupId, updateSupergroupFullInfo.supergroupFullInfo);
                     break;
 
 	default:

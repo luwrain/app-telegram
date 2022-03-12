@@ -19,11 +19,11 @@ import org.luwrain.core.queries.*;
 import org.luwrain.controls.*;
 import org.luwrain.app.base.*;
 
-final class Core
+public final class Core
 {
     static private final int CHAT_NUM_LIMIT = 200;
 
-    static final String
+    static public final String
 	LOG_COMPONENT = "telegram";
 
     final Luwrain luwrain;

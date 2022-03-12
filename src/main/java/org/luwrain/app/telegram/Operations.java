@@ -48,12 +48,14 @@ abstract class Operations
 
     abstract Client getClient();
 
+    void callFunc(TdApi.Function func, int constructor, Consumer<TdApi.Object> res)
+    {
+		getClient().send(func,
+			 new Handler(constructor, (obj)->res.accept(obj)));
+    }
+
     void addContact(String phone, String firstName, String lastName, Runnable onSuccess)
     {
-	NullCheck.notEmpty(phone, "phone");
-	NullCheck.notEmpty(firstName, "firstName");
-	NullCheck.notEmpty(lastName, "lastName");
-	NullCheck.notNull(onSuccess, "onSuccess");
 	final TdApi.Contact contact = new TdApi.Contact(phone, firstName, lastName, "", 0);
 	getClient().send(new TdApi.ImportContacts(new TdApi.Contact[]{contact}),
 			 new DefaultHandler(TdApi.ImportedContacts.CONSTRUCTOR, (obj)->{

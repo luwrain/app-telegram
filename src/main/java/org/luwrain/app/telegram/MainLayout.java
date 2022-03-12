@@ -9,25 +9,14 @@ package org.luwrain.app.telegram;
 
 import java.util.*;
 
-import org.drinkless.tdlib.TdApi.LocalFile;
-import org.drinkless.tdlib.TdApi.Chat;
-import org.drinkless.tdlib.TdApi.ChatTypePrivate;
-import org.drinkless.tdlib.TdApi.User;
-import org.drinkless.tdlib.TdApi.Message;
-import org.drinkless.tdlib.TdApi.MessageText;
-import org.drinkless.tdlib.TdApi.MessageAudio;
-import org.drinkless.tdlib.TdApi.PhotoSize;
-import org.drinkless.tdlib.TdApi.MessagePhoto;
-import org.drinkless.tdlib.TdApi.MessageDocument;
-import org.drinkless.tdlib.TdApi.MessagePhoto;
-import org.drinkless.tdlib.TdApi.MessageVoiceNote;
-import org.drinkless.tdlib.TdApi.VoiceNote;
-import org.drinkless.tdlib.TdApi.Messages;
+import org.drinkless.tdlib.*;
+import org.drinkless.tdlib.TdApi.*;
 
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.app.base.*;
+import org.luwrain.app.telegram.props.*;
 
 final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>, ConsoleArea.InputHandler, ConsoleArea.ClickHandler<Message>,
 						     Objects.ChatsListener, Objects.NewMessageListener
@@ -87,7 +76,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 
 	final ActionInfo
 	searchChatsAction = 					     action("search-chats", "Поиск групп и каналов", App.HOTKEY_SEARCH_CHATS, app.layouts()::searchChats),
-	contactsAction = action("contacts", app.getStrings().actionContacts(), App.HOTKEY_CONTACTS, MainLayout.this::actContacts);
+	contactsAction = action("contacts", app.getStrings().actionContacts(), App.HOTKEY_CONTACTS, app.layouts()::contacts);
 
 	setAreaLayout(AreaLayout.LEFT_RIGHT, chatsArea, actions(
 								action("close-chat", app.getStrings().actionCloseChat(), new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actCloseChat),
@@ -149,6 +138,67 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	return true;
     }
 
+    
+    private boolean actDeleteMessage()
+    {
+	if (activeChat == null)
+	    return false;
+	final Message message = consoleArea.selected();
+	if (message == null)
+	    return false;
+	app.getOperations().deleteMessage(activeChat, new Message[]{ message}, ()->{
+		app.getLuwrain().playSound(Sounds.OK);
+	    });
+	return true;
+    }
+
+            private boolean actCloseChat()
+    {
+	final Chat chat = chatsArea.selected();
+	if (chat == null)
+	    return false;
+	app.getOperations().leaveChat(chat, ()->app.getLuwrain().playSound(Sounds.OK));
+	return true;
+    }
+
+    private boolean onChatProperties()
+    {
+	final Chat chat = chatsArea.selected();
+	if (chat == null)
+	    return false;
+
+	if (chat.type instanceof ChatTypeSupergroup)
+	{
+	    final long supergroupId = ((ChatTypeSupergroup)chat.type).supergroupId;
+	    final Supergroup supergroup = app.getObjects().supergroups.get(supergroupId);
+	    if (supergroup == null)
+	    {
+		org.luwrain.core.Log.error(LOG_COMPONENT, "no supergroup in objects, id = " + supergroupId);
+		return false;
+	    }
+	    app.getOperations().callFunc(new GetSupergroupFullInfo(supergroupId), SupergroupFullInfo.CONSTRUCTOR, (obj)->{
+		    final SupergroupFullInfo fullInfo = (SupergroupFullInfo)obj;
+		    final SupergroupPropertiesLayout props = new SupergroupPropertiesLayout(app, chat, supergroup, fullInfo, ()->{
+			    app.setAreaLayout(MainLayout.this);
+			    getLuwrain().announceActiveArea();
+			    return true;
+			});
+		    app.setAreaLayout(props);
+		    getLuwrain().announceActiveArea();
+		});
+	    return true;
+	}
+
+	return false;
+	
+	/*
+	final ChatPropertiesLayout layout = new ChatPropertiesLayout(app, chat, ()->app.layouts().main());
+	app.layout(layout.getLayout());
+	return true;
+	*/
+    }
+
+
     @Override public void onNewMessage(Chat chat, Message message)
     {
 		if (message.content instanceof MessageText)
@@ -157,8 +207,6 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 		    getLuwrain().speak(text.text.text, Sounds.CHAT_MESSAGE);
 		    return;
 		}
-
-	
     }
 
     @Override public void onChatsUpdate(Chat sourceChat)
@@ -179,19 +227,6 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	chatsArea.refresh();
     }
 
-    private boolean actDeleteMessage()
-    {
-	if (activeChat == null)
-	    return false;
-	final Object obj = consoleArea.selected();
-	if (obj == null || !(obj instanceof Message))
-	    return false;
-	app.getOperations().deleteMessage(activeChat, new Message[]{ (Message)obj}, ()->{
-		app.getLuwrain().playSound(Sounds.OK);
-	    });
-	return true;
-    }
-
 
     private void updateActiveChatHistory()
     {
@@ -208,36 +243,6 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 		consoleArea.refresh();
 	    });
     }
-
-    private boolean actContacts()
-    {
-	app.layouts().contacts();
-	return true;
-    }
-
-        private boolean actCloseChat()
-    {
-	final Object obj = chatsArea.selected();
-	if (obj == null || !(obj instanceof Chat))
-	    return false;
-	final Chat chat = (Chat)obj;
-	app.getOperations().leaveChat(chat, ()->app.getLuwrain().playSound(Sounds.OK));
-	return true;
-    }
-
-    private boolean onChatProperties()
-    {
-	final Object obj = chatsArea.selected();
-	if (obj == null || !(obj instanceof Chat))
-	    return false;
-	final Chat chat = (Chat)obj;
-	final ChatPropertiesLayout layout = new ChatPropertiesLayout(app, chat, ()->app.layouts().main());
-	app.layout(layout.getLayout());
-	return true;
-    }
-
-
-
 
     /*
     void activate()

@@ -32,6 +32,7 @@ final class Objects
     final NavigableSet<OrderedChat> mainChats = new TreeSet<>();
     final Map<Long, BasicGroup> basicGroups = new ConcurrentHashMap<>();
     final Map<Long, Supergroup> supergroups = new ConcurrentHashMap<>();
+        final Map<Long, SupergroupFullInfo> supergroupsFullInfo = new ConcurrentHashMap<>();
     final Map<Integer, SecretChat> secretChats = new ConcurrentHashMap<>();
 
     private long[] contacts = new long[0];
