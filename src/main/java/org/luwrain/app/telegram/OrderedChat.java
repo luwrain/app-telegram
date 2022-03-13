@@ -32,7 +32,7 @@ final class OrderedChat implements Comparable<OrderedChat>
 
     @Override public boolean equals(Object obj)
     {
-	OrderedChat o = (OrderedChat) obj;
+	final OrderedChat o = (OrderedChat) obj;
 	return this.chatId == o.chatId && this.position.order == o.position.order;
     }
 }

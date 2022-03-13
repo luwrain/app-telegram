@@ -134,29 +134,33 @@ synchronized (objects) {
                     break;
 
 	case UpdateChatPosition.CONSTRUCTOR: {
+	    Log.debug(LOG_COMPONENT, "Update chat position");
 	    final UpdateChatPosition updateChat = (UpdateChatPosition) object;
 	    if (updateChat.position.list.getConstructor() != ChatListMain.CONSTRUCTOR) 
 		break;
+	    final long newOrder = updateChat.position.order;
 	    final Chat chat = objects.chats.get(updateChat.chatId);
+	    if (chat == null)
+		break;
 	    synchronized (objects) {
 		int i;
+		//Searching for the position which corresponds to the main chat list
 		for (i = 0; i < chat.positions.length; i++)
-		{
 		    if (chat.positions[i].list.getConstructor() == ChatListMain.CONSTRUCTOR)
 			break;
-		}
-		TdApi.ChatPosition[] new_positions = new TdApi.ChatPosition[chat.positions.length + (updateChat.position.order == 0 ? 0 : 1) - (i < chat.positions.length ? 1 : 0)];
+		final ChatPosition[] new_positions = new ChatPosition[chat.positions.length +
+								      (newOrder == 0 ?0:1) -
+								      (i < chat.positions.length ? 1 : 0)];
 		int pos = 0;
-		if (updateChat.position.order != 0) {
+		//Adding the new value
+		if (newOrder != 0)
 		    new_positions[pos++] = updateChat.position;
-		}
+		//Copying old values excluding the value to be replaced
 		for (int j = 0; j < chat.positions.length; j++)
-		{
 		    if (j != i)
 			new_positions[pos++] = chat.positions[j];
-		}
 		if (pos != new_positions.length)
-		    Log.warning(LOG_COMPONENT, "pos != new_positions.length");
+		    Log.warning(LOG_COMPONENT, "updating the chat position: pos != new_positions.length");
 		setChatPositions(chat, new_positions);
 	    }
 	    objects.chatsUpdated(chat);
@@ -434,19 +438,15 @@ this.authorizationState = authorizationState;
         }
     }
 
-    private void setChatPositions(TdApi.Chat chat, TdApi.ChatPosition[] positions)
+    private void setChatPositions(Chat chat, ChatPosition[] positions)
     {
 	for (ChatPosition position : chat.positions)
 	    if (position.list.getConstructor() == ChatListMain.CONSTRUCTOR)
 		objects.mainChats.remove(new OrderedChat(chat.id, position));
 	chat.positions = positions;
 	for (ChatPosition position : chat.positions)
-	{
 	    if (position.list.getConstructor() == ChatListMain.CONSTRUCTOR)
-	    {
 		objects.mainChats.add(new OrderedChat(chat.id, position));
-	    }
-	}
     }
 
 static final class InputWaiter

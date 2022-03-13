@@ -211,6 +211,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 
     @Override public void onChatsUpdate(Chat sourceChat)
     {
+	org.luwrain.core.Log.debug(LOG_COMPONENT, "updating main chat list");
 	final Objects objects = app.getObjects();
 	final ArrayList<Chat> res = new ArrayList<>();
 	synchronized(objects) {
