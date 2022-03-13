@@ -40,4 +40,5 @@ public interface Strings
 
     String actionComposeText();
     String composeTextAreaName();
+    String composedTextEmpty();
 }

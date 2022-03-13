@@ -63,16 +63,13 @@ public abstract class Operations
 			 }));
     }
 
-    void sendMessage(TdApi.Chat chat, String text, Runnable onSuccess)
+    void sendTextMessage(Chat chat, String text, Runnable onSuccess)
     {
-	TdApi.InlineKeyboardButton[] row = {new TdApi.InlineKeyboardButton("https://telegram.org?1", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?2", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?3", new TdApi.InlineKeyboardButtonTypeUrl())};
-        TdApi.ReplyMarkup replyMarkup = new TdApi.ReplyMarkupInlineKeyboard(new TdApi.InlineKeyboardButton[][]{row, row, row});
-	final TdApi.InputMessageContent content = new TdApi.InputMessageText(new TdApi.FormattedText(text, null), false, true);
-	//	getClient().send(new TdApi.SendMessage(chat.id, 0, null, replyMarkup, content),
+	final InlineKeyboardButton[] row = {new TdApi.InlineKeyboardButton("https://telegram.org?1", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?2", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?3", new TdApi.InlineKeyboardButtonTypeUrl())};
+        final ReplyMarkup replyMarkup = new ReplyMarkupInlineKeyboard(new TdApi.InlineKeyboardButton[][]{row, row, row});
+	final InputMessageContent content = new InputMessageText(new FormattedText(text, null), false, true);
 	getClient().send(new TdApi.SendMessage(chat.id, 0, 0, null, replyMarkup, content),
-			 new DefaultHandler(TdApi.Message.CONSTRUCTOR, (obj)->{
-				 luwrain.runUiSafely(()->onSuccess.run());
-			 }));
+			 new Handler(Message.CONSTRUCTOR, (obj)->onSuccess.run()));
     }
 
     void deleteMessage(TdApi.Chat chat, TdApi.Message[] messages, Runnable onSuccess)

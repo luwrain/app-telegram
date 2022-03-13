@@ -26,22 +26,34 @@ final class ComposeTextLayout extends LayoutBase
 {
     private final App app;
     private final EditArea editArea;
+    private final Chat chat;
 
-    ComposeTextLayout(App app, ActionHandler closing)
+    ComposeTextLayout(App app, Chat chat, ActionHandler closing, Runnable afterSending)
     {
 	super(app);
+	this.chat = chat;
 	this.app = app;
 	this.editArea = new EditArea(editParams((params)->{
 		    params.name = app.getStrings().composeTextAreaName();
 		}));
 	setCloseHandler(closing);
-	setOkHandler(()->onOk(closing));
+	setOkHandler(()->onOk(closing, afterSending));
 	setAreaLayout(editArea, null);
     }
 
-    private boolean onOk(ActionHandler closing)
+    private boolean onOk(ActionHandler closing, Runnable afterSending)
     {
+	final String[] lines = editArea.getText();
+	if (lines.length == 0 ||
+	    (lines.length == 1 && lines[0].trim().isEmpty()))
+	{
+	    app.message(app.getStrings().composedTextEmpty(), Luwrain.MessageType.ERROR);
+	    return true;
+	}
+	final StringBuilder b = new StringBuilder();
+	for(String l: lines)
+	    b.append(l).append("\n");
+	app.getOperations().sendTextMessage(chat, new String(b), afterSending);
 	return closing.onAction();
     }
-    
 }

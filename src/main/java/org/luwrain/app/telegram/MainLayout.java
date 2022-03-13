@@ -80,11 +80,13 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 
 	setAreaLayout(AreaLayout.LEFT_RIGHT, chatsArea, actions(
 								action("close-chat", app.getStrings().actionCloseChat(), new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actCloseChat),
+													   					   action("new-channel", app.getStrings().actionNewChannel(), MainLayout.this::actNewChannel),
 								searchChatsAction, contactsAction),
 
 		      consoleArea, actions(
+					   					   action("compose-text", app.getStrings().actionComposeText(), new InputEvent(InputEvent.Special.INSERT), MainLayout.this::actComposeText),
 					   action("delete", app.getStrings().actionDeleteMessage(), new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actDeleteMessage),
-					   					   action("new-channel", app.getStrings().actionNewChannel(), MainLayout.this::actNewChannel),
+
 					   searchChatsAction, contactsAction)
 		      );
 	synchronized(app.getObjects()) {
@@ -110,10 +112,10 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	NullCheck.notNull(text, "text");
 	if (text.isEmpty() || activeChat == null)
 	    return ConsoleArea.InputHandler.Result.REJECTED;
-	app.getOperations().sendMessage(activeChat, text, ()->{
+	app.getOperations().sendTextMessage(activeChat, text, ()->{
 		consoleArea.setInput("");
 		updateActiveChatHistory();
-		app.getLuwrain().playSound(Sounds.DONE);
+		getLuwrain().playSound(Sounds.DONE);
 	    });
 	return ConsoleArea.InputHandler.Result.OK;
     }
@@ -149,6 +151,23 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	app.getOperations().deleteMessage(activeChat, new Message[]{ message}, ()->{
 		app.getLuwrain().playSound(Sounds.OK);
 	    });
+	return true;
+    }
+
+    private boolean actComposeText()
+    {
+	if (activeChat == null)
+	    return false;
+	final ComposeTextLayout compose = new ComposeTextLayout(app, activeChat, ()->{
+		app.setAreaLayout(MainLayout.this);
+		getLuwrain().announceActiveArea();
+		return true;
+	    }, ()->{
+		updateActiveChatHistory();
+		getLuwrain().playSound(Sounds.DONE);
+	    });
+	app.setAreaLayout(compose);
+	getLuwrain().announceActiveArea();
 	return true;
     }
 
