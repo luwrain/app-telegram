@@ -174,13 +174,10 @@ public abstract class Operations
     }
 
 
-    void createPrivateChat(long userId, Runnable onSuccess)
+    void createPrivateChat(long userId, Consumer<Chat> onSuccess)
     {
-	NullCheck.notNull(onSuccess, "onSuccess");
 	getClient().send(new TdApi.CreatePrivateChat(userId, false),
-			 new DefaultHandler(TdApi.Chat.CONSTRUCTOR, (obj)->{
-				 luwrain.runUiSafely(onSuccess);
-			 }));
+			 new Handler(Chat.CONSTRUCTOR, (obj)->onSuccess.accept((Chat)obj)));
     }
 
     void createSupergroupChat(String title, String descr, boolean isChannel, Consumer<Chat> onSuccess)

@@ -66,7 +66,15 @@ final class ContactsLayout extends LayoutBase implements ClickHandler<Contact>, 
 
     @Override public boolean onListClick(ListArea listArea, int index, Contact contact)
     {
-	app.getOperations().createPrivateChat(contact.userId, ()->app.layouts().main());
+	app.getOperations().createPrivateChat(contact.userId, (chat)->{
+		final ComposeTextLayout compose = new ComposeTextLayout(app, chat, ()->{
+			app.setAreaLayout(ContactsLayout.this);
+			getLuwrain().announceActiveArea();
+			return true;
+		    }, ()->getLuwrain().playSound(Sounds.DONE));
+		app.setAreaLayout(compose);
+		getLuwrain().announceActiveArea();
+	    });
 	return true;
     }
 
@@ -92,6 +100,7 @@ final class ContactsLayout extends LayoutBase implements ClickHandler<Contact>, 
 
     @Override public void onUsersUpdate(User user)
     {
+	//FIXME:
     }
 
     private final class ContactsAppearance extends AbstractAppearance<Contact>
