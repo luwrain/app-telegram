@@ -37,4 +37,7 @@ public interface Strings
     String newChannelTitlePopupPrefix();
         String newChannelDescrPopupPrefix();
     String channelCreated(String title);
+
+    String actionComposeText();
+    String composeTextAreaName();
 }
