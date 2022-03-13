@@ -134,35 +134,10 @@ synchronized (objects) {
                     break;
 
 	case UpdateChatPosition.CONSTRUCTOR: {
-	    Log.debug(LOG_COMPONENT, "Update chat position");
 	    final UpdateChatPosition updateChat = (UpdateChatPosition) object;
-	    if (updateChat.position.list.getConstructor() != ChatListMain.CONSTRUCTOR) 
-		break;
-	    final long newOrder = updateChat.position.order;
-	    final Chat chat = objects.chats.get(updateChat.chatId);
-	    if (chat == null)
-		break;
-	    synchronized (objects) {
-		int i;
-		//Searching for the position which corresponds to the main chat list
-		for (i = 0; i < chat.positions.length; i++)
-		    if (chat.positions[i].list.getConstructor() == ChatListMain.CONSTRUCTOR)
-			break;
-		final ChatPosition[] new_positions = new ChatPosition[chat.positions.length +
-								      (newOrder == 0 ?0:1) -
-								      (i < chat.positions.length ? 1 : 0)];
-		int pos = 0;
-		//Adding the new value
-		if (newOrder != 0)
-		    new_positions[pos++] = updateChat.position;
-		//Copying old values excluding the value to be replaced
-		for (int j = 0; j < chat.positions.length; j++)
-		    if (j != i)
-			new_positions[pos++] = chat.positions[j];
-		if (pos != new_positions.length)
-		    Log.warning(LOG_COMPONENT, "updating the chat position: pos != new_positions.length");
-		setChatPositions(chat, new_positions);
-	    }
+	    updateChatPosition(updateChat.chatId, updateChat.position );
+	    final  Chat chat = objects.chats.get(updateChat.chatId);
+	    if (chat != null)
 	    objects.chatsUpdated(chat);
 	    break;
 	}
@@ -207,8 +182,11 @@ synchronized (objects) {
 chat = objects.chats.get(updateChat.chatId);
                         chat.lastMessage = updateChat.lastMessage;
                     }
-					objects.chatsUpdated(chat);
-                    break;
+					if (updateChat.positions != null)
+					for(ChatPosition p: updateChat.positions)
+								updateChatPosition(updateChat.chatId, p);
+						    objects.chatsUpdated(chat);
+								                    break;
                 }
 
                 case UpdateChatReadInbox.CONSTRUCTOR: {
@@ -436,6 +414,37 @@ this.authorizationState = authorizationState;
                     Log.error(LOG_COMPONENT, "Receive wrong response from TDLib: " + object);
             }
         }
+    }
+
+    private void updateChatPosition(long chatId, ChatPosition position)
+    {
+	if (position.list.getConstructor() != ChatListMain.CONSTRUCTOR) 
+	    return;
+	final long newOrder = position.order;
+	synchronized (objects) {
+	    final Chat chat = objects.chats.get(chatId);
+	    if (chat == null)
+		return;
+	    int i;
+	    //Searching for the position which corresponds to the main chat list
+	    for (i = 0; i < chat.positions.length; i++)
+		if (chat.positions[i].list.getConstructor() == ChatListMain.CONSTRUCTOR)
+		    break;
+	    final ChatPosition[] new_positions = new ChatPosition[chat.positions.length +
+								  (newOrder == 0 ?0:1) -
+								  (i < chat.positions.length ? 1 : 0)];
+	    int pos = 0;
+	    //Adding the new value
+	    if (newOrder != 0)
+		new_positions[pos++] = position;
+	    //Copying old values excluding the value to be replaced
+	    for (int j = 0; j < chat.positions.length; j++)
+		if (j != i)
+		    new_positions[pos++] = chat.positions[j];
+	    if (pos != new_positions.length)
+		Log.warning(LOG_COMPONENT, "updating the chat position: pos != new_positions.length");
+	    setChatPositions(chat, new_positions);
+	}
     }
 
     private void setChatPositions(Chat chat, ChatPosition[] positions)
