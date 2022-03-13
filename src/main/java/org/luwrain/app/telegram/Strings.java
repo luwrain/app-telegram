@@ -31,7 +31,6 @@ public interface Strings
     String authPhoneNumberInput();
     String authCodeIntro();
     String authContinue();
-    
 
     String actionNewChannel();
     String newChannelPopupName();
