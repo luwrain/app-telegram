@@ -79,7 +79,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	contactsAction = action("contacts", app.getStrings().actionContacts(), App.HOTKEY_CONTACTS, app.layouts()::contacts);
 
 	setAreaLayout(AreaLayout.LEFT_RIGHT, chatsArea, actions(
-								action("close-chat", app.getStrings().actionCloseChat(), new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actCloseChat),
+								//action("stat", app.getStrings().actionChatStat(), new InputEvent('?'), this::actStat),
 													   					   action("new-channel", app.getStrings().actionNewChannel(), MainLayout.this::actNewChannel),
 								searchChatsAction, contactsAction),
 
@@ -170,6 +170,27 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	getLuwrain().announceActiveArea();
 	return true;
     }
+
+    private boolean actStat()
+    {
+	final Chat chat = chatsArea.selected();
+	if (chat == null)
+	    return false;
+	app.getOperations().callFunc(new GetChatStatistics(chat.id, false), ChatStatisticsChannel.CONSTRUCTOR, (res)->{
+		final ChatStatisticsLayout stat = new ChatStatisticsLayout(app, chat, (ChatStatistics)res, ()->{
+			app.setAreaLayout(this);
+			getLuwrain().announceActiveArea();
+			return true;
+		    });
+		app.setAreaLayout(stat);
+		getLuwrain().announceActiveArea();
+		
+	    });
+
+	return true;
+	    }
+
+	
 
             private boolean actCloseChat()
     {

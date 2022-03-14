@@ -41,4 +41,7 @@ public interface Strings
     String actionComposeText();
     String composeTextAreaName();
     String composedTextEmpty();
+
+    String actionChatStat();
+    String chatStatAreaName();
 }
