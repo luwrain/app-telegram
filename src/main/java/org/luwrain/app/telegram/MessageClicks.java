@@ -24,17 +24,25 @@ import static org.luwrain.core.DefaultEventResponse.*;
 final class MessageClicks
 {
     private final App app;
+    private final LayoutBase layout;
 
-    MessageClicks(App app)
+    MessageClicks(App app, LayoutBase layout)
     {
 	NullCheck.notNull(app, "app");
+	NullCheck.notNull(layout, "layout");
 	this.app = app;
+	this.layout = layout;
     }
 
-    
 boolean onMessageClick(Message message)
     {
-	NullCheck.notNull(message, "message");
+	if (message == null || message.content == null)
+	    return false;
+
+	if (message.content instanceof MessageText)
+	    return onText(message, (MessageText)message.content);
+
+	
 	if (message.content != null && message.content instanceof MessageAudio)
 	{
 	    final MessageAudio audio = (MessageAudio)message.content;
@@ -116,6 +124,18 @@ PhotoSize size = photo.photo.sizes[photo.photo.sizes.length - 1];
 	}
 
 	return false;
+    }
+
+    private boolean onText(Message message, MessageText text)
+    {
+	final MessageContentLayout content = new MessageContentLayout(app, message, ()->{
+		app.setAreaLayout(this.layout);
+		app.getLuwrain().announceActiveArea();
+		return true;
+	    });
+	app.setAreaLayout(content);
+	app.getLuwrain().announceActiveArea();
+	return true;
     }
 
 }

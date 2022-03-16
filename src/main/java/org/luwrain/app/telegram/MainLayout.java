@@ -157,7 +157,17 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 
     @Override public boolean onConsoleClick(ConsoleArea consoleArea, int index, Message message)
     {
-	final MessageClicks clicks = new MessageClicks(app);
+	if (activeChat == null)
+	    return false;
+	final MessageClicks clicks = new MessageClicks(app, this);
+	if (message.content instanceof MessagePinMessage)
+	{
+	    final MessagePinMessage pin = (MessagePinMessage)message.content;
+	    app.getOperations().callFunc(new GetMessage(activeChat.id, pin.messageId), Message.CONSTRUCTOR, (res)->{
+		    clicks.onMessageClick((Message)res);
+		});
+	    return true;
+	}
 	return clicks.onMessageClick(message);
     }
 

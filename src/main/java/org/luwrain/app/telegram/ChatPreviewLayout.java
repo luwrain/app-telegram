@@ -47,7 +47,7 @@ final class ChatPreviewLayout extends LayoutBase implements ClickHandler<Message
 
     @Override public boolean onListClick(ListArea area, int index, Message message)
     {
-	final MessageClicks c = new MessageClicks(app);
+	final MessageClicks c = new MessageClicks(app, this);
 	return c.onMessageClick(message);
 	
     }

@@ -49,4 +49,6 @@ public interface Strings
 
     String actionChatStat();
     String chatStatAreaName();
+
+    String actionPrivacySettings();
 }
