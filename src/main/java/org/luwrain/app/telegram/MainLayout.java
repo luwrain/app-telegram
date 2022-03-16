@@ -79,13 +79,14 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	contactsAction = action("contacts", app.getStrings().actionContacts(), App.HOTKEY_CONTACTS, app.layouts()::contacts);
 
 	setAreaLayout(AreaLayout.LEFT_RIGHT, chatsArea, actions(
-								//action("stat", app.getStrings().actionChatStat(), new InputEvent('?'), this::actStat),
-													   					   action("new-channel", app.getStrings().actionNewChannel(), MainLayout.this::actNewChannel),
+								action("delete-chat", app.getStrings().actionDeleteChat(), this::actDeleteChat),
+								action("new-channel", app.getStrings().actionNewChannel(), this::actNewChannel),
 								searchChatsAction, contactsAction),
 
 		      consoleArea, actions(
-					   					   action("compose-text", app.getStrings().actionComposeText(), new InputEvent(InputEvent.Special.INSERT), MainLayout.this::actComposeText),
-					   action("delete", app.getStrings().actionDeleteMessage(), new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actDeleteMessage),
+					   action("edit-message-text", app.getStrings().actionEditMessageText(), new InputEvent(InputEvent.Special.F5, EnumSet.of(InputEvent.Modifiers.SHIFT)), MainLayout.this::actEditMessageText),
+					   action("compose-text", app.getStrings().actionComposeText(), new InputEvent(InputEvent.Special.INSERT), MainLayout.this::actComposeText),
+					   action("delete-message", app.getStrings().actionDeleteMessage(), new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actDeleteMessage),
 
 					   searchChatsAction, contactsAction)
 		      );
@@ -118,6 +119,40 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 		getLuwrain().playSound(Sounds.DONE);
 	    });
 	return ConsoleArea.InputHandler.Result.OK;
+    }
+
+    private boolean actDeleteChat()
+    {
+	final Chat chat = chatsArea.selected();
+	if (chat == null)
+	    return false;
+	if (!app.getConv().confirmChatDeleting(chat))
+	    return true;
+	app.getOperations().callFunc(new DeleteChat(chat.id), Ok.CONSTRUCTOR, (res)->{
+		getLuwrain().playSound(Sounds.OK);
+	    });
+	return true;
+    }
+
+    private boolean actEditMessageText()
+    {
+	final Message message = consoleArea.selected();
+	if (message == null || activeChat == null)
+	    return false;
+	if (message.content == null || !(message.content instanceof MessageText))
+	    return false;
+	final ComposeTextLayout compose = new ComposeTextLayout(app, activeChat, message, ()->{
+		app.setAreaLayout(this);
+		getLuwrain().announceActiveArea();
+		return true;
+	    }, ()->{
+				updateActiveChatHistory();
+		getLuwrain().playSound(Sounds.DONE);
+	    });
+	app.setAreaLayout(compose);
+	getLuwrain().announceActiveArea();
+
+	return true;
     }
 
     @Override public boolean onConsoleClick(ConsoleArea consoleArea, int index, Message message)
@@ -158,7 +193,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
     {
 	if (activeChat == null)
 	    return false;
-	final ComposeTextLayout compose = new ComposeTextLayout(app, activeChat, ()->{
+	final ComposeTextLayout compose = new ComposeTextLayout(app, activeChat, null, ()->{
 		app.setAreaLayout(MainLayout.this);
 		getLuwrain().announceActiveArea();
 		return true;
@@ -241,6 +276,8 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 
     @Override public void onNewMessage(Chat chat, Message message)
     {
+	if (chat.type != null && chat.type instanceof ChatTypeSupergroup)
+	    return;
 		if (message.content instanceof MessageText)
 	{
 		    final MessageText text = (MessageText)message.content;

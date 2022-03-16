@@ -67,7 +67,7 @@ final class ContactsLayout extends LayoutBase implements ClickHandler<Contact>, 
     @Override public boolean onListClick(ListArea listArea, int index, Contact contact)
     {
 	app.getOperations().createPrivateChat(contact.userId, (chat)->{
-		final ComposeTextLayout compose = new ComposeTextLayout(app, chat, ()->{
+		final ComposeTextLayout compose = new ComposeTextLayout(app, chat, null, ()->{
 			app.setAreaLayout(ContactsLayout.this);
 			getLuwrain().announceActiveArea();
 			return true;

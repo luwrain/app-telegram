@@ -7,6 +7,9 @@
 
 package org.luwrain.app.telegram;
 
+import org.drinkless.tdlib.TdApi;
+import org.drinkless.tdlib.TdApi.*;
+
 import org.luwrain.core.*;
 import org.luwrain.controls.*;
 import org.luwrain.popups.Popups;
@@ -71,5 +74,10 @@ final class Conversations
 	    if (Character.isDigit(str.charAt(i)))
 		b.append(str.charAt(i));
 	return new String(b);
+    }
+
+    boolean confirmChatDeleting(Chat chat)
+    {
+	return Popups.confirmDefaultNo(luwrain, strings.chatDeletingPopupName(), strings.chatDeletingPopupText(chat.title));
     }
 }

@@ -39,8 +39,13 @@ public interface Strings
     String channelCreated(String title);
 
     String actionComposeText();
+    String actionEditMessageText();
     String composeTextAreaName();
     String composedTextEmpty();
+
+    String actionDeleteChat();
+    String chatDeletingPopupName();
+    String chatDeletingPopupText(String title);
 
     String actionChatStat();
     String chatStatAreaName();

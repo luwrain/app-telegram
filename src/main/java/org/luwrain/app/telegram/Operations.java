@@ -66,11 +66,21 @@ public abstract class Operations
     void sendTextMessage(Chat chat, String text, Runnable onSuccess)
     {
 	final InlineKeyboardButton[] row = {new TdApi.InlineKeyboardButton("https://telegram.org?1", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?2", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?3", new TdApi.InlineKeyboardButtonTypeUrl())};
-        final ReplyMarkup replyMarkup = new ReplyMarkupInlineKeyboard(new TdApi.InlineKeyboardButton[][]{row, row, row});
+        final ReplyMarkup replyMarkup = new ReplyMarkupInlineKeyboard(new InlineKeyboardButton[][]{row, row, row});
 	final InputMessageContent content = new InputMessageText(new FormattedText(text, null), false, true);
 	getClient().send(new TdApi.SendMessage(chat.id, 0, 0, null, replyMarkup, content),
 			 new Handler(Message.CONSTRUCTOR, (obj)->onSuccess.run()));
     }
+
+    void editMessageText(Chat chat, Message message, String text, Runnable onSuccess)
+    {
+	final InlineKeyboardButton[] row = {new TdApi.InlineKeyboardButton("https://telegram.org?1", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?2", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?3", new TdApi.InlineKeyboardButtonTypeUrl())};
+        final ReplyMarkup replyMarkup = new ReplyMarkupInlineKeyboard(new InlineKeyboardButton[][]{row, row, row});
+	final InputMessageContent content = new InputMessageText(new FormattedText(text, null), false, true);
+	getClient().send(new EditMessageText(chat.id, message.id, replyMarkup, content),
+			 new Handler(Message.CONSTRUCTOR, (obj)->onSuccess.run()));
+    }
+
 
     void deleteMessage(TdApi.Chat chat, TdApi.Message[] messages, Runnable onSuccess)
     {

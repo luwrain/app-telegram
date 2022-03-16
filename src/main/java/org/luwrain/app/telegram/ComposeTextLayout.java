@@ -11,31 +11,35 @@ import java.util.*;
 import java.io.*;
 
 import org.drinkless.tdlib.TdApi;
-import org.drinkless.tdlib.TdApi.Chat;
-import org.drinkless.tdlib.TdApi.ChatTypeSupergroup;
-import org.drinkless.tdlib.TdApi.Supergroup;
-import org.drinkless.tdlib.TdApi.ChatTypeBasicGroup;
-import org.drinkless.tdlib.TdApi.BasicGroup;
+import org.drinkless.tdlib.TdApi.*;
 
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.app.base.*;
+import static org.luwrain.util.TextUtils.*;
 
 final class ComposeTextLayout extends LayoutBase
 {
     private final App app;
     private final EditArea editArea;
     private final Chat chat;
+    private final Message message;
 
-    ComposeTextLayout(App app, Chat chat, ActionHandler closing, Runnable afterSending)
+    ComposeTextLayout(App app, Chat chat, Message message, ActionHandler closing, Runnable afterSending)
     {
 	super(app);
-	this.chat = chat;
 	this.app = app;
+		this.chat = chat;
+		this.message = message;
 	this.editArea = new EditArea(editParams((params)->{
 		    params.name = app.getStrings().composeTextAreaName();
 		}));
+	if (message != null && message.content != null && message.content instanceof MessageText)
+	{
+	    final MessageText text = (MessageText)message.content;
+	    editArea.setText(splitLinesAnySeparator(text.text.text));
+	}
 	setCloseHandler(closing);
 	setOkHandler(()->onOk(closing, afterSending));
 	setAreaLayout(editArea, null);
@@ -53,6 +57,8 @@ final class ComposeTextLayout extends LayoutBase
 	final StringBuilder b = new StringBuilder();
 	for(String l: lines)
 	    b.append(l).append("\n");
+	if (message != null)
+	    app.getOperations().editMessageText(chat, message, new String(b), afterSending); else
 	app.getOperations().sendTextMessage(chat, new String(b), afterSending);
 	return closing.onAction();
     }
