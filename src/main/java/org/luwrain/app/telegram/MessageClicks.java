@@ -28,21 +28,20 @@ final class MessageClicks
 
     MessageClicks(App app, LayoutBase layout)
     {
-	NullCheck.notNull(app, "app");
+		NullCheck.notNull(app, "app");
 	NullCheck.notNull(layout, "layout");
 	this.app = app;
 	this.layout = layout;
     }
 
-boolean onMessageClick(Message message)
+    boolean onMessageClick(Message message)
     {
 	if (message == null || message.content == null)
 	    return false;
-
 	if (message.content instanceof MessageText)
 	    return onText(message, (MessageText)message.content);
-
-	
+	if (message.content instanceof MessageVideo)
+	    return onVideo((MessageVideo)message.content);
 	if (message.content != null && message.content instanceof MessageAudio)
 	{
 	    final MessageAudio audio = (MessageAudio)message.content;
@@ -138,4 +137,12 @@ PhotoSize size = photo.photo.sizes[photo.photo.sizes.length - 1];
 	return true;
     }
 
+    private boolean onVideo(MessageVideo video)
+    {
+		    if (video.video.video.local.isDownloadingActive)
+		return false;
+		    app.getOperations().downloadFile(video.video.video);
+		    app.getLuwrain().message("Выполняется доставка файла");//FIXME:
+		    return true;
+	}
 }
