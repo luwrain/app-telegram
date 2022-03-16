@@ -44,8 +44,6 @@ final class ChatsListAppearance extends ListUtils.DefaultAppearance<Chat>
 
     @Override public String getScreenAppearance(Chat chat, Set<Flags> flags)
     {
-	NullCheck.notNull(chat, "chat");
-	NullCheck.notNull(flags, "flags");
 	    final StringBuilder b = new StringBuilder();
 	    b.append(chat.title);
 	    if (chat.lastMessage != null)

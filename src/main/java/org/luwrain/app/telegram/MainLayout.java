@@ -331,12 +331,4 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 		consoleArea.refresh();
 	    });
     }
-
-    /*
-    void activate()
-    {
-			app.getOperations().fillMainChatList(CHAT_NUM_LIMIT);
-	setActiveArea(chatsArea);
-    }
-    */
 }

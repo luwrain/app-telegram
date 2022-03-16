@@ -32,15 +32,9 @@ final class MessageAppearance implements ConsoleArea.Appearance<Message>
 
     @Override public void announceItem(Message message)
     {
-	NullCheck.notNull(message, "message");
 	if (message.content == null)
 	{
 	    luwrain.setEventResponse(hint(Hint.EMPTY_LINE));
-	    return;
-	}
-	if (message.content instanceof MessagePhoto)
-	{
-	    announcePhoto(message, (MessagePhoto)message.content);
 	    return;
 	}
 	if (message.content instanceof MessageText)
@@ -53,7 +47,77 @@ final class MessageAppearance implements ConsoleArea.Appearance<Message>
 	    announceMessageAudio(message, (MessageAudio)message.content);
 	    return;
 	}
+	if (message.content instanceof MessagePhoto)
+	{
+	    announcePhoto(message, (MessagePhoto)message.content);
+	    return;
+	}
+	if (message.content instanceof MessageVideo)
+	{
+	    announceVideo(message, (MessageVideo)message.content);
+	    return;
+	}
 	luwrain.setEventResponse(DefaultEventResponse.text(message.content.getClass().getName()));
+    }
+
+    @Override public String getTextAppearance(Message message)
+    {
+	NullCheck.notNull(message, "message");
+	if (message.content == null)
+	    return "";
+	if (message.content instanceof MessageText)
+	{
+	    final MessageText text = (MessageText)message.content;
+	    return text.text.text;
+	}
+	return message.content.getClass().getName();
+    }
+
+    private String getAnnouncementSuffix(Message message)
+    {
+	final User user;
+	if (message.senderId instanceof TdApi.MessageSenderUser)
+	    user = objects.users.get(((MessageSenderUser)message.senderId).userId); else
+	    user = null;
+	final StringBuilder b = new StringBuilder();
+	if (user != null)
+	{
+	    if (user.firstName != null && !user.firstName.trim().isEmpty())
+		b.append(user.firstName.trim()).append(" ");
+	    if (user.lastName != null && !user.lastName.trim().isEmpty())
+		b.append(user.lastName.trim()).append(" ");
+	}
+	long date = message.date;
+	date *= 1000;
+	b.append(luwrain.i18n().getPastTimeBrief(new java.util.Date(date)));
+	return new String(b);
+    }
+
+    static String getMessageText(Message message)
+    {
+	if (message.content == null)
+	    return "";
+	if (message.content instanceof MessageText)
+	{
+	    final MessageText text = (MessageText)message.content;
+	    return text.text.text.trim();
+	}
+	if (message.content instanceof MessagePhoto)
+	{
+	    final MessagePhoto photo = (MessagePhoto)message.content;
+	    return photo.caption.text.trim();
+	}
+	if (message.content instanceof MessageVideo)
+	{
+	    final MessageVideo video = (MessageVideo)message.content;
+	    return video.caption.text.trim();
+	}
+	return "";
+    }
+
+    private void announceText(Message message, MessageText text)
+    {
+	luwrain.setEventResponse(listItem(luwrain.getSpeakableText(text.text.text, Luwrain.SpeakableTextType.NATURAL) + ", " + getAnnouncementSuffix(message), Suggestions.CLICKABLE_LIST_ITEM));
     }
 
     void announceMessageAudio(Message message, MessageAudio audio)
@@ -71,69 +135,21 @@ final class MessageAppearance implements ConsoleArea.Appearance<Message>
 	luwrain.setEventResponse(DefaultEventResponse.listItem(new String(b)));
     }
 
-    @Override public String getTextAppearance(Message message)
-    {
-	NullCheck.notNull(message, "message");
-	if (message.content == null)
-	    return "";
-	if (message.content instanceof MessageText)
-	{
-	    final MessageText text = (MessageText)message.content;
-	    return text.text.text;
-	}
-	return message.content.getClass().getName();
-    }
-
-            private String getAnnouncementSuffix(Message message)
-    {
-	final User user;
-	if (message.senderId instanceof TdApi.MessageSenderUser)
-	    user = objects.users.get(((MessageSenderUser)message.senderId).userId); else
-	    user = null;
-	final StringBuilder b = new StringBuilder();
-	if (user != null)
-	{
-	if (user.firstName != null && !user.firstName.trim().isEmpty())
-	    b.append(user.firstName.trim()).append(" ");
-    	if (user.lastName != null && !user.lastName.trim().isEmpty())
-	    b.append(user.lastName.trim()).append(" ");
-	}
-	long date = message.date;
-	date *= 1000;
-	b.append(luwrain.i18n().getPastTimeBrief(new java.util.Date(date)));
-	return new String(b);
-    }
-
-        private void announceText(Message message, MessageText text)
-    {
-	luwrain.setEventResponse(listItem(luwrain.getSpeakableText(text.text.text, Luwrain.SpeakableTextType.NATURAL) + ", " + getAnnouncementSuffix(message), Suggestions.CLICKABLE_LIST_ITEM));
-    }
-
-static String getMessageText(Message message)
-    {
-	NullCheck.notNull(message, "message");
-	if (message.content == null)
-	    return "";
-	if (message.content instanceof MessageText)
-	{
-	    final MessageText text = (MessageText)message.content;
-	    return text.text.text;
-	}
-	return "";
-    }
-
     private void announcePhoto(Message message, MessagePhoto photo)
     {
 	luwrain.setEventResponse(listItem(Sounds.PICTURE, photo.caption.text + ", " + getAnnouncementSuffix(message), Suggestions.CLICKABLE_LIST_ITEM));
     }
 
-    
-
-        static final class ForList extends ListUtils.AbstractAppearance<Message>
+    private void announceVideo(Message message, MessageVideo video)
     {
-		private final MessageAppearance appearance;
+	luwrain.setEventResponse(listItem(Sounds.PICTURE, "ВИДЕО " + video.caption.text + ", " + getAnnouncementSuffix(message), Suggestions.CLICKABLE_LIST_ITEM));
+    }
+
+    static final class ForList extends ListUtils.AbstractAppearance<Message>
+    {
+	private final MessageAppearance appearance;
 	ForList(App app) { this.appearance = new MessageAppearance(app.getLuwrain(), app.getObjects()); }
 	@Override public void announceItem(Message message, Set<Flags> flags) { appearance.announceItem(message); }
 	@Override public String getScreenAppearance(Message message, Set<Flags> flags) { return appearance.getTextAppearance(message); }
     }
-    }
+}
