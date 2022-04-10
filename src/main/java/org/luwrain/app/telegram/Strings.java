@@ -51,4 +51,9 @@ public interface Strings
     String chatStatAreaName();
 
     String actionPrivacySettings();
+
+    String actionSendPhoto();
+        String actionSendAudio();
+    String actionSetChatPhoto();
+    String actionChatMembers();
 }

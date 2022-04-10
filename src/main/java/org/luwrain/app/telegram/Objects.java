@@ -15,7 +15,7 @@ import org.drinkless.tdlib.TdApi.*;
 
 import org.luwrain.core.*;
 
-final class Objects
+public final class Objects
 {
     interface ChatsListener { void onChatsUpdate(Chat chat); }
     interface UsersListener { void onUsersUpdate(User user); }
@@ -27,7 +27,7 @@ final class Objects
 
     private final Luwrain luwrain;
 
-    final Map<Long, User> users = new ConcurrentHashMap<>();
+    public final Map<Long, User> users = new ConcurrentHashMap<>();
     final Map<Integer, File> files = new ConcurrentHashMap<>();
     final Map<Long, Chat> chats = new ConcurrentHashMap<>();
     final NavigableSet<OrderedChat> mainChats = new TreeSet<>();

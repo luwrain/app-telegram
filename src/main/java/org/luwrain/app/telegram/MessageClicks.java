@@ -129,7 +129,12 @@ PhotoSize size = photo.photo.sizes[photo.photo.sizes.length - 1];
     {
 	final MessageContentLayout content = new MessageContentLayout(app, message, ()->{
 		app.setAreaLayout(this.layout);
-		app.getLuwrain().announceActiveArea();
+		if (this.layout instanceof MainLayout)
+		{
+		    final MainLayout mainLayout = (MainLayout)this.layout;
+		    mainLayout.setActiveArea(mainLayout.consoleArea);
+		} else
+		    app.getLuwrain().announceActiveArea();
 		return true;
 	    });
 	app.setAreaLayout(content);

@@ -16,7 +16,9 @@ import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.app.base.*;
+
 import org.luwrain.app.telegram.props.*;
+import org.luwrain.app.telegram.layouts.*;
 
 final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>, ConsoleArea.InputHandler, ConsoleArea.ClickHandler<Message>,
 						     Objects.ChatsListener, Objects.NewMessageListener
@@ -79,6 +81,8 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	contactsAction = action("contacts", app.getStrings().actionContacts(), App.HOTKEY_CONTACTS, app.layouts()::contacts);
 
 	setAreaLayout(AreaLayout.LEFT_RIGHT, chatsArea, actions(
+								action("set-chat-photo", app.getStrings().actionSetChatPhoto(), this::actSetChatPhoto),
+								action("chat-members", app.getStrings().actionChatMembers(), this::actChatMembers),
 								action("delete-chat", app.getStrings().actionDeleteChat(), this::actDeleteChat),
 								action("new-channel", app.getStrings().actionNewChannel(), this::actNewChannel),
 								searchChatsAction, contactsAction),
@@ -86,6 +90,8 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 		      consoleArea, actions(
 					   action("edit-message-text", app.getStrings().actionEditMessageText(), new InputEvent(InputEvent.Special.F5, EnumSet.of(InputEvent.Modifiers.SHIFT)), MainLayout.this::actEditMessageText),
 					   action("compose-text", app.getStrings().actionComposeText(), new InputEvent(InputEvent.Special.INSERT), MainLayout.this::actComposeText),
+					   action("send-photo", app.getStrings().actionSendPhoto(), new InputEvent(InputEvent.Special.INSERT, EnumSet.of(InputEvent.Modifiers.CONTROL)), MainLayout.this::actSendPhoto),
+					   					   action("send-audio", app.getStrings().actionSendAudio(), new InputEvent(InputEvent.Special.INSERT, EnumSet.of(InputEvent.Modifiers.SHIFT)), MainLayout.this::actSendAudio),
 					   action("delete-message", app.getStrings().actionDeleteMessage(), new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actDeleteMessage),
 
 					   searchChatsAction, contactsAction)
@@ -133,6 +139,57 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	    });
 	return true;
     }
+
+        private boolean actSetChatPhoto()
+    {
+	final Chat chat = chatsArea.selected();
+	if (chat == null)
+	    return false;
+	app.getOperations().callFunc(new SetChatPhoto(chat.id, new InputChatPhotoStatic(new InputFileLocal(""))), Ok.CONSTRUCTOR, (res)->{
+		getLuwrain().playSound(Sounds.OK);
+	    });
+	return true;
+    }
+
+            private boolean actChatMembers()
+    {
+	final Chat chat = chatsArea.selected();
+	if (chat == null)
+	    return false;
+	/*
+
+		if (chat.type instanceof ChatTypeSupergroup)
+	{
+	    final long supergroupId = ((ChatTypeSupergroup)chat.type).supergroupId;
+	    app.getOperations().callFunc(new GetSupergroupMembers(supergroupId, null, 0, 200), ChatMembers.CONSTRUCTOR, (res)->{
+		    final ChatMembers members = (ChatMembers)res;
+		    for(ChatMember m: members.members)
+		    {
+			if (m.memberId instanceof  MessageSenderUser)
+			{
+			    final MessageSenderUser sender = (MessageSenderUser)m.memberId;
+			    final User user = app.getObjects().users.get(sender.userId);
+						if (user == null)
+			    continue;
+			org.luwrain.core.Log.debug(LOG_COMPONENT, user.firstName + " " + user.lastName);
+			}
+		    }
+		});
+	    return true;
+	}
+		return false;
+	*/
+	final ChatMembersLayout layout = new ChatMembersLayout(app, chat, ()->{
+		app.setAreaLayout(this);
+		setActiveArea(chatsArea);
+		return true;
+	    });
+	app.setAreaLayout(layout);
+	layout.showFirst();
+	return true;
+	
+		    }
+
 
     private boolean actEditMessageText()
     {
@@ -215,6 +272,50 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	getLuwrain().announceActiveArea();
 	return true;
     }
+
+        private boolean actSendPhoto()
+    {
+	if (activeChat == null)
+	    return false;
+	app.getOperations().sendPhotoMessage(activeChat, new java.io.File("/tmp/good/DSC_0533.jpg"), "У нас всё точно получится!\n#RaspberryPi #Linux #тифлопедагогика #образование", ()->{});
+	return true;
+	/*
+	final ComposeTextLayout compose = new ComposeTextLayout(app, activeChat, null, ()->{
+		app.setAreaLayout(MainLayout.this);
+		getLuwrain().announceActiveArea();
+		return true;
+	    }, ()->{
+		updateActiveChatHistory();
+		getLuwrain().playSound(Sounds.DONE);
+	    });
+	app.setAreaLayout(compose);
+	getLuwrain().announceActiveArea();
+	return true;
+	*/
+    }
+
+            private boolean actSendAudio()
+    {
+	if (activeChat == null)
+	    return false;
+	app.getOperations().sendAudioMessage(activeChat, new java.io.File("mp3"), "text", "", "", ()->{});
+	return true;
+	/*
+	final ComposeTextLayout compose = new ComposeTextLayout(app, activeChat, null, ()->{
+		app.setAreaLayout(MainLayout.this);
+		getLuwrain().announceActiveArea();
+		return true;
+	    }, ()->{
+		updateActiveChatHistory();
+		getLuwrain().playSound(Sounds.DONE);
+	    });
+	app.setAreaLayout(compose);
+	getLuwrain().announceActiveArea();
+	return true;
+	*/
+    }
+
+
 
     private boolean actStat()
     {

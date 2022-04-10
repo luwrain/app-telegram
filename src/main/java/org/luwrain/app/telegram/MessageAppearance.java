@@ -62,13 +62,17 @@ final class MessageAppearance implements ConsoleArea.Appearance<Message>
 
     @Override public String getTextAppearance(Message message)
     {
-	NullCheck.notNull(message, "message");
 	if (message.content == null)
 	    return "";
 	if (message.content instanceof MessageText)
 	{
 	    final MessageText text = (MessageText)message.content;
 	    return text.text.text;
+	}
+	if (message.content instanceof MessageAudio)
+	{
+	    final MessageAudio audio = (MessageAudio)message.content;
+	    return audio.caption.text;
 	}
 	return message.content.getClass().getName();
     }
@@ -122,8 +126,9 @@ final class MessageAppearance implements ConsoleArea.Appearance<Message>
 
     void announceMessageAudio(Message message, MessageAudio audio)
     {
-	NullCheck.notNull(message, "message");
-	NullCheck.notNull(audio, "audio");
+
+		luwrain.setEventResponse(listItem(Sounds.LIST_ITEM, "АУДИО " + audio.caption.text + ", " + getAnnouncementSuffix(message), Suggestions.CLICKABLE_LIST_ITEM));
+		/*
 	final User user =null;// objects.users.get(message.senderUserId);
 	final StringBuilder b = new StringBuilder();
 	b.append("аудио ");
@@ -133,6 +138,7 @@ final class MessageAppearance implements ConsoleArea.Appearance<Message>
 	if (user != null && user.firstName != null && !user.firstName.trim().isEmpty())
 	    b.append(" ").append(user.firstName.trim());
 	luwrain.setEventResponse(DefaultEventResponse.listItem(new String(b)));
+		*/
     }
 
     private void announcePhoto(Message message, MessagePhoto photo)
