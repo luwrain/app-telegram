@@ -43,8 +43,9 @@ public final class ChatMembersLayout extends LayoutBase
 	this.app = app;
 	this.chat = chat;
 	this.listArea = new ListArea<>(listParams((params)->{
-		    params.name = "Поиск  групп и каналов";
+		    params.name = "Участники";
 		    params.model = new ListModel<>(items);
+		    params.appearance = new UserAppearance.ForList(app);
 		}));
 	setAreaLayout(listArea, null);
 	setCloseHandler(closing);
