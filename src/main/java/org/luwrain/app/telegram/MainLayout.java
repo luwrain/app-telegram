@@ -298,7 +298,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
     {
 	if (activeChat == null)
 	    return false;
-	app.getOperations().sendAudioMessage(activeChat, new java.io.File("mp3"), "text", "", "", ()->{});
+	app.getOperations().sendAudioMessage(activeChat, new java.io.File("/tmp/Nocturne.mp3"), "Этому меланхолическому фортепианному размышлению уже несколько лет, но так и не может перерасти в полноценную пьесу.\n#музыка #фортепиано #неоклассика", "Michael Pozhidaev", "Nocturne", ()->{});
 	return true;
 	/*
 	final ComposeTextLayout compose = new ComposeTextLayout(app, activeChat, null, ()->{

@@ -47,7 +47,7 @@ public String getTextAppearance(User user)
 	    b.append(user.firstName).append(" ");
 		if (user.lastName != null && !user.lastName.isEmpty())
 	    b.append(user.lastName);
-			return new String(b);
+		return new String(b).trim();
     }
 
 

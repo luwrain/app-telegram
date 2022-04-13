@@ -63,7 +63,7 @@ public abstract class Operations
 			 }));
     }
 
-    void sendTextMessage(Chat chat, String text, Runnable onSuccess)
+    public void sendTextMessage(Chat chat, String text, Runnable onSuccess)
     {
 	final InlineKeyboardButton[] row = {new TdApi.InlineKeyboardButton("https://telegram.org?1", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?2", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?3", new TdApi.InlineKeyboardButtonTypeUrl())};
         final ReplyMarkup replyMarkup = new ReplyMarkupInlineKeyboard(new InlineKeyboardButton[][]{row, row, row});
@@ -92,7 +92,7 @@ public abstract class Operations
 
 
 
-    void editMessageText(Chat chat, Message message, String text, Runnable onSuccess)
+    public void editMessageText(Chat chat, Message message, String text, Runnable onSuccess)
     {
 	final InlineKeyboardButton[] row = {new TdApi.InlineKeyboardButton("https://telegram.org?1", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?2", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?3", new TdApi.InlineKeyboardButtonTypeUrl())};
         final ReplyMarkup replyMarkup = new ReplyMarkupInlineKeyboard(new InlineKeyboardButton[][]{row, row, row});

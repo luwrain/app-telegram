@@ -19,6 +19,7 @@ import org.luwrain.controls.*;
 import org.luwrain.controls.ListArea.*;
 import org.luwrain.controls.ListUtils.*;
 import org.luwrain.app.base.*;
+import org.luwrain.app.telegram.layouts.*;
 
 final class ContactsLayout extends LayoutBase implements ClickHandler<Contact>, Objects.UsersListener
 {
