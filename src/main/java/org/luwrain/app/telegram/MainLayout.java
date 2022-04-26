@@ -17,7 +17,6 @@ import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.app.base.*;
 
-import org.luwrain.app.telegram.props.*;
 import org.luwrain.app.telegram.layouts.*;
 
 final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>, ConsoleArea.InputHandler, ConsoleArea.ClickHandler<Message>,
@@ -277,7 +276,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
     {
 	if (activeChat == null)
 	    return false;
-	app.getOperations().sendPhotoMessage(activeChat, new java.io.File("/tmp/good/DSC_0533.jpg"), "У нас всё точно получится!\n#RaspberryPi #Linux #тифлопедагогика #образование", ()->{});
+	app.getOperations().sendPhotoMessage(activeChat, new java.io.File("/tmp/transformer/decoder.jpg"), "А это декодер.\n#NLP #лингвистика ", ()->{});
 	return true;
 	/*
 	final ComposeTextLayout compose = new ComposeTextLayout(app, activeChat, null, ()->{

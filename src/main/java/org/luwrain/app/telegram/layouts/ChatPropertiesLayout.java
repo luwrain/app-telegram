@@ -5,7 +5,7 @@
 // file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-package org.luwrain.app.telegram;
+package org.luwrain.app.telegram.layouts;
 
 import java.util.*;
 import java.io.*;
@@ -21,13 +21,14 @@ import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
 import org.luwrain.app.base.*;
+import org.luwrain.app.telegram.*;
 
-final class ChatPropertiesLayout extends LayoutBase
+public final class ChatPropertiesLayout extends LayoutBase
 {
     private final App app;
     private final SimpleArea propsArea;
 
-    ChatPropertiesLayout(App app, Chat chat, Runnable closing)
+    public ChatPropertiesLayout(App app, Chat chat, Runnable closing)
     {
 	NullCheck.notNull(app, "app");
 	NullCheck.notNull(chat, "chat");
@@ -61,7 +62,6 @@ final class ChatPropertiesLayout extends LayoutBase
 
     private void fill(Chat chat)
     {
-	NullCheck.notNull(chat, "chat");
 	if (chat.type != null && chat.type instanceof ChatTypeSupergroup)
 	{
 	    final ChatTypeSupergroup s = (ChatTypeSupergroup)chat.type;
@@ -86,7 +86,6 @@ final class ChatPropertiesLayout extends LayoutBase
 	    return;
 	}
 
-		
 		propsArea.update((lines)->{
 	fillBasic(chat);
 	lines.addLine("");
@@ -95,11 +94,9 @@ final class ChatPropertiesLayout extends LayoutBase
 
     private void fillBasic(Chat chat)
     {
-	NullCheck.notNull(chat, "chat");
 	propsArea.addLine("Тип: " + chat.type.getClass().getName());
 	//	propsArea.addLine(chat.chatList.getClass().getName());
 	propsArea.addLine("Имя: " + chat.title);
-	propsArea.addLine("Unread: " + chat.isMarkedAsUnread);
 	propsArea.addLine("canBeDeletedOnlyForSelf: " + chat.canBeDeletedOnlyForSelf);
 	propsArea.addLine("canBeDeletedForAllUsers: " + chat.canBeDeletedForAllUsers);
 	propsArea.addLine("unreadCount: " + chat.unreadCount);
@@ -107,11 +104,9 @@ final class ChatPropertiesLayout extends LayoutBase
 
     private void fillSupergroup(Chat chat, Supergroup supergroup)
     {
-	NullCheck.notNull(chat, "chat");
-	NullCheck.notNull(supergroup, "supergroup");
-	propsArea.addLine("Name: " + supergroup.username);
-	propsArea.addLine("Member count: " + supergroup.memberCount);
-	propsArea.addLine("Is channel: " + supergroup.isChannel);
+	propsArea.addLine("Имя: " + supergroup.username);
+	propsArea.addLine("Участников: " + supergroup.memberCount);
+	propsArea.addLine("Канал: " + supergroup.isChannel);
     }
 
         private void fillBasicGroup(Chat chat, BasicGroup basicGroup)
@@ -121,7 +116,6 @@ final class ChatPropertiesLayout extends LayoutBase
 	propsArea.addLine("Name: " + chat.title);
 	propsArea.addLine("Member count: " + basicGroup.memberCount);
     }
-
 
     AreaLayout getLayout()
     {

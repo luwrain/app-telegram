@@ -5,7 +5,7 @@
 // file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-package org.luwrain.app.telegram.props;
+package org.luwrain.app.telegram.layouts;
 
 import java.util.*;
 
@@ -21,6 +21,7 @@ public final class SupergroupPropertiesLayout extends LayoutBase
 {
     static private final String
 	LOG_COMPONENT = Core.LOG_COMPONENT,
+	EDIT_DESCR = "description",
 	EDIT_USERNAME = "username";
 
     private final App app;
@@ -43,8 +44,9 @@ public final class SupergroupPropertiesLayout extends LayoutBase
 
 	formArea.addStatic("Title: " + chat.title);
 	if (supergroup.isChannel)
-	    formArea.addStatic("Type: channel"); else
-	    formArea.addStatic("Type: group");
+	    formArea.addStatic("Тип: канал"); else
+	    formArea.addStatic("Тип: группа");
+		    formArea.addEdit(EDIT_DESCR, "Описание: ", fullInfo.description);
 	if (fullInfo.canSetUsername)
 	    formArea.addEdit(EDIT_USERNAME, "User name: ", supergroup.username); else
 	formArea.addStatic("Username: " + supergroup.username);
@@ -58,6 +60,11 @@ public final class SupergroupPropertiesLayout extends LayoutBase
 
     private boolean onOk()
     {
+
+		if (!formArea.getEnteredText(EDIT_DESCR).equals(fullInfo.description))
+	    app.getOperations().callFunc(new SetChatDescription(chat.id, formArea.getEnteredText(EDIT_DESCR)), Ok.CONSTRUCTOR, (res)->{});
+
+		
 	if (fullInfo.canSetUsername && !formArea.getEnteredText(EDIT_USERNAME).equals(supergroup.username))
 	    app.getOperations().callFunc(new SetSupergroupUsername(supergroup.id, formArea.getEnteredText(EDIT_USERNAME)), Ok.CONSTRUCTOR, (res)->{});
 	return true;

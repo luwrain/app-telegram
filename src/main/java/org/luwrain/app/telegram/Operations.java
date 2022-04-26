@@ -13,12 +13,6 @@ import java.io.*;
 
 import org.drinkless.tdlib.*;
 import org.drinkless.tdlib.TdApi.*;
-//import org.drinkless.tdlib.TdApi.Chat;
-//import org.drinkless.tdlib.TdApi.Message;
-//import org.drinkless.tdlib.TdApi.User;
-//import org.drinkless.tdlib.TdApi.Contact;
-//import org.drinkless.tdlib.TdApi.Supergroup;
-//import org.drinkless.tdlib.TdApi.BasicGroup;
 
 import org.luwrain.core.*;
 //import org.luwrain.core.events.*;
@@ -32,8 +26,8 @@ public abstract class Operations
 	LOG_COMPONENT = Core.LOG_COMPONENT;
 
     interface ChatHistoryCallback { void onChatHistoryMessages(TdApi.Chat chat, TdApi.Messages messages); }
-    interface SupergroupCallback { void onSupergroup(Supergroup supergroup); }
-    interface BasicGroupCallback { void onBasicGroup(BasicGroup basicGroup); }
+    public interface SupergroupCallback { void onSupergroup(Supergroup supergroup); }
+    public interface BasicGroupCallback { void onBasicGroup(BasicGroup basicGroup); }
 
     private final Luwrain luwrain;
     private final Objects objects;
@@ -57,7 +51,7 @@ public abstract class Operations
     void addContact(String phone, String firstName, String lastName, Runnable onSuccess)
     {
 	final TdApi.Contact contact = new TdApi.Contact(phone, firstName, lastName, "", 0);
-	getClient().send(new TdApi.ImportContacts(new TdApi.Contact[]{contact}),
+	getClient().send(new ImportContacts(new TdApi.Contact[]{contact}),
 			 new DefaultHandler(TdApi.ImportedContacts.CONSTRUCTOR, (obj)->{
 				 luwrain.runUiSafely(onSuccess);
 			 }));
@@ -185,7 +179,7 @@ public abstract class Operations
     }
 
 
-    void getSupergroup(long supergroupId, SupergroupCallback callback)
+    public void getSupergroup(long supergroupId, SupergroupCallback callback)
     {
 	NullCheck.notNull(callback, "callback");
 	getClient().send(new TdApi.GetSupergroup(supergroupId),
@@ -194,7 +188,7 @@ public abstract class Operations
 			 }));
     }
 
-        void getBasicGroup(long basicGroupId, BasicGroupCallback callback)
+        public void getBasicGroup(long basicGroupId, BasicGroupCallback callback)
     {
 	NullCheck.notNull(callback, "callback");
 	getClient().send(new TdApi.GetBasicGroup(basicGroupId),
