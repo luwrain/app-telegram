@@ -55,7 +55,7 @@ final class MessageClicks
 			    return false;
 			app.getLuwrain().getPlayer().play(new org.luwrain.player.FixedPlaylist(new String[]{
 				    org.luwrain.util.UrlUtils.fileToUrl(new java.io.File(audio.audio.audio.local.path))
-			    }), 0, 0, org.luwrain.player.Player.DEFAULT_FLAGS, new Properties());
+			    }), 0, 0, org.luwrain.player.Player.DEFAULT_FLAGS);
 		return true;
 		    }
 		    app.getOperations().downloadFile(audio.audio.audio);
@@ -114,7 +114,7 @@ PhotoSize size = photo.photo.sizes[photo.photo.sizes.length - 1];
 			    return false;
 			app.getLuwrain().getPlayer().play(new org.luwrain.player.FixedPlaylist(new String[]{
 				    org.luwrain.util.UrlUtils.fileToUrl(new java.io.File(localFile.path))
-			    }), 0, 0, org.luwrain.player.Player.DEFAULT_FLAGS, new Properties());
+			    }), 0, 0, org.luwrain.player.Player.DEFAULT_FLAGS);
 		return true;
 		    }
 		    app.getOperations().downloadFile(voiceNote.voice);
