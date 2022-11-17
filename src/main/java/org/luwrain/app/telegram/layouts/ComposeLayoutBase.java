@@ -21,52 +21,29 @@ import org.luwrain.app.telegram.*;
 
 import static org.luwrain.util.TextUtils.*;
 
-public final class ComposeTextLayout extends LayoutBase
+abstract class ComposeLayoutBase extends LayoutBase
 {
-    private final App app;
-    private final EditArea editArea;
-    private final Chat chat;
-    private final Message message;
+    final App app;
+    final FormArea formArea;
+    final Chat chat;
+    final Message message;
 
-    public ComposeTextLayout(App app, Chat chat, Message message, ActionHandler closing, Runnable afterSending)
+    abstract protected boolean onOk(ActionHandler closing, Runnable afterSending);
+
+    protected ComposeLayoutBase(App app, Chat chat, Message message, ActionHandler closing, Runnable afterSending)
     {
 	super(app);
 	this.app = app;
 		this.chat = chat;
 		this.message = message;
-	this.editArea = new EditArea(editParams((params)->{
-		    params.name = app.getStrings().composeTextAreaName();
-		}));
-	if (message != null && message.content != null && message.content instanceof MessageText)
-	{
-	    final MessageText text = (MessageText)message.content;
-	    editArea.setText(splitLinesAnySeparator(text.text.text));
-	}
+		this.formArea = new FormArea(getControlContext());
 	setCloseHandler(closing);
 	setOkHandler(()->onOk(closing, afterSending));
-	setAreaLayout(editArea, null);
     }
 
-    private boolean onOk(ActionHandler closing, Runnable afterSending)
+    protected String[] getText()
     {
-	final String[] lines = getText();
-	if (lines.length == 0)
-	{
-	    app.message(app.getStrings().composedTextEmpty(), Luwrain.MessageType.ERROR);
-	    return true;
-	}
-	final StringBuilder b = new StringBuilder();
-	for(String l: lines)
-	    b.append(l).append("\n").append("\n");
-	if (message != null)
-	    app.getOperations().editMessageText(chat, message, new String(b), afterSending); else
-	app.getOperations().sendTextMessage(chat, new String(b), afterSending);
-	return closing.onAction();
-    }
-
-    private String[] getText()
-    {
-		final String[] lines = editArea.getText();
+	final String[] lines = formArea.getMultilineEditText();
 		if (lines.length == 0 || (lines.length == 1 && lines[0].trim().isEmpty()))
 		    return new String[0];
 		final List<String> res = new ArrayList<>();
@@ -88,7 +65,7 @@ public final class ComposeTextLayout extends LayoutBase
 		return res.toArray(new String[res.size()]);
     }
 
-    private String replaceChars(String line)
+    protected String replaceChars(String line)
     {
 	return line.replaceAll("---", "—").replaceAll("<<", "«").replaceAll(">>", "»");
     }
