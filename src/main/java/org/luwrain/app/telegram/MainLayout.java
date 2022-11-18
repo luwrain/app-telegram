@@ -22,10 +22,12 @@ import org.luwrain.app.telegram.layouts.*;
 final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>, ConsoleArea.InputHandler, ConsoleArea.ClickHandler<Message>,
 						     Objects.ChatsListener, Objects.NewMessageListener
 {
-    static private final String LOG_COMPONENT = App.LOG_COMPONENT;
-    static private final int CHAT_NUM_LIMIT = 500;
+    static private final String
+	LOG_COMPONENT = App.LOG_COMPONENT;
+    static private final int
+	CHAT_NUM_LIMIT = 500;
 
-    private final App app;
+    final App app;
     final ListArea<Chat> chatsArea;
     final ConsoleArea<Message> consoleArea;
 
@@ -82,8 +84,9 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	setAreaLayout(AreaLayout.LEFT_RIGHT, chatsArea, actions(
 								action("set-chat-photo", app.getStrings().actionSetChatPhoto(), this::actSetChatPhoto),
 								action("chat-members", app.getStrings().actionChatMembers(), this::actChatMembers),
-								action("delete-chat", app.getStrings().actionDeleteChat(), this::actDeleteChat),
+								action("leave-chat", "Отписаться", new InputEvent(InputEvent.Special.DELETE), this::actLeaveChat),
 								action("new-channel", app.getStrings().actionNewChannel(), this::actNewChannel),
+																action("delete-chat", app.getStrings().actionDeleteChat(), this::actDeleteChat),
 								searchChatsAction, contactsAction),
 
 		      consoleArea, actions(
@@ -125,6 +128,20 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	    });
 	return ConsoleArea.InputHandler.Result.OK;
     }
+
+        private boolean actLeaveChat()
+    {
+	final Chat chat = chatsArea.selected();
+	if (chat == null)
+	    return false;
+	if (!app.getConv().leaveChatConfirm())
+	    return true;
+		    app.getOperations().leaveChat(chat.id, ()->{
+		app.message("ОТписано", Luwrain.MessageType.OK);
+	    });
+	return true;
+    }
+
 
     private boolean actDeleteChat()
     {
@@ -261,14 +278,14 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	    return false;
 	final ComposeTextLayout compose = new ComposeTextLayout(app, activeChat, null, ()->{
 		app.setAreaLayout(MainLayout.this);
-		getLuwrain().announceActiveArea();
+		setActiveArea(consoleArea);
 		return true;
 	    }, ()->{
 		updateActiveChatHistory();
 		getLuwrain().playSound(Sounds.DONE);
 	    });
 	app.setAreaLayout(compose);
-	getLuwrain().announceActiveArea();
+	setActiveArea(consoleArea);
 	return true;
     }
 
@@ -276,7 +293,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
     {
 	if (activeChat == null)
 	    return false;
-	app.getOperations().sendPhotoMessage(activeChat, new java.io.File("jpg"), "", ()->{});
+	app.getOperations().sendPhotoMessage(activeChat, new java.io.File("photo.jpg"), "", ()->{});
 	return true;
 	/*
 	final ComposeTextLayout compose = new ComposeTextLayout(app, activeChat, null, ()->{
@@ -293,28 +310,23 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	*/
     }
 
-            private boolean actSendAudio()
+    private boolean actSendAudio()
     {
 	if (activeChat == null)
 	    return false;
-	app.getOperations().sendAudioMessage(activeChat, new java.io.File("file.mp3"), "", "author", "title", ()->{});
-	return true;
-	/*
-	final ComposeTextLayout compose = new ComposeTextLayout(app, activeChat, null, ()->{
+	final ComposeAudioLayout compose = new ComposeAudioLayout(app, activeChat, null, ()->{
 		app.setAreaLayout(MainLayout.this);
-		getLuwrain().announceActiveArea();
+		setActiveArea(consoleArea);
 		return true;
-	    }, ()->{
+	    },
+	    ()->{
 		updateActiveChatHistory();
 		getLuwrain().playSound(Sounds.DONE);
 	    });
 	app.setAreaLayout(compose);
-	getLuwrain().announceActiveArea();
+	setActiveArea(consoleArea);
 	return true;
-	*/
     }
-
-
 
     private boolean actStat()
     {

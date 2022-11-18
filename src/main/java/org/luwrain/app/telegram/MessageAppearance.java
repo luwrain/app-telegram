@@ -24,8 +24,6 @@ final class MessageAppearance implements ConsoleArea.Appearance<Message>
 
     MessageAppearance(Luwrain luwrain, Objects objects)
     {
-	NullCheck.notNull(luwrain, "luwrain");
-	NullCheck.notNull(objects, "objects");
 	this.luwrain = luwrain;
 	this.objects = objects;
     }
@@ -57,6 +55,11 @@ final class MessageAppearance implements ConsoleArea.Appearance<Message>
 	    announceVideo(message, (MessageVideo)message.content);
 	    return;
 	}
+		if (message.content instanceof MessageDocument)
+	{
+	    announceDocument(message, (MessageDocument)message.content);
+	    return;
+	}
 	luwrain.setEventResponse(DefaultEventResponse.text(message.content.getClass().getName()));
     }
 
@@ -73,6 +76,21 @@ final class MessageAppearance implements ConsoleArea.Appearance<Message>
 	{
 	    final MessageAudio audio = (MessageAudio)message.content;
 	    return audio.caption.text;
+	}
+	if (message.content instanceof MessagePhoto)
+	{
+	    final MessagePhoto photo = (MessagePhoto)message.content;
+	    return photo.caption.text;
+	}
+	if (message.content instanceof MessageDocument)
+	{
+	    final MessageDocument doc = (MessageDocument)message.content;
+	    return doc.caption.text;
+	}
+	if (message.content instanceof MessageVideo)
+	{
+	    final MessageVideo video = (MessageVideo)message.content;
+	    return video.caption.text;
 	}
 	return message.content.getClass().getName();
     }
@@ -150,6 +168,12 @@ final class MessageAppearance implements ConsoleArea.Appearance<Message>
     {
 	luwrain.setEventResponse(listItem(Sounds.PICTURE, "ВИДЕО " + video.caption.text + ", " + getAnnouncementSuffix(message), Suggestions.CLICKABLE_LIST_ITEM));
     }
+
+        private void announceDocument(Message message, MessageDocument doc)
+    {
+		luwrain.setEventResponse(listItem(Sounds.PICTURE, "ДОКУМЕНТ " + doc.caption.text + ", " + getAnnouncementSuffix(message), Suggestions.CLICKABLE_LIST_ITEM));
+    }
+
 
     static final class ForList extends ListUtils.AbstractAppearance<Message>
     {

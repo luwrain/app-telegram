@@ -75,7 +75,7 @@ public abstract class Operations
 			 new Handler(Message.CONSTRUCTOR, (obj)->onSuccess.run()));
     }
 
-    void sendAudioMessage(Chat chat, java.io.File audioFile, String caption, String author, String title, Runnable onSuccess)
+    public void sendAudioMessage(Chat chat, java.io.File audioFile, String caption, String author, String title, Runnable onSuccess)
     {
 	final InlineKeyboardButton[] row = {new TdApi.InlineKeyboardButton("https://telegram.org?1", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?2", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?3", new TdApi.InlineKeyboardButtonTypeUrl())};
         final ReplyMarkup replyMarkup = new ReplyMarkupInlineKeyboard(new InlineKeyboardButton[][]{row, row, row});
@@ -166,6 +166,15 @@ public abstract class Operations
 				 luwrain.runUiSafely(onSuccess);
 			 }));
     }
+
+        void leaveChat(long chatId, Runnable onSuccess)
+    {
+	getClient().send(new LeaveChat(chatId),
+			 new DefaultHandler(Ok.CONSTRUCTOR, (obj)->{
+				 luwrain.runUiSafely(onSuccess);
+			 }));
+    }
+
 
 
             void leaveChat(Chat chat, Runnable onSuccess)

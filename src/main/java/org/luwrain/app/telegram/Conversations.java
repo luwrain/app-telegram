@@ -80,4 +80,9 @@ final class Conversations
     {
 	return Popups.confirmDefaultNo(luwrain, strings.chatDeletingPopupName(), strings.chatDeletingPopupText(chat.title));
     }
+
+    boolean leaveChatConfirm()
+    {
+	return Popups.confirmDefaultNo(luwrain, "Отписка", "Вы действительно хотите покинуть чат?");
+    }
 }

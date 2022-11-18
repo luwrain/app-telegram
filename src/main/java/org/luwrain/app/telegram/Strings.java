@@ -53,7 +53,13 @@ public interface Strings
     String actionPrivacySettings();
 
     String actionSendPhoto();
-        String actionSendAudio();
+
     String actionSetChatPhoto();
     String actionChatMembers();
+
+            String actionSendAudio();
+    String composeAudioTitle();
+    String composeAudioAuthor();
+    String composeAudioFile();
+    String composeAudioComment();
 }

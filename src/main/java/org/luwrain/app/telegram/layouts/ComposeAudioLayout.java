@@ -7,19 +7,10 @@
 
 package org.luwrain.app.telegram.layouts;
 
-import java.util.*;
-
-import org.drinkless.tdlib.TdApi;
 import org.drinkless.tdlib.TdApi.*;
 
 import org.luwrain.core.*;
-import org.luwrain.core.events.*;
-import org.luwrain.controls.*;
-import org.luwrain.app.base.*;
-import org.luwrain.nlp.*;
 import org.luwrain.app.telegram.*;
-
-import static org.luwrain.util.TextUtils.*;
 
 public final class ComposeAudioLayout extends ComposeLayoutBase
 {
@@ -38,7 +29,7 @@ public final class ComposeAudioLayout extends ComposeLayoutBase
 	setAreaLayout(formArea, null);
     }
 
-@Override protected boolean onOk(ActionHandler closing, Runnable afterSending)
+    @Override protected boolean onOk(ActionHandler closing, Runnable afterSending)
     {
 	final java.io.File file = new java.io.File(formArea.getEnteredText(FILE));
 	final String
@@ -46,13 +37,11 @@ public final class ComposeAudioLayout extends ComposeLayoutBase
 	author = formArea.getEnteredText(AUTHOR),
 	title = formArea.getEnteredText(TITLE);
 	if (text == null)
-		{
+	{
 	    app.message(app.getStrings().composedTextEmpty(), Luwrain.MessageType.ERROR);
 	    return true;
 	}
-
-		app.getOperations().sendAudioMessage(chat, file, "Чем профессиональная фортепианная игра отличается от гениальной? Три предельно необъективных сравнения.\n\n#НеПоДелу #фортепиано", author, title, afterSending);
-		return closing.onAction();
+	app.getOperations().sendAudioMessage(chat, file, "Чем профессиональная фортепианная игра отличается от гениальной? Три предельно необъективных сравнения.\n\n#НеПоДелу #фортепиано", author, title, afterSending);
+	return closing.onAction();
     }
-
-    }
+}
