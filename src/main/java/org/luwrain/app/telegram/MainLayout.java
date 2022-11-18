@@ -39,7 +39,6 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
     {
 	super(app);
 	this.app = app;
-
 	chats.ensureCapacity(app.getObjects().mainChats.size());
 	for(OrderedChat o: app.getObjects().mainChats)
 	{
@@ -47,7 +46,6 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	    if (c != null)
 		chats.add(c);
 	}
-
 	this.chatsArea = new ListArea<Chat>(listParams((params)->{
 		    params.model = new ListUtils.ListModel<>(chats);
 		    params.appearance = new ChatsListAppearance(app, params.context);
@@ -56,17 +54,15 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 		})){
 		@Override public boolean onSystemEvent(SystemEvent event)
 		{
-		    NullCheck.notNull(event, "event");
 		    if (event.getType() == SystemEvent.Type.REGULAR)
 			switch(event.getCode())
 			{
 			case PROPERTIES:
-			    return onChatProperties();
+			return onChatProperties();
 			}
 		    return super.onSystemEvent(event);
 		}
 	    };
-
 	this.consoleArea = new ConsoleArea<Message>(consoleParams((params)->{
 		    params.model = new ConsoleUtils.ArrayModel<>(()->messages);
 		    params.appearance = new MessageAppearance(app.getLuwrain(), app.getObjects());
@@ -76,26 +72,23 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 		    params.clickHandler = this;
 		    params.inputHandler = this;
 		}));
-
 	final ActionInfo
 	searchChatsAction = 					     action("search-chats", "Поиск групп и каналов", App.HOTKEY_SEARCH_CHATS, app.layouts()::searchChats),
 	contactsAction = action("contacts", app.getStrings().actionContacts(), App.HOTKEY_CONTACTS, app.layouts()::contacts);
-
 	setAreaLayout(AreaLayout.LEFT_RIGHT, chatsArea, actions(
-								action("set-chat-photo", app.getStrings().actionSetChatPhoto(), this::actSetChatPhoto),
-								action("chat-members", app.getStrings().actionChatMembers(), this::actChatMembers),
 								action("leave-chat", "Отписаться", new InputEvent(InputEvent.Special.DELETE), this::actLeaveChat),
 								action("new-channel", app.getStrings().actionNewChannel(), this::actNewChannel),
-																action("delete-chat", app.getStrings().actionDeleteChat(), this::actDeleteChat),
+								action("chat-members", app.getStrings().actionChatMembers(), this::actChatMembers),
+								action("delete-chat", app.getStrings().actionDeleteChat(), this::actDeleteChat),
+								action("set-chat-photo", app.getStrings().actionSetChatPhoto(), this::actSetChatPhoto),
+								action("set-user-name", app.getStrings().actionSetUserName(), this::actSetUserName),
 								searchChatsAction, contactsAction),
-
 		      consoleArea, actions(
 					   action("edit-message-text", app.getStrings().actionEditMessageText(), new InputEvent(InputEvent.Special.F5, EnumSet.of(InputEvent.Modifiers.SHIFT)), MainLayout.this::actEditMessageText),
 					   action("compose-text", app.getStrings().actionComposeText(), new InputEvent(InputEvent.Special.INSERT), MainLayout.this::actComposeText),
 					   action("send-photo", app.getStrings().actionSendPhoto(), new InputEvent(InputEvent.Special.INSERT, EnumSet.of(InputEvent.Modifiers.CONTROL)), MainLayout.this::actSendPhoto),
-					   					   action("send-audio", app.getStrings().actionSendAudio(), new InputEvent(InputEvent.Special.INSERT, EnumSet.of(InputEvent.Modifiers.SHIFT)), MainLayout.this::actSendAudio),
+					   action("send-audio", app.getStrings().actionSendAudio(), new InputEvent(InputEvent.Special.INSERT, EnumSet.of(InputEvent.Modifiers.SHIFT)), MainLayout.this::actSendAudio),
 					   action("delete-message", app.getStrings().actionDeleteMessage(), new InputEvent(InputEvent.Special.DELETE), MainLayout.this::actDeleteMessage),
-
 					   searchChatsAction, contactsAction)
 		      );
 	synchronized(app.getObjects()) {
@@ -258,7 +251,6 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	return true;
     }
 
-    
     private boolean actDeleteMessage()
     {
 	if (activeChat == null)
@@ -285,29 +277,26 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 		getLuwrain().playSound(Sounds.DONE);
 	    });
 	app.setAreaLayout(compose);
-	setActiveArea(consoleArea);
+	getLuwrain().announceActiveArea();
 	return true;
     }
 
-        private boolean actSendPhoto()
+    private boolean actSendPhoto()
     {
 	if (activeChat == null)
 	    return false;
-	app.getOperations().sendPhotoMessage(activeChat, new java.io.File("photo.jpg"), "", ()->{});
-	return true;
-	/*
-	final ComposeTextLayout compose = new ComposeTextLayout(app, activeChat, null, ()->{
+    	final ComposePhotoLayout compose = new ComposePhotoLayout(app, activeChat, null, ()->{
 		app.setAreaLayout(MainLayout.this);
-		getLuwrain().announceActiveArea();
+		setActiveArea(consoleArea);
 		return true;
-	    }, ()->{
+	    },
+	    ()->{
 		updateActiveChatHistory();
 		getLuwrain().playSound(Sounds.DONE);
 	    });
 	app.setAreaLayout(compose);
 	getLuwrain().announceActiveArea();
 	return true;
-	*/
     }
 
     private boolean actSendAudio()
@@ -324,7 +313,16 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 		getLuwrain().playSound(Sounds.DONE);
 	    });
 	app.setAreaLayout(compose);
-	setActiveArea(consoleArea);
+	getLuwrain().announceActiveArea();
+	return true;
+    }
+
+    private boolean actSetUserName()
+    {
+	final String userName = app.getConv().userName();
+	if (userName == null)
+	    return true;
+	app.getOperations().callFunc(new SetUsername(userName.trim()), SetUsername.CONSTRUCTOR, (res)->{});
 	return true;
     }
 
@@ -341,9 +339,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 		    });
 		app.setAreaLayout(stat);
 		getLuwrain().announceActiveArea();
-		
 	    });
-
 	return true;
 	    }
 

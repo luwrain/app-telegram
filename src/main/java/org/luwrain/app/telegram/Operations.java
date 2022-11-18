@@ -34,8 +34,6 @@ public abstract class Operations
 
     Operations(Luwrain luwrain, Objects objects)
     {
-	NullCheck.notNull(luwrain, "luwrain");
-	NullCheck.notNull(objects, "objects");
 	this.luwrain = luwrain;
 	this.objects = objects;
     }
@@ -66,7 +64,7 @@ public abstract class Operations
 			 new Handler(Message.CONSTRUCTOR, (obj)->onSuccess.run()));
     }
 
-    void sendPhotoMessage(Chat chat, java.io.File photoFile, String caption, Runnable onSuccess)
+    public void sendPhotoMessage(Chat chat, java.io.File photoFile, String caption, Runnable onSuccess)
     {
 	final InlineKeyboardButton[] row = {new TdApi.InlineKeyboardButton("https://telegram.org?1", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?2", new TdApi.InlineKeyboardButtonTypeUrl()), new TdApi.InlineKeyboardButton("https://telegram.org?3", new TdApi.InlineKeyboardButtonTypeUrl())};
         final ReplyMarkup replyMarkup = new ReplyMarkupInlineKeyboard(new InlineKeyboardButton[][]{row, row, row});

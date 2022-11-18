@@ -33,7 +33,7 @@ public final class App extends AppBase<Strings> implements MonoApp
     final long startTimeMillis = System.currentTimeMillis();
 
     final Core core;
-    private Conversations conv = null;
+    private Conv conv = null;
     private MainLayout mainLayout = null;
     private ContactsLayout contactsLayout = null;
     private AuthLayout authLayout = null;
@@ -48,7 +48,7 @@ public final class App extends AppBase<Strings> implements MonoApp
 
     @Override protected AreaLayout onAppInit()
     {
-	this.conv = new Conversations(this);
+	this.conv = new Conv(this);
 	this.mainLayout = new MainLayout(this);
 	this.contactsLayout = new ContactsLayout(this);
 	this.authLayout = new AuthLayout(this);
@@ -118,7 +118,7 @@ mainLayout.setActiveArea(App.this.mainLayout.chatsArea);
 	return MonoApp.Result.BRING_FOREGROUND;
     }
 
-            Conversations getConv() { return this.conv; }
+            Conv getConv() { return this.conv; }
     public Objects getObjects() { return this.core.objects; }
     public Operations getOperations() { return this.core.operations; }
 

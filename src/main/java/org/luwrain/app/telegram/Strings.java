@@ -52,7 +52,7 @@ public interface Strings
 
     String actionPrivacySettings();
 
-    String actionSendPhoto();
+
 
     String actionSetChatPhoto();
     String actionChatMembers();
@@ -62,4 +62,12 @@ public interface Strings
     String composeAudioAuthor();
     String composeAudioFile();
     String composeAudioComment();
+
+        String actionSendPhoto();
+    String composePhotoFile();
+    String composePhotoComment();
+
+    String actionSetUserName();
+    String userNamePopupName();
+    String userNamePopupPrefix();
 }

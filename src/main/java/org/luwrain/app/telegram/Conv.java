@@ -14,40 +14,26 @@ import org.luwrain.core.*;
 import org.luwrain.controls.*;
 import org.luwrain.popups.Popups;
 
-final class Conversations
+final class Conv
 {
     private final App app;
     private final Luwrain luwrain;
     private final Strings strings;
 
-    Conversations(App app)
+    Conv(App app)
     {
-	NullCheck.notNull(app, "app");
 	this.app = app;
 	this.luwrain = app.getLuwrain();
 	this.strings = app.getStrings();
     }
 
-    String newChannelTitle()
-    {
-	return Popups.textNotEmpty(luwrain, strings.newChannelPopupName(), strings.newChannelTitlePopupPrefix(), "");
-    }
-
-        String newChannelDescr()
-    {
-	return Popups.text(luwrain, strings.newChannelPopupName(), strings.newChannelDescrPopupPrefix(), "");
-    }
-
-
-    String newContactFirstName()
-    {
-	return Popups.textNotEmpty(luwrain, "Новый контакт", "Имя человека:", "");
-    }
-
-    String newContactLastName()
-    {
-	return Popups.textNotEmpty(luwrain, "Новый контакт", "Фамилия:", "");
-    }
+    String newChannelTitle() { return Popups.textNotEmpty(luwrain, strings.newChannelPopupName(), strings.newChannelTitlePopupPrefix(), ""); }
+    String newChannelDescr() { return Popups.text(luwrain, strings.newChannelPopupName(), strings.newChannelDescrPopupPrefix(), ""); }
+    boolean confirmChatDeleting(Chat chat) { return Popups.confirmDefaultNo(luwrain, strings.chatDeletingPopupName(), strings.chatDeletingPopupText(chat.title)); }
+    boolean leaveChatConfirm() { return Popups.confirmDefaultNo(luwrain, "Отписка", "Вы действительно хотите покинуть чат?"); }
+    String userName(){ return Popups.text(luwrain, strings.userNamePopupName(), strings.userNamePopupPrefix(), ""); }
+    String newContactFirstName() { return Popups.textNotEmpty(luwrain, "Новый контакт", "Имя человека:", ""); }
+    String newContactLastName() { return Popups.textNotEmpty(luwrain, "Новый контакт", "Фамилия:", ""); }
 
     String newContactPhone()
     {
@@ -68,21 +54,10 @@ final class Conversations
 
     private String properPhoneValue(String str)
     {
-	NullCheck.notNull(str, "str");
 	final StringBuilder b = new StringBuilder();
 	for(int i = 0;i < str.length();i++)
 	    if (Character.isDigit(str.charAt(i)))
 		b.append(str.charAt(i));
 	return new String(b);
-    }
-
-    boolean confirmChatDeleting(Chat chat)
-    {
-	return Popups.confirmDefaultNo(luwrain, strings.chatDeletingPopupName(), strings.chatDeletingPopupText(chat.title));
-    }
-
-    boolean leaveChatConfirm()
-    {
-	return Popups.confirmDefaultNo(luwrain, "Отписка", "Вы действительно хотите покинуть чат?");
     }
 }

@@ -12,36 +12,29 @@ import org.drinkless.tdlib.TdApi.*;
 import org.luwrain.core.*;
 import org.luwrain.app.telegram.*;
 
-public final class ComposeAudioLayout extends ComposeLayoutBase
+public final class ComposePhotoLayout extends ComposeLayoutBase
 {
     static private String
-	TITLE = "title",
-	AUTHOR = "author",
 	FILE = "file";
 
-    public ComposeAudioLayout(App app, Chat chat, Message message, ActionHandler closing, Runnable afterSending)
+    public ComposePhotoLayout(App app, Chat chat, Message message, ActionHandler closing, Runnable afterSending)
     {
 	super(app, chat, message, closing, afterSending);
-	formArea.addEdit(FILE, app.getStrings().composeAudioFile(), "");
-	formArea.addEdit(AUTHOR, app.getStrings().composeAudioAuthor(), "");
-	formArea.addEdit(TITLE, app.getStrings().composeAudioTitle(), "");
-	formArea.activateMultilineEdit(app.getStrings().composeAudioComment(), new String[0]);
+	formArea.addEdit(FILE, app.getStrings().composePhotoFile(), "");
+	formArea.activateMultilineEdit(app.getStrings().composePhotoComment(), new String[0]);
 	setAreaLayout(formArea, null);
     }
 
     @Override protected boolean onOk(ActionHandler closing, Runnable afterSending)
     {
 	final java.io.File file = new java.io.File(formArea.getEnteredText(FILE));
-	final String
-	text = concatText(getText(formArea.getMultilineEditText())),
-	author = formArea.getEnteredText(AUTHOR),
-	title = formArea.getEnteredText(TITLE);
+	final String text = concatText(getText(formArea.getMultilineEditText()));
 	if (text == null)
 	{
 	    app.message(app.getStrings().composedTextEmpty(), Luwrain.MessageType.ERROR);
 	    return true;
 	}
-	app.getOperations().sendAudioMessage(chat, file, text, author, title, afterSending);
+	app.getOperations().sendPhotoMessage(chat, file, text, afterSending);
 	return closing.onAction();
     }
 }
