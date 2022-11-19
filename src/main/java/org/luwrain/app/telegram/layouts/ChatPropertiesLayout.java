@@ -30,9 +30,7 @@ public final class ChatPropertiesLayout extends LayoutBase
 
     public ChatPropertiesLayout(App app, Chat chat, Runnable closing)
     {
-	NullCheck.notNull(app, "app");
-	NullCheck.notNull(chat, "chat");
-	NullCheck.notNull(closing, "closing");
+	//FIXME:super
 	this.app = app;
 	this.propsArea = new SimpleArea(new DefaultControlContext(app.getLuwrain()), app.getStrings().chatPropsAreaName()) {
 		@Override public boolean onInputEvent(InputEvent event)
@@ -111,8 +109,6 @@ public final class ChatPropertiesLayout extends LayoutBase
 
         private void fillBasicGroup(Chat chat, BasicGroup basicGroup)
     {
-	NullCheck.notNull(chat, "chat");
-	NullCheck.notNull(basicGroup, "basicGroup");
 	propsArea.addLine("Name: " + chat.title);
 	propsArea.addLine("Member count: " + basicGroup.memberCount);
     }

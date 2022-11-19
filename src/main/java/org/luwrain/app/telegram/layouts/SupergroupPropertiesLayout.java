@@ -60,11 +60,8 @@ public final class SupergroupPropertiesLayout extends LayoutBase
 
     private boolean onOk()
     {
-
 		if (!formArea.getEnteredText(EDIT_DESCR).equals(fullInfo.description))
 	    app.getOperations().callFunc(new SetChatDescription(chat.id, formArea.getEnteredText(EDIT_DESCR)), Ok.CONSTRUCTOR, (res)->{});
-
-		
 	if (fullInfo.canSetUsername && !formArea.getEnteredText(EDIT_USERNAME).equals(supergroup.username))
 	    app.getOperations().callFunc(new SetSupergroupUsername(supergroup.id, formArea.getEnteredText(EDIT_USERNAME)), Ok.CONSTRUCTOR, (res)->{});
 	return true;

@@ -77,11 +77,12 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	contactsAction = action("contacts", app.getStrings().actionContacts(), App.HOTKEY_CONTACTS, app.layouts()::contacts);
 	setAreaLayout(AreaLayout.LEFT_RIGHT, chatsArea, actions(
 								action("leave-chat", "Отписаться", new InputEvent(InputEvent.Special.DELETE), this::actLeaveChat),
-								action("new-channel", app.getStrings().actionNewChannel(), this::actNewChannel),
-								action("chat-members", app.getStrings().actionChatMembers(), this::actChatMembers),
-								action("delete-chat", app.getStrings().actionDeleteChat(), this::actDeleteChat),
+																action("set-chat-descr", app.getStrings().actionSetChatDescr(), this::actSetChatDescr),
 								action("set-chat-photo", app.getStrings().actionSetChatPhoto(), this::actSetChatPhoto),
+																action("chat-members", app.getStrings().actionChatMembers(), this::actChatMembers),
 								action("set-user-name", app.getStrings().actionSetUserName(), this::actSetUserName),
+																action("delete-chat", app.getStrings().actionDeleteChat(), this::actDeleteChat),
+								action("new-channel", app.getStrings().actionNewChannel(), this::actNewChannel),
 								searchChatsAction, contactsAction),
 		      consoleArea, actions(
 					   action("edit-message-text", app.getStrings().actionEditMessageText(), new InputEvent(InputEvent.Special.F5, EnumSet.of(InputEvent.Modifiers.SHIFT)), MainLayout.this::actEditMessageText),
@@ -160,6 +161,35 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	return true;
     }
 
+    private boolean actSetChatDescr()
+    {
+	final Chat chat = chatsArea.selected();
+	if (chat == null)
+	    return false;
+	//Supergroup
+		if (chat.type instanceof ChatTypeSupergroup)
+	{
+	    final long supergroupId = ((ChatTypeSupergroup)chat.type).supergroupId;
+	    final Supergroup supergroup = app.getObjects().supergroups.get(supergroupId);
+	    if (supergroup == null)
+	    {
+		org.luwrain.core.Log.error(LOG_COMPONENT, "no supergroup in objects, id = " + supergroupId);
+		return false;
+	    }
+	    app.getOperations().callFunc(new GetSupergroupFullInfo(supergroupId), SupergroupFullInfo.CONSTRUCTOR, (obj)->{
+		    final SupergroupFullInfo fullInfo = (SupergroupFullInfo)obj;
+		    final SetChatDescrLayout layout = new SetChatDescrLayout(app, chat, fullInfo.description, ()->{
+			    app.setAreaLayout(this);
+			    setActiveArea(chatsArea);
+			    return true;
+			});
+		    app.setAreaLayout(layout);
+		    getLuwrain().announceActiveArea();
+		});
+	}
+		return false;
+		    }
+
             private boolean actChatMembers()
     {
 	final Chat chat = chatsArea.selected();
@@ -209,7 +239,7 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	    return false;
 	final ComposeTextLayout compose = new ComposeTextLayout(app, activeChat, message, ()->{
 		app.setAreaLayout(this);
-		getLuwrain().announceActiveArea();
+		setActiveArea(consoleArea);
 		return true;
 	    }, ()->{
 				updateActiveChatHistory();
@@ -217,7 +247,6 @@ final class MainLayout extends LayoutBase implements ListArea.ClickHandler<Chat>
 	    });
 	app.setAreaLayout(compose);
 	getLuwrain().announceActiveArea();
-
 	return true;
     }
 

@@ -70,4 +70,7 @@ public interface Strings
     String actionSetUserName();
     String userNamePopupName();
     String userNamePopupPrefix();
+
+    String actionSetChatDescr();
+    String setChatDescrAreaName();
 }
