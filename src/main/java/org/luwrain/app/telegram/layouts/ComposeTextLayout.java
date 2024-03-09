@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 Michael Pozhidaev <msp@luwrain.org>
+// Copyright 2020-2024 Michael Pozhidaev <msp@luwrain.org>
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -16,6 +16,7 @@ import org.drinkless.tdlib.TdApi.*;
 import org.luwrain.core.*;
 import org.luwrain.core.events.*;
 import org.luwrain.controls.*;
+import org.luwrain.controls.edit.*;
 import org.luwrain.app.base.*;
 import org.luwrain.app.telegram.*;
 
